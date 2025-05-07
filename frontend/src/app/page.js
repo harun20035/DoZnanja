@@ -77,13 +77,7 @@ export default function HomePage() {
               </div>
               <div className="col-lg-6">
                 <div className="text-center">
-                  <Image
-                    src="https://source.unsplash.com/random/600x400/?education"
-                    width={600}
-                    height={400}
-                    alt="DoZnanja Hero"
-                    className="img-fluid rounded-4 shadow-sm"
-                  />
+                  
                 </div>
               </div>
             </div>
@@ -143,13 +137,7 @@ export default function HomePage() {
                 <div key={course.id} className="col">
                   <div className="card h-100 border-light shadow-sm hover-card">
                     <div className="course-image-container">
-                      <Image
-                        src={`https://source.unsplash.com/random/600x400/?${course.category.toLowerCase()}`}
-                        alt={course.title}
-                        width={600}
-                        height={400}
-                        className="card-img-top course-image"
-                      />
+                      
                     </div>
                     <div className="card-body">
                       <div className="d-flex justify-content-between align-items-center mb-2">
@@ -164,13 +152,7 @@ export default function HomePage() {
                     </div>
                     <div className="card-footer bg-white d-flex justify-content-between align-items-center">
                       <div className="d-flex align-items-center">
-                        <Image
-                          src={course.instructorImage || "/placeholder.svg"}
-                          alt={course.instructor}
-                          width={24}
-                          height={24}
-                          className="rounded-circle me-2"
-                        />
+                        
                         <small className="fw-medium">{course.instructor}</small>
                       </div>
                       <span className="fw-bold">{course.price} €</span>
@@ -208,13 +190,7 @@ export default function HomePage() {
                   <div className="card h-100 border-light shadow-sm">
                     <div className="card-body">
                       <div className="d-flex align-items-center mb-4">
-                        <Image
-                          src="https://source.unsplash.com/random/100x100/?person"
-                          alt={testimonial.name}
-                          width={48}
-                          height={48}
-                          className="rounded-circle me-3"
-                        />
+                        
                         <div>
                           <h5 className="card-title mb-0">{testimonial.name}</h5>
                           <p className="card-subtitle text-secondary small">{testimonial.role}</p>
