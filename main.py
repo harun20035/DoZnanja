@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from database import database
+from init_db import create_db_and_tables
 
 app = FastAPI()
 
 @app.on_event("startup")
 async def startup():
+    create_db_and_tables()
     await database.connect()
     print("✅ Povezani na bazu.")
 

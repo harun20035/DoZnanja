@@ -7,7 +7,7 @@ class Course(SQLModel, table=True):
     __tablename__ = 'courses'
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    creator_id: int = Field(foreign_key="user.id")
+    creator_id: int = Field(foreign_key="users.id")
     title: str
     description: str
     price: float
