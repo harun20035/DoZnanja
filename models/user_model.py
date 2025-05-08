@@ -1,5 +1,11 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
+from enum import Enum
+
+class Role(str, Enum):
+    USER = "USER"
+    CREATOR = "CREATOR"
+    ADMIN = "ADMIN"
 
 class User(SQLModel, table=True):
     
@@ -11,6 +17,6 @@ class User(SQLModel, table=True):
     username:str = Field(sa_column_kwargs={"unique": True})
     email: str = Field(sa_column_kwargs={"unique": True})
     password_hash: str
-    role: str  # 'student', 'creator', 'admin'
+    role: Role  # 'student', 'creator', 'admin'
     credits: int = 0
     google_id: Optional[str] = None
