@@ -8,6 +8,7 @@ class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     surname: str
+    username:str = Field(sa_column_kwargs={"unique": True})
     email: str = Field(sa_column_kwargs={"unique": True})
     password_hash: str
     role: str  # 'student', 'creator', 'admin'
