@@ -7,9 +7,10 @@ const Register = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    username: '',  // Dodato polje za korisničko ime
     email: '',
     password: '',
-    role: 'user',
+    role: 'USER',  // Promenjena vrednost na "USER"
   });
 
   const handleChange = (e) => {
@@ -17,10 +18,35 @@ const Register = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Registracija:', formData);
-    // Ovdje ide poziv prema backendu
+
+    try {
+      const response = await fetch('http://localhost:8000/users/register', {  // Promeni URL na tvoj backend endpoint
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.firstName,
+          surname: formData.lastName,
+          username: formData.username,  // Dodato slanje username
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,  // Slanje uloge
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Neuspela registracija');
+      }
+
+      const data = await response.json();
+      console.log('User created:', data);
+    } catch (error) {
+      console.error('Greška prilikom registracije:', error);
+    }
   };
 
   return (
@@ -44,6 +70,16 @@ const Register = () => {
           placeholder="Prezime"
           className={styles.input}
           value={formData.lastName}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          type="text"
+          name="username"  // Dodato polje za korisničko ime
+          placeholder="Korisničko ime"
+          className={styles.input}
+          value={formData.username}
           onChange={handleChange}
           required
         />
@@ -73,8 +109,8 @@ const Register = () => {
             <input
               type="radio"
               name="role"
-              value="user"
-              checked={formData.role === 'user'}
+              value="USER"  // Ažurirano na "USER"
+              checked={formData.role === 'USER'}
               onChange={handleChange}
               className={styles.radio}
             />
@@ -85,8 +121,8 @@ const Register = () => {
             <input
               type="radio"
               name="role"
-              value="creator"
-              checked={formData.role === 'creator'}
+              value="CREATOR"  // Ažurirano na "CREATOR"
+              checked={formData.role === 'CREATOR'}
               onChange={handleChange}
               className={styles.radio}
             />
