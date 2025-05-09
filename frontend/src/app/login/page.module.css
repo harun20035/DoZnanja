@@ -54,6 +54,7 @@
     color: #6a1b9a;
     display: flex;
     align-items: center;
+    cursor: pointer;
   }
   
   .radio {
