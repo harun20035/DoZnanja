@@ -44,6 +44,7 @@ const Register = () => {
 
       const data = await response.json();
       console.log('User created:', data);
+      window.location.href = '/login';
     } catch (error) {
       console.error('Greška prilikom registracije:', error);
     }
