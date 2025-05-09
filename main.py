@@ -9,10 +9,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Dopušta samo ovom URL-u
+    allow_origins=["http://localhost:3000"],  
     allow_credentials=True,
-    allow_methods=["*"],  # Dopušta sve HTTP metode (GET, POST, PUT, DELETE, itd.)
-    allow_headers=["*"],  # Dopušta sve zaglavlja
+    allow_methods=["*"],  
+    allow_headers=["*"],  
 )
 
 
