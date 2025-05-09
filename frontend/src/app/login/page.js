@@ -8,16 +8,42 @@ const Login = () => {
     email: '',
     password: '',
   });
+  const [errorMessage, setErrorMessage] = useState(null); // Za prikaz greške
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login podaci:', formData);
-    // Ovdje ide poziv prema backendu
+
+    try {
+      // Poziv backendu za prijavu
+      const response = await fetch('http://localhost:8000/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Nevalidni podaci');
+      }
+
+      const data = await response.json();
+      if (data.access_token) {
+        // Ako je uspešno, sačuvaj JWT token u lokalnoj memoriji
+        localStorage.setItem('auth_token', data.access_token);
+        console.log('Uspješan login, token je sačuvan.');
+        // Ovdje možeš redirektovati korisnika na zaštićenu rutu, npr. dashboard
+        window.location.href = 'login/dashboard'; // Možeš promeniti rutu u skladu sa tvojim aplikacijama
+      }
+    } catch (error) {
+      setErrorMessage(error.message);  // Postavi grešku ako nije uspelo
+      console.error('Greška prilikom prijave:', error);
+    }
   };
 
   return (
@@ -44,6 +70,8 @@ const Login = () => {
           onChange={handleChange}
           required
         />
+
+        {errorMessage && <p className={styles.error}>{errorMessage}</p>} {/* Prikaz greške */}
 
         <button type="submit" className={styles.button}>
           Prijavi se

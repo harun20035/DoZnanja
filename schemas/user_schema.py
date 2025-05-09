@@ -13,3 +13,8 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: Role = Role.USER
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
