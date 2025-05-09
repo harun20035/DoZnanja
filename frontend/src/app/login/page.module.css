@@ -35,7 +35,9 @@
     background: transparent;
     outline: none;
     transition: border-color 0.3s;
+    color: #000; /* <-- dodano */
   }
+
   
   .input:focus {
     border-color: #9c4d97;
