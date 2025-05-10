@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './page.module.css';
+import { FaGoogle } from 'react-icons/fa';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -134,6 +135,11 @@ const Register = () => {
         <button type="submit" className={styles.button}>
           Registruj se
         </button>
+
+        {/* Google login button */}
+        <a href="http://localhost:8000/users/google/login" className={styles.googleButton}>
+          <FaGoogle className={styles.googleLogo} /> Prijavi se sa Google
+        </a>
       </form>
     </div>
   );
