@@ -134,6 +134,11 @@ const Register = () => {
         <button type="submit" className={styles.button}>
           Registruj se
         </button>
+
+        {/* Google login button */}
+        <a href="http://localhost:8000/users/google/login" className={styles.googleButton}>
+          Prijavi se sa Google
+        </a>
       </form>
     </div>
   );

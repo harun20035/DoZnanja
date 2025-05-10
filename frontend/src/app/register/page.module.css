@@ -87,4 +87,20 @@
       font-size: 1rem;
     }
   }
+
+  .googleButton {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4285F4;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.googleButton:hover {
+  background-color: #357ae8;
+}
+
   
