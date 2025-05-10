@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import styles from './page.module.css';
+import { FaGoogle } from 'react-icons/fa';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  const [errorMessage, setErrorMessage] = useState(null); // Za prikaz greške
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,7 +20,6 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      // Poziv backendu za prijavu
       const response = await fetch('http://localhost:8000/users/login', {
         method: 'POST',
         headers: {
@@ -34,14 +34,12 @@ const Login = () => {
 
       const data = await response.json();
       if (data.access_token) {
-        // Ako je uspešno, sačuvaj JWT token u lokalnoj memoriji
         localStorage.setItem('auth_token', data.access_token);
         console.log('Uspješan login, token je sačuvan.');
-        // Ovdje možeš redirektovati korisnika na zaštićenu rutu, npr. dashboard
-        window.location.href = 'login/dashboard'; // Možeš promeniti rutu u skladu sa tvojim aplikacijama
+        window.location.href = 'login/dashboard';
       }
     } catch (error) {
-      setErrorMessage(error.message);  // Postavi grešku ako nije uspelo
+      setErrorMessage(error.message);
       console.error('Greška prilikom prijave:', error);
     }
   };
@@ -71,11 +69,15 @@ const Login = () => {
           required
         />
 
-        {errorMessage && <p className={styles.error}>{errorMessage}</p>} {/* Prikaz greške */}
+        {errorMessage && <p className={styles.error}>{errorMessage}</p>}
 
         <button type="submit" className={styles.button}>
           Prijavi se
         </button>
+
+        <a href="http://localhost:8000/users/google/login" className={styles.googleButton}>
+            <FaGoogle className={styles.googleLogo} /> Prijavi se sa Google
+        </a>
       </form>
     </div>
   );

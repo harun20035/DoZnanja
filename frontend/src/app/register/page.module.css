@@ -89,18 +89,30 @@
   }
 
   .googleButton {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #4285F4;
+  background-color: #db4437; /* Google crvena boja */
   color: white;
+  border: none;
+  border-radius: 8px; /* Isto kao za .button */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem; /* Isto kao za .button */
+  padding: 12px; /* Isto kao za .button */
+  cursor: pointer;
+  width: 100%; /* Prilagođeno širini formulara */
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
   text-decoration: none;
-  border-radius: 5px;
-  text-align: center;
-  margin-top: 20px;
 }
 
 .googleButton:hover {
-  background-color: #357ae8;
+  background-color: #c1351d; /* Snižena nijansa crvene na hover */
 }
 
+.googleLogo {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  object-fit: contain; /* Osigurava da ikona bude u potpunosti prikazana unutar okvira */
+}
   

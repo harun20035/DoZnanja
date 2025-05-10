@@ -1,60 +1,49 @@
 from sqlalchemy.orm import Session
 from typing import Annotated
-from fastapi import Depends
-from fastapi import APIRouter, HTTPException
-from schemas.user_schema import UserCreate
-from services.user_service import create_user
-from database import engine
-from fastapi import APIRouter, HTTPException
-from sqlalchemy.orm import Session
-from models.user_model import User
-from services.user_service import verify_password
-from schemas.user_schema import UserLogin
-from datetime import timedelta
-import jwt
-from datetime import datetime, timedelta
-from passlib.context import CryptContext
-import os
+from fastapi import Depends, APIRouter, HTTPException, Request
+from schemas.user_schema import UserCreate, UserLogin
+from services.user_service import create_user, verify_password
 from fastapi.responses import RedirectResponse
-from fastapi import Request
+from database import engine
+from models.user_model import User, Role
+from fastapi.responses import RedirectResponse
+from passlib.context import CryptContext
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
+import jwt
+import os
 import requests
-from models.user_model import Role
-from fastapi import Request
 
+# Učitavanje .env
+load_dotenv()
 
-
-# Tvoj tajni ključ, koristi nešto sigurno u produkciji
-SECRET_KEY = "your-secret-key"
+# Konstante iz .env
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+# Inicijalizacija ruta i lozinki
+router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def create_access_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-
-
-
-router = APIRouter()
-
-
-
+# Session dependency
 def get_session():
     with Session(engine) as session:
         yield session
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
+# JWT token kreacija
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+# === Auth rute ===
 
 @router.post("/register")
 def register_user(user_data: UserCreate, db: SessionDep):
@@ -63,48 +52,31 @@ def register_user(user_data: UserCreate, db: SessionDep):
         return {"message": "User created", "user_id": user.id}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
 
-
-# Funkcija koja proverava korisničko ime i lozinku
 @router.post("/login")
 def login_user(user_data: UserLogin, db: SessionDep):
     user = db.query(User).filter(User.email == user_data.email).first()
     if user is None or not verify_password(user_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # Kreiraj JWT token
-    access_token_expires = timedelta(minutes=30)
-    access_token = create_access_token(data={"sub": user.id}, expires_delta=access_token_expires)
-
+    access_token = create_access_token(data={"sub": user.id})
     return {"access_token": access_token, "token_type": "bearer"}
 
-
-load_dotenv()
-
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
-
+# === Google OAuth2 login ===
 
 @router.get("/google/login")
-async def google_login(request: Request):
+async def google_login():
     try:
-        redirect_uri = request.url_for("google_callback")  # Koristite request.url_for
-        print(f"Redirect URI: {redirect_uri}")  # Debug ispis
-        
         google_auth_url = (
             "https://accounts.google.com/o/oauth2/v2/auth?"
             f"client_id={GOOGLE_CLIENT_ID}&"
-            f"redirect_uri={redirect_uri}&"
+            f"redirect_uri={REDIRECT_URI}&"
             f"response_type=code&"
             f"scope=openid%20email%20profile"
         )
         return RedirectResponse(url=google_auth_url)
     except Exception as e:
-        print(f"Error in google_login: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.get("/google/callback", name="google_callback")
 def google_callback(code: str, db: SessionDep):
@@ -138,10 +110,10 @@ def google_callback(code: str, db: SessionDep):
     if not email or not google_id:
         raise HTTPException(status_code=400, detail="Incomplete user data from Google")
 
-    # Provjera postoji li već user
+    # Provjera postoji li već korisnik
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        # Novi korisnik – registruj
+        # Novi korisnik – registruj ga
         user = User(
             name=name,
             surname=surname,
@@ -157,4 +129,7 @@ def google_callback(code: str, db: SessionDep):
 
     # Token za sesiju
     access_token = create_access_token(data={"sub": user.id})
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    # Preusmjeravanje korisnika na željenu rutu (dashboard)
+    return RedirectResponse(url="http://localhost:3000/login/dashboard", status_code=303)
+
