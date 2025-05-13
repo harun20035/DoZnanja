@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from models.user_model import User
 from schemas.user_schema import UserCreate
 from passlib.context import CryptContext
+from repositories import user_repository
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -15,10 +16,8 @@ def create_user(user_data: UserCreate, db: Session):
         password_hash=hashed_password,
         role=user_data.role,
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+
+    return user_repository.create_user(db, user)
 
 
 def verify_password(plain_password, hashed_password):
