@@ -67,69 +67,20 @@ def login_user(user_data: UserLogin, db: SessionDep):
 @router.get("/google/login")
 async def google_login():
     try:
-        google_auth_url = (
-            "https://accounts.google.com/o/oauth2/v2/auth?"
-            f"client_id={GOOGLE_CLIENT_ID}&"
-            f"redirect_uri={REDIRECT_URI}&"
-            f"response_type=code&"
-            f"scope=openid%20email%20profile"
-        )
-        return RedirectResponse(url=google_auth_url)
+        return RedirectResponse(url=get_google_auth_url())
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/google/callback", name="google_callback")
-def google_callback(code: str, db: SessionDep):
-    token_url = "https://oauth2.googleapis.com/token"
-    token_data = {
-        "code": code,
-        "client_id": GOOGLE_CLIENT_ID,
-        "client_secret": GOOGLE_CLIENT_SECRET,
-        "redirect_uri": REDIRECT_URI,
-        "grant_type": "authorization_code",
-    }
-
-    token_response = requests.post(token_url, data=token_data)
-    token_json = token_response.json()
-    access_token = token_json.get("access_token")
-
-    if not access_token:
-        raise HTTPException(status_code=400, detail="Google token fetch failed")
-
-    userinfo_response = requests.get(
-        "https://www.googleapis.com/oauth2/v2/userinfo",
-        headers={"Authorization": f"Bearer {access_token}"}
-    )
-    user_info = userinfo_response.json()
-
-    email = user_info.get("email")
-    name = user_info.get("given_name")
-    surname = user_info.get("family_name")
-    google_id = user_info.get("id")
-
-    if not email or not google_id:
-        raise HTTPException(status_code=400, detail="Incomplete user data from Google")
-
-    # Provjera postoji li već korisnik
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        # Novi korisnik – registruj ga
-        user = User(
-            name=name,
-            surname=surname,
-            username=email.split("@")[0],  # basic username
-            email=email,
-            password_hash="",  # prazno jer koristi Google login
-            role=Role.USER,
-            google_id=google_id
+@router.get("/google/callback")
+def google_callback(code: str, session: Session = Depends(get_session)):
+    try:
+        user = handle_google_callback(code, session)
+        access_token = create_access_token(data={"sub": str(user.id)})
+        return RedirectResponse(
+            url="http://localhost:3000/login/dashboard",
+            status_code=303,
+            headers={"Authorization": f"Bearer {access_token}"}
         )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-
-    # Token za sesiju
-    access_token = create_access_token(data={"sub": user.id})
-
-    # Preusmjeravanje korisnika na željenu rutu (dashboard)
-    return RedirectResponse(url="http://localhost:3000/login/dashboard", status_code=303)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
