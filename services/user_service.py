@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 from models.user_model import User
 from schemas.user_schema import UserCreate
 from passlib.context import CryptContext
@@ -8,6 +8,7 @@ from repositories.user_repository import get_user_by_email, create_user_with_goo
 import requests
 import os
 from dotenv import load_dotenv
+from models.user_model import Role
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -43,7 +44,7 @@ def get_google_auth_url() -> str:
         f"scope=openid%20email%20profile"
     )
 
-def handle_google_callback(code: str, session) -> User:
+def handle_google_callback(code: str, session: Session) -> User:
     # Dobijanje access_tokena od Googlea
     token_data = {
         "code": code,
@@ -70,14 +71,19 @@ def handle_google_callback(code: str, session) -> User:
     if not email or not google_id:
         raise Exception("Incomplete user data from Google")
 
-    # Pronalaženje ili kreiranje korisnika
+    # Provjera da li korisnik već postoji
     user = get_user_by_email(session, email)
     if not user:
-        user = create_user_with_google(
-            session,
+        # Kreiranje User objekta u servisu
+        user = User(
             name=userinfo.get("given_name", ""),
             surname=userinfo.get("family_name", ""),
+            username=email.split("@")[0],
             email=email,
+            password_hash="",  # prazno jer Google login
+            role=Role.USER,
             google_id=google_id
         )
+        user = user_repository.create_user(session, user)  # Repozitorijum samo spašava
+
     return user

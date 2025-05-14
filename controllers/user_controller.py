@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlmodel import Session
 from typing import Annotated
 from fastapi import Depends, APIRouter, HTTPException, Request
 from schemas.user_schema import UserCreate, UserLogin
@@ -13,14 +13,12 @@ from datetime import datetime, timedelta
 import jwt
 import os
 import requests
+from services.user_service import get_google_auth_url, handle_google_callback
 
 # Učitavanje .env
 load_dotenv()
 
 # Konstante iz .env
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
