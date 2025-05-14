@@ -35,6 +35,7 @@ def create_course(
         price=course_data.price,
         discount_percent=course_data.discount_percent,
         status=course_data.status,
+        category=course_data.category,
         created_at=datetime.utcnow(),
         image_thumbnail=image_path,
         video_demo=video_path,

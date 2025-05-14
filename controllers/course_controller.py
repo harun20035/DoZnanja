@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import Annotated
 from database import engine
-from schemas.course_schema import CourseCreate
+from schemas.course_schema import CourseCreate, Category
 from services.course_service import create_course
 from fastapi.security import OAuth2PasswordBearer
 import jwt
@@ -45,6 +45,7 @@ def create_course_controller(
     description: str = Form(...),
     price: float = Form(...),
     discount_percent: int = Form(...),
+    category: Category = Form(...),
     image_thumbnail: UploadFile = File(...),
     video_demo: UploadFile = File(...),
     current_user: User = Depends(get_current_user)
@@ -58,6 +59,7 @@ def create_course_controller(
                 description=description,
                 price=price,
                 discount_percent=discount_percent,
+                category=category
             ),
             image_thumbnail=image_thumbnail,
             video_demo=video_demo
