@@ -59,7 +59,7 @@ def login_user(user_data: UserLogin, db: SessionDep):
     if user is None or not verify_password(user_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
 
 # === Google OAuth2 login ===

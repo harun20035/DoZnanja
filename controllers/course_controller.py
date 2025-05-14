@@ -49,17 +49,16 @@ def create_course_controller(
     video_demo: UploadFile = File(...),
     current_user: User = Depends(get_current_user)
 ):
-    print("dadad" + current_user.id)
     try:
         course = create_course(
             db=db,
             creator_id=current_user.id,
-            course_data={
-                "title": title,
-                "description": description,
-                "price": price,
-                "discount_percent": discount_percent,
-            },
+            course_data=CourseCreate(
+                title=title,
+                description=description,
+                price=price,
+                discount_percent=discount_percent,
+            ),
             image_thumbnail=image_thumbnail,
             video_demo=video_demo
         )
