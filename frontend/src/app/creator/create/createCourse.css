@@ -1,0 +1,172 @@
+.form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 2px solid #e9d5ff;
+  border-radius: 8px;
+  background-color: #faf5ff;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #6b21a8;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+input,
+textarea,
+select {
+  padding: 0.75rem;
+  border: 1px solid #d8b4fe;
+  border-radius: 4px;
+  background-color: white;
+  color: #333;
+  font-size: 1rem;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.upload-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #c084fc;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.upload-btn:hover {
+  background-color: #a855f7;
+}
+
+.upload-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.submit-btn {
+  background-color: #7e22ce;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background-color: #6b21a8;
+}
+
+.form-message {
+  margin-top: 1rem;
+  color: #dc2626;
+  text-align: center;
+}
+
+.modal-popup {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 2px solid #a78bfa;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.modal-icon {
+  color: #10b981;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+/* ostatak ostaje isti kao ranije */
+
+.modal-popup {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 2px solid #a78bfa;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+  min-width: 300px;
+  text-align: center;
+}
+
+.modal-popup.error {
+  border-color: #f87171;
+}
+
+.modal-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: center;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.modal-content .error {
+  color: #ef4444;
+}
+
+.modal-icon {
+  color: #10b981;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
