@@ -36,7 +36,7 @@ const Login = () => {
       if (data.access_token) {
         localStorage.setItem('auth_token', data.access_token);
         console.log('Uspješan login, token je sačuvan.');
-        window.location.href = 'login/dashboard';
+        window.location.href = 'creator';
       }
     } catch (error) {
       setErrorMessage(error.message);

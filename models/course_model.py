@@ -1,9 +1,15 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
 from datetime import datetime
+from enum import Enum
+
+class Status(str, Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
 
 class Course(SQLModel, table=True):
-    
+
     __tablename__ = 'courses'
 
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -12,6 +18,8 @@ class Course(SQLModel, table=True):
     description: str
     price: float
     discount_percent: int
-    status: str  # 'pending', 'approved', 'rejected', 'closed'
+    status: Status  # 'pending', 'approved', 'rejected'
     created_at: datetime
+    image_thumbnail: Optional[str] = None
+    video_demo: Optional[str] = None
     average_rating: float = 0
