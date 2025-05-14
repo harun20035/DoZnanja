@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from database import database
 from init_db import create_db_and_tables
-from controllers import user_controller
+from controllers import user_controller, course_controller
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -35,3 +35,4 @@ async def test_connection():
 
 
 app.include_router(user_controller.router, prefix="/users", tags=["Users"])
+app.include_router(course_controller.router, prefix="/course", tags=["Course"])
