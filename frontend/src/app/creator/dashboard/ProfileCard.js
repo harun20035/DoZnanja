@@ -1,7 +1,39 @@
-import "./dashboard.css"
-import Link from "next/link"
+"use client";
+
+import { useEffect, useState } from "react";
+import "./dashboard.css";
+import Link from "next/link";
 
 export default function ProfileCard() {
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+
+    if (!token) return;
+
+    fetch("http://localhost:8000/course/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Greška pri dohvaćanju korisnika");
+        return res.json();
+      })
+      .then((data) => {
+        setUserData(data);
+      })
+      .catch((err) => console.error("Greška:", err));
+  }, []);
+
+  const getInitials = (ime, prezime) => {
+    if (!ime || !prezime) return "??";
+    return `${ime[0]}${prezime[0]}`.toUpperCase();
+  };
+
+  if (!userData) return <p>Učitavanje profila...</p>;
+
   return (
     <div className="card profile-card">
       <div className="card-header purple-header">
@@ -10,24 +42,39 @@ export default function ProfileCard() {
           My Profile
         </h3>
       </div>
+
       <div className="card-content profile-content">
         <div className="avatar-container">
-          <img src="/placeholder.svg?height=80&width=80" alt="Profile" className="avatar-img" />
-          <div className="avatar-fallback">JD</div>
+          {userData.profile_image ? (
+            <img src={userData.profile_image} alt="Profile" className="avatar-img" />
+          ) : (
+            <>
+              <img src={`http://localhost:8000/${userData.profile_image}`} alt="Profile" className="avatar-img" />
+
+              <div className="avatar-fallback">
+                {getInitials(userData.name, userData.surname)}
+              </div>
+            </>
+          )}
         </div>
-        <h3 className="profile-name">John Doe</h3>
-        <p className="profile-role">Web Development Instructor</p>
+
+        <h3 className="profile-name">
+          {userData.name} {userData.surname}
+        </h3>
+
+        <p className="profile-role">{userData.username}</p>
 
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: "75%" }}></div>
         </div>
         <p className="progress-text">Profile completion: 75%</p>
       </div>
+
       <div className="card-footer">
         <Link href="/creator/profile" className="btn-outline-purple">
           ⚙ Edit Profile
         </Link>
       </div>
     </div>
-  )
+  );
 }

@@ -4,11 +4,13 @@ import CreateCourseCard from './CreateCourseCard'
 import ProfileCard from './ProfileCard'
 import MessagesCard from './MessagesCard'
 import MyCourses from './MyCoursesSection'
+import userData from './ProfileCard'
+
 
 export default function DashboardPage() {
   return (
     <div className="dashboard-container">
-        <h1 className="welcome-title">Welcome, nickname</h1>
+        <h1 className="welcome-title">Welcome {userData.username}</h1>
       <div className="dashboard-grid">
             <CreateCourseCard />
             <ProfileCard />
