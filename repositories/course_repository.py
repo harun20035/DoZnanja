@@ -9,5 +9,4 @@ def create_course(db: Session, course: Course) -> Course:
     return course
 
 
-def get_user(session: Session, user_id: int) -> User | None:
-  return session.get(User, user_id)
+

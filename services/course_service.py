@@ -50,7 +50,4 @@ def create_course(
     return course_repository.create_course(db, new_course)
 
 
-def sget_user(db:Session,token:str) -> User:
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    user_id= payload.get("sub")
-    return course_repository.get_user(db,user_id)
+
