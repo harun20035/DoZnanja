@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import styles from './page.module.css';
-import { FaGoogle } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import './login.css';
+import { FaGoogle, FaExclamationCircle } from 'react-icons/fa';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [errorMessage, setErrorMessage] = useState(null);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,43 +16,51 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  setIsLoading(true);
+  setErrorMessage(null);
+  setShowErrorModal(false);
 
-    try {
-      const response = await fetch('http://localhost:8000/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+  try {
+    const response = await fetch('http://localhost:8000/users/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
 
-      if (!response.ok) {
-        throw new Error('Nevalidni podaci');
-      }
+    const data = await response.json();
 
-      const data = await response.json();
-      if (data.access_token) {
-        localStorage.setItem('auth_token', data.access_token);
-        console.log('Uspješan login, token je sačuvan.');
-        window.location.href = 'creator';
-      }
-    } catch (error) {
-      setErrorMessage(error.message);
-      console.error('Greška prilikom prijave:', error);
+    if (!response.ok) {
+      const poruka =
+        data.detail?.toLowerCase() === 'invalid credentials'
+          ? 'Nevalidni podaci'
+          : data.detail || 'Greška prilikom prijave';
+
+      throw new Error(poruka);
     }
-  };
+
+    if (data.access_token) {
+      localStorage.setItem('auth_token', data.access_token);
+      window.location.href = '/creator';
+    }
+  } catch (error) {
+    setErrorMessage(error.message);
+    setShowErrorModal(true);
+    setIsLoading(false);
+  }
+};
 
   return (
-    <div className={styles.container}>
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <h2 className={styles.title}>Prijava</h2>
+    <div className="form-container">
+      <form onSubmit={handleSubmit} className="form-fields">
+        <h2 className="form-title">Prijava</h2>
 
         <input
           type="email"
           name="email"
           placeholder="Email"
-          className={styles.input}
           value={formData.email}
           onChange={handleChange}
           required
@@ -63,22 +70,28 @@ const Login = () => {
           type="password"
           name="password"
           placeholder="Lozinka"
-          className={styles.input}
           value={formData.password}
           onChange={handleChange}
           required
         />
 
-        {errorMessage && <p className={styles.error}>{errorMessage}</p>}
-
-        <button type="submit" className={styles.button}>
-          Prijavi se
+        <button type="submit" className="submit-btn" disabled={isLoading}>
+          {isLoading ? 'Prijava u toku...' : 'Prijavi se'}
         </button>
 
-        <a href="http://localhost:8000/users/google/login" className={styles.googleButton}>
-            <FaGoogle className={styles.googleLogo} /> Prijavi se sa Google
+        <a href="http://localhost:8000/users/google/login" className="google-button">
+          <FaGoogle className="google-icon" /> Prijavi se sa Google
         </a>
       </form>
+
+      {showErrorModal && (
+        <div className="modal-popup">
+          <div className="modal-content">
+            <FaExclamationCircle className="modal-icon" />
+            <span>{errorMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
