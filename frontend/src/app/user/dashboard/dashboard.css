@@ -1,0 +1,174 @@
+:root {
+  --primary-purple: #6f42c1;
+  --primary-purple-dark: #5a32a3;
+  --primary-purple-light: #9a7ad1;
+  --light-purple: #f3f0f9;
+  --white: #ffffff;
+  --gray-100: #f8f9fa;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-400: #ced4da;
+  --gray-500: #adb5bd;
+  --gray-600: #6c757d;
+  --gray-700: #495057;
+  --gray-800: #343a40;
+  --gray-900: #212529;
+}
+
+body {
+  background-color: var(--gray-100);
+  color: var(--gray-800);
+  margin: 0;
+  padding: 0;
+}
+
+.btn-purple {
+  background-color: var(--primary-purple);
+  border-color: var(--primary-purple);
+  color: white;
+}
+
+.btn-purple:hover {
+  background-color: var(--primary-purple-dark);
+  border-color: var(--primary-purple-dark);
+  color: white;
+}
+
+.btn-outline-purple {
+  color: var(--primary-purple);
+  border-color: var(--primary-purple);
+}
+
+.btn-outline-purple:hover {
+  background-color: var(--primary-purple);
+  color: white;
+}
+
+.text-purple {
+  color: var(--primary-purple);
+}
+
+.bg-purple {
+  background-color: var(--primary-purple);
+}
+
+.bg-light-purple {
+  background-color: var(--light-purple);
+}
+
+.sidebar {
+  background-color: white;
+  min-height: 100vh;
+  border-right: 1px solid var(--gray-200);
+}
+
+.sidebar .nav-link {
+  color: var(--gray-700);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar .nav-link:hover {
+  background-color: var(--light-purple);
+}
+
+.sidebar .nav-link.active {
+  background-color: var(--light-purple);
+  color: var(--primary-purple);
+  font-weight: 500;
+}
+
+.sidebar .nav-link i {
+  margin-right: 0.5rem;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.course-card {
+  height: 100%;
+}
+
+.course-card .card-img-top {
+  height: 160px;
+  object-fit: cover;
+}
+
+.progress-bar {
+  background-color: var(--primary-purple);
+}
+
+.badge-purple {
+  background-color: var(--primary-purple-light);
+  color: white;
+}
+
+.chat-container {
+  height: 400px;
+  overflow-y: auto;
+}
+
+.chat-message {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.chat-message.sent {
+  background-color: var(--light-purple);
+  margin-left: 2rem;
+}
+
+.chat-message.received {
+  background-color: var(--gray-200);
+  margin-right: 2rem;
+}
+
+.chat-input {
+  border-radius: 1.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  color: var(--primary-purple);
+}
+
+.dropdown-item:active {
+  background-color: var(--primary-purple);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+}
+
+.credits-badge {
+  background-color: var(--primary-purple);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+}
