@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from database import engine
 from schemas.course_schema import CourseCreate, Category
-from services.course_service import create_course,sget_user
+from services.course_service import create_course
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 import os
