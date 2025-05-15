@@ -51,7 +51,14 @@ def register_user(user_data: UserCreate, db: SessionDep):
         user = create_user(user_data, db)
         return {"message": "User created", "user_id": user.id}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        error_message = str(e).lower()
+        if 'username' in error_message:
+            raise HTTPException(status_code=400, detail='Email već postoji')
+        elif 'email' in error_message:
+            raise HTTPException(status_code=400, detail='Korisničko ime već postoji')
+        else:
+            raise HTTPException(status_code=400, detail='Greška pri registraciji')
+
 
 @router.post("/login")
 def login_user(user_data: UserLogin, db: SessionDep):
