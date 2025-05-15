@@ -41,22 +41,7 @@ export default function MyCourses() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">Moji kursevi</h2>
         <div className="d-flex">
-          <div className="input-group me-2">
-            <input type="text" className="form-control" placeholder="Pretraži kurseve..." />
-            <button className="btn btn-purple" type="button">
-              <i className="bi bi-search"></i>
-            </button>
-          </div>
           <div className="dropdown">
-            <button
-              className="btn btn-outline-purple dropdown-toggle"
-              type="button"
-              id="sortDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Sortiraj
-            </button>
             <ul className="dropdown-menu" aria-labelledby="sortDropdown">
               <li>
                 <a className="dropdown-item" href="#">
