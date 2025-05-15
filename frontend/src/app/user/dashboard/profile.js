@@ -83,7 +83,7 @@ export default function Profile() {
     <div className="row">
       <div className="col-md-4 col-lg-3 mb-4 mb-md-0">
         <div className="card">
-          <div className="card-body text-center">
+          <div className="card-body text-center p-3">
             <div className="mb-3">
               <Image
                 src={userInfo.avatar || "/placeholder.svg"}
@@ -179,7 +179,7 @@ export default function Profile() {
               <div>
                 <h5 className="card-title mb-4">Lični podaci</h5>
                 <form>
-                  <div className="row mb-3">
+                  <div className="row mb-3 g-3">
                     <div className="col-md-6">
                       <label htmlFor="fullName" className="form-label">
                         Ime i prezime
@@ -193,7 +193,7 @@ export default function Profile() {
                       <input type="email" className="form-control" id="email" defaultValue={userInfo.email} />
                     </div>
                   </div>
-                  <div className="row mb-3">
+                  <div className="row mb-3 g-3">
                     <div className="col-md-6">
                       <label htmlFor="phone" className="form-label">
                         Telefon
@@ -225,7 +225,7 @@ export default function Profile() {
                     </label>
                     <input type="password" className="form-control" id="currentPassword" />
                   </div>
-                  <div className="row mb-3">
+                  <div className="row mb-3 g-3">
                     <div className="col-md-6">
                       <label htmlFor="newPassword" className="form-label">
                         Nova lozinka
@@ -254,8 +254,8 @@ export default function Profile() {
             {activeTab === "certificates" && (
               <div>
                 <h5 className="card-title mb-4">Moji certifikati</h5>
-                <div className="table-responsive">
-                  <table className="table table-hover">
+                <div className="table-responsive" style={{ overflowX: "auto" }}>
+                  <table className="table table-hover table-sm">
                     <thead>
                       <tr>
                         <th scope="col">#</th>
@@ -291,8 +291,8 @@ export default function Profile() {
             {activeTab === "transactions" && (
               <div>
                 <h5 className="card-title mb-4">Historija transakcija</h5>
-                <div className="table-responsive">
-                  <table className="table table-hover">
+                <div className="table-responsive" style={{ overflowX: "auto" }}>
+                  <table className="table table-hover table-sm">
                     <thead>
                       <tr>
                         <th scope="col">Datum</th>

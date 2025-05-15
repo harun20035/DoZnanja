@@ -142,7 +142,7 @@ export default function Chat() {
                   <div className="d-flex w-100 justify-content-between align-items-start">
                     <div>
                       <h6 className="mb-0">{contact.name}</h6>
-                      <p className="mb-0 small text-truncate" style={{ maxWidth: "150px" }}>
+                      <p className="mb-0 small text-truncate" style={{ maxWidth: "100%" }}>
                         {contact.lastMessage}
                       </p>
                       <small className="text-muted">{contact.course}</small>
@@ -161,7 +161,7 @@ export default function Chat() {
       <div className="col-md-8 col-lg-9">
         <div className="card">
           <div className="card-header bg-white">
-            <div className="d-flex align-items-center">
+            <div className="d-flex align-items-center w-100">
               <div className="position-relative me-2">
                 <Image
                   src={contacts.find((c) => c.id === activeChat)?.avatar || "/placeholder.svg?height=40&width=40"}
@@ -184,9 +184,13 @@ export default function Chat() {
             </div>
           </div>
           <div className="card-body p-0">
-            <div className="chat-container p-3">
+            <div className="chat-container p-3" style={{ maxHeight: "400px", overflowY: "auto" }}>
               {messages.map((message) => (
-                <div key={message.id} className={`chat-message ${message.senderId === "me" ? "sent" : "received"}`}>
+                <div
+                  key={message.id}
+                  className={`chat-message ${message.senderId === "me" ? "sent" : "received"}`}
+                  style={{ wordBreak: "break-word" }}
+                >
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <span className="fw-medium">
                       {message.senderId === "me"

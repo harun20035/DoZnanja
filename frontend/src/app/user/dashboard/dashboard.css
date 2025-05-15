@@ -115,22 +115,27 @@ body {
 .chat-container {
   height: 400px;
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .chat-message {
   margin-bottom: 1rem;
   padding: 0.75rem;
   border-radius: 0.5rem;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .chat-message.sent {
   background-color: var(--light-purple);
   margin-left: 2rem;
+  margin-right: 0.5rem;
 }
 
 .chat-message.received {
   background-color: var(--gray-200);
   margin-right: 2rem;
+  margin-left: 0.5rem;
 }
 
 .chat-input {
@@ -171,4 +176,53 @@ body {
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 1rem;
+}
+
+/* Fix for profile component */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-sm td,
+.table-sm th {
+  padding: 0.5rem;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+
+  .chat-message.sent {
+    margin-left: 1rem;
+  }
+
+  .chat-message.received {
+    margin-right: 1rem;
+  }
+
+  .avatar-lg {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* Fix for long text in cards */
+.card-title,
+.card-text {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Fix for form elements */
+.form-control {
+  max-width: 100%;
+}
+
+/* Fix for dropdown menus */
+.dropdown-menu {
+  max-width: 100%;
+  overflow-x: hidden;
 }
