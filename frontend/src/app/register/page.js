@@ -20,6 +20,7 @@ const Register = () => {
 
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,6 +36,8 @@ const Register = () => {
       setShowErrorModal(true);
       return;
     }
+
+    setIsLoading(true);
 
     try {
       const res = await fetch('http://localhost:8000/users/register', {
@@ -55,26 +58,26 @@ const Register = () => {
       const data = await res.json();
 
       if (!res.ok) {
+        setIsLoading(false);
         let poruka = 'Greška prilikom registracije.';
 
         if (typeof data.detail === 'string') {
           if (data.detail.toLowerCase().includes('username')) {
             poruka = 'Korisničko ime već postoji.';
           } else if (data.detail.toLowerCase().includes('email')) {
-              poruka = 'Email već postoji.';
+            poruka = 'Email već postoji.';
           } else {
             poruka = data.detail;
-      }
-      }  
+          }
+        }
 
-  setErrorMessage(poruka);
-  setShowErrorModal(true);
-}
-
- else {
+        setErrorMessage(poruka);
+        setShowErrorModal(true);
+      } else {
         router.push('/login');
       }
     } catch (err) {
+      setIsLoading(false);
       setErrorMessage('Greška prilikom slanja zahteva.');
       setShowErrorModal(true);
     }
@@ -118,6 +121,12 @@ const Register = () => {
           Prijavi se sa Google
         </a>
       </form>
+
+      {isLoading && (
+        <div className="loading-message">
+          Registracija je u toku...
+        </div>
+      )}
 
       {showErrorModal && (
         <div className="modal-popup error">
