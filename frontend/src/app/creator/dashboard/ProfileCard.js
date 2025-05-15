@@ -46,10 +46,11 @@ export default function ProfileCard() {
       <div className="card-content profile-content">
         <div className="avatar-container">
           {userData.profile_image ? (
-            <img src={userData.profile_image} alt="Profile" className="avatar-img" />
+            <img src={`http://localhost:8000/images/${userData.profile_image}`} alt="Profile" className="avatar-img" />
+
           ) : (
             <>
-              <img src={`http://localhost:8000/${userData.profile_image}`} alt="Profile" className="avatar-img" />
+  
 
               <div className="avatar-fallback">
                 {getInitials(userData.name, userData.surname)}
