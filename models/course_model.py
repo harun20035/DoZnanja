@@ -8,6 +8,17 @@ class Status(str, Enum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
 
+
+class Category(str, Enum):
+    PROGRAMMING = "Programming"
+    DESIGN = "Design"
+    MARKETING = "Marketing"
+    MUSIC = "Music"
+    BUSINESS = "Business"
+    PHOTOGRAPHY = "Photography"
+    LANGUAGES = "Languages"
+    OTHER = "Other"
+
 class Course(SQLModel, table=True):
 
     __tablename__ = 'courses'
@@ -19,6 +30,7 @@ class Course(SQLModel, table=True):
     price: float
     discount_percent: int
     status: Status  # 'pending', 'approved', 'rejected'
+    category: Category 
     created_at: datetime
     image_thumbnail: Optional[str] = None
     video_demo: Optional[str] = None

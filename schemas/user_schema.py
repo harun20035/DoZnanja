@@ -6,6 +6,7 @@ class Role(str, Enum):
     CREATOR = "CREATOR"
     ADMIN = "ADMIN"
 
+
 class UserCreate(BaseModel):
     name: str
     surname: str
@@ -13,6 +14,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: Role = Role.USER
+    
 
 
 class UserLogin(BaseModel):
