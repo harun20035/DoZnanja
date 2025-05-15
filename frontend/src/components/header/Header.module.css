@@ -1,0 +1,45 @@
+.header {
+  background-color: #6b21a8; /* tamno ljubičasta */
+  color: white;
+}
+
+.brand {
+  color: white !important;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+
+.navLinks {
+  display: flex;
+  gap: 1rem;
+}
+
+.authLinks {
+  display: flex;
+  gap: 1rem;
+}
+
+.linkText {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.linkText:hover {
+  color: #ddd6fe; /* svjetlija ljubičasta */
+}
+
+.searchInput {
+  background-color: white;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  width: 350px;
+}
+
+.searchIcon {
+  color: #6b21a8;
+}
