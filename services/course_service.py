@@ -4,9 +4,14 @@ from models.course_model import Course
 from schemas.course_schema import CourseCreate
 from repositories import course_repository
 from datetime import datetime
+from models.user_model import User
 import shutil
+import jwt
 import os
 import uuid
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = "HS256"
 
 def save_file(file: UploadFile, folder: str) -> str:
     ext = file.filename.split('.')[-1]
@@ -43,3 +48,6 @@ def create_course(
     )
 
     return course_repository.create_course(db, new_course)
+
+
+

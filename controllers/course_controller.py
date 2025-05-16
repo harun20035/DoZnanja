@@ -13,7 +13,6 @@ router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 SECRET_KEY = os.getenv("SECRET_KEY")
-print(SECRET_KEY)
 ALGORITHM = "HS256"
 
 def get_session():
@@ -67,3 +66,9 @@ def create_course_controller(
         return {"message": "Course created", "course_id": course.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@router.get("/me")
+def get_user(db:SessionDep,current_user: User = Depends(get_current_user)):
+    return current_user
