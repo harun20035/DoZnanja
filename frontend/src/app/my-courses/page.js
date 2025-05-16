@@ -215,12 +215,6 @@ export default function MyCoursesPage() {
 
   return (
     <div className="container-fluid p-4">
-      <div className="mb-4">
-        <Link href="/user/dashboard" className="btn btn-outline-purple">
-          <i className="bi bi-arrow-left me-2"></i>
-          Nazad na dashboard
-        </Link>
-      </div>
 
       <h2 className="mb-4">Moji kursevi</h2>
 
