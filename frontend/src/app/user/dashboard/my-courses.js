@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 
 export default function MyCourses() {
   const courses = [
@@ -37,40 +38,14 @@ export default function MyCourses() {
   ]
 
   return (
-    <div>
+    <div className="container-fluid px-0">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">Moji kursevi</h2>
-        <div className="d-flex">
-          <div className="dropdown">
-            <ul className="dropdown-menu" aria-labelledby="sortDropdown">
-              <li>
-                <a className="dropdown-item" href="#">
-                  Najnovije
-                </a>
-              </li>
-              <li>
-                <a className="dropdown-item" href="#">
-                  Najstarije
-                </a>
-              </li>
-              <li>
-                <a className="dropdown-item" href="#">
-                  Napredak (rastući)
-                </a>
-              </li>
-              <li>
-                <a className="dropdown-item" href="#">
-                  Napredak (opadajući)
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
       </div>
 
       <div className="row g-4">
         {courses.map((course) => (
-          <div key={course.id} className="col-md-6 col-lg-4 col-xl-3">
+          <div key={course.id} className="col-sm-6 col-md-4 col-lg-3">
             <div className="card course-card h-100">
               <Image
                 src={course.image || "/placeholder.svg"}
@@ -113,10 +88,18 @@ export default function MyCourses() {
         ))}
       </div>
 
+      {/* Link za pregled svih korisnikovih kurseva */}
+      <div className="d-flex justify-content-end mt-3">
+        <Link href="/my-courses" className="text-purple text-decoration-none">
+          <span>Pogledaj sve moje kurseve</span>
+          <i className="bi bi-arrow-right ms-2"></i>
+        </Link>
+      </div>
+
       <div className="mt-5">
         <h3 className="mb-4">Preporučeni kursevi za tebe</h3>
         <div className="row g-4">
-          <div className="col-md-6 col-lg-4 col-xl-3">
+          <div className="col-sm-6 col-md-4 col-lg-3">
             <div className="card course-card h-100">
               <Image
                 src="/placeholder.svg?height=160&width=300"
@@ -151,7 +134,7 @@ export default function MyCourses() {
               </div>
             </div>
           </div>
-          <div className="col-md-6 col-lg-4 col-xl-3">
+          <div className="col-sm-6 col-md-4 col-lg-3">
             <div className="card course-card h-100">
               <Image
                 src="/placeholder.svg?height=160&width=300"
@@ -186,7 +169,62 @@ export default function MyCourses() {
               </div>
             </div>
           </div>
+          <div className="col-sm-6 col-md-4 col-lg-3">
+            <div className="card course-card h-100">
+              <Image
+                src="/placeholder.svg?height=160&width=300"
+                width={300}
+                height={160}
+                className="card-img-top"
+                alt="Digitalni marketing"
+              />
+              <div className="card-body d-flex flex-column">
+                <h5 className="card-title">Digitalni marketing</h5>
+                <p className="card-text text-muted mb-1">Mirza Mirzić</p>
+                <div className="d-flex align-items-center mt-2">
+                  <div className="me-2">
+                    <i className="bi bi-star-fill text-warning"></i>
+                    <i className="bi bi-star-fill text-warning"></i>
+                    <i className="bi bi-star-fill text-warning"></i>
+                    <i className="bi bi-star-fill text-warning"></i>
+                    <i className="bi bi-star text-warning"></i>
+                  </div>
+                  <small className="text-muted">(110)</small>
+                </div>
+                <div className="mt-3 d-flex align-items-center">
+                  <span className="badge bg-purple me-2">Preporučeno</span>
+                  <span className="badge bg-light text-dark">Marketing</span>
+                </div>
+                <div className="mt-auto pt-3 d-flex justify-content-between align-items-center">
+                  <span className="fw-bold">40 kredita</span>
+                  <a href="#" className="btn btn-outline-purple">
+                    Detalji
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* CTA za stranicu sa svim kursevima */}
+      <div className="mt-5 text-center py-5 bg-light-purple rounded">
+        <h3 className="mb-3">Istražite našu kompletnu ponudu kurseva</h3>
+        <p className="mb-4">Pronađite kurseve koji odgovaraju vašim interesima i ciljevima</p>
+        <Link
+          href="/all-courses"
+          className="btn btn-lg"
+          style={{
+            backgroundColor: "var(--primary-purple)",
+            color: "white",
+            borderColor: "var(--primary-purple)",
+            padding: "0.75rem 2rem",
+            fontWeight: "500",
+          }}
+        >
+          <i className="bi bi-collection me-2"></i>
+          Pregledaj sve kurseve
+        </Link>
       </div>
     </div>
   )
