@@ -1,3 +1,4 @@
+/* Stilovi za stranicu mojih kurseva */
 :root {
   --primary-purple: #6f42c1;
   --primary-purple-dark: #5a32a3;
@@ -13,13 +14,6 @@
   --gray-700: #495057;
   --gray-800: #343a40;
   --gray-900: #212529;
-}
-
-body {
-  background-color: var(--gray-100);
-  color: var(--gray-800);
-  margin: 0;
-  padding: 0;
 }
 
 .btn-purple {
@@ -76,25 +70,61 @@ body {
   object-fit: cover;
 }
 
+.progress {
+  background-color: var(--gray-200);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
 .progress-bar {
   background-color: var(--primary-purple);
+  transition: width 0.6s ease;
 }
 
-.badge-purple {
-  background-color: var(--primary-purple-light);
-  color: white;
+.progress-bar.bg-success {
+  background-color: #28a745 !important;
 }
 
-/* Fix for long text in cards */
-.card-title,
-.card-text {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+.progress-bar.bg-warning {
+  background-color: #ffc107 !important;
 }
 
-/* Responsive fixes */
-@media (max-width: 768px) {
-  .card-body {
-    padding: 1rem;
-  }
+.badge.bg-success {
+  background-color: #28a745 !important;
+}
+
+.page-link:focus {
+  box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+}
+
+.page-item.active .page-link {
+  background-color: var(--primary-purple);
+  border-color: var(--primary-purple);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-purple-light);
+  box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+}
+
+.search-no-results {
+  border: 2px dashed var(--gray-300);
+  border-radius: 1rem;
+  background-color: var(--gray-100);
+}
+
+.search-no-results i {
+  color: var(--primary-purple-light);
+}
+
+.status-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }

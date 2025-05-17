@@ -1,3 +1,4 @@
+/* Stilovi za stranicu svih kurseva */
 :root {
   --primary-purple: #6f42c1;
   --primary-purple-dark: #5a32a3;
@@ -13,13 +14,6 @@
   --gray-700: #495057;
   --gray-800: #343a40;
   --gray-900: #212529;
-}
-
-body {
-  background-color: var(--gray-100);
-  color: var(--gray-800);
-  margin: 0;
-  padding: 0;
 }
 
 .btn-purple {
@@ -76,25 +70,47 @@ body {
   object-fit: cover;
 }
 
-.progress-bar {
+.categories-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.categories-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.categories-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--gray-400);
+  border-radius: 3px;
+}
+
+.categories-scroll::-webkit-scrollbar-track {
+  background-color: var(--gray-200);
+  border-radius: 3px;
+}
+
+.page-link:focus {
+  box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+}
+
+.page-item.active .page-link {
   background-color: var(--primary-purple);
+  border-color: var(--primary-purple);
 }
 
-.badge-purple {
-  background-color: var(--primary-purple-light);
-  color: white;
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-purple-light);
+  box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
 }
 
-/* Fix for long text in cards */
-.card-title,
-.card-text {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+.search-no-results {
+  border: 2px dashed var(--gray-300);
+  border-radius: 1rem;
+  background-color: var(--gray-100);
 }
 
-/* Responsive fixes */
-@media (max-width: 768px) {
-  .card-body {
-    padding: 1rem;
-  }
+.search-no-results i {
+  color: var(--primary-purple-light);
 }
