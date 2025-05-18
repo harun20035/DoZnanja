@@ -1,7 +1,7 @@
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 from models.course_model import Course
-from schemas.course_schema import CourseCreate
+from schemas.course_schema import CourseCreate, UserUpdate
 from repositories import course_repository
 from datetime import datetime
 from models.user_model import User
@@ -48,6 +48,14 @@ def create_course(
     )
 
     return course_repository.create_course(db, new_course)
+
+
+def update_user_data(user_data: UserUpdate, db: Session, current_user: User):
+    return course_repository.r_update_user(db, user_data, current_user)
+
+
+
+
 
 
 

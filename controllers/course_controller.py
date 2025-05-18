@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import Annotated
 from database import engine
-from schemas.course_schema import CourseCreate, Category
-from services.course_service import create_course
+from schemas.course_schema import CourseCreate, Category, UserUpdate
+from services.course_service import create_course, update_user_data
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 import os
@@ -72,3 +72,8 @@ def create_course_controller(
 @router.get("/me")
 def get_user(db:SessionDep,current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.put("/update")
+def update_user(user_data : UserUpdate, db : SessionDep, current_user : User = Depends(get_current_user)):
+    return update_user_data(user_data, db, current_user)
