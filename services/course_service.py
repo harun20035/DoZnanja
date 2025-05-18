@@ -7,6 +7,11 @@ from datetime import datetime
 import shutil
 import os
 import uuid
+from sqlmodel import Session, select
+from models.course_model import Course
+from sqlmodel import Session
+from typing import List
+from repositories import course_repository
 
 def save_file(file: UploadFile, folder: str) -> str:
     ext = file.filename.split('.')[-1]
@@ -43,3 +48,8 @@ def create_course(
     )
 
     return course_repository.create_course(db, new_course)
+
+
+def fetch_all_courses(db: Session) -> List[dict]:
+    courses = course_repository.get_all_courses(db)
+    return [course.dict() for course in courses]

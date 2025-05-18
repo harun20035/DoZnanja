@@ -8,6 +8,12 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 import os
 from models.user_model import User
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from services import course_service
+from models.course_model import Course
+from fastapi import APIRouter, Depends
+from services import course_service
 
 router = APIRouter()
 
@@ -67,3 +73,8 @@ def create_course_controller(
         return {"message": "Course created", "course_id": course.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@router.get("/all-courses")
+def get_all_courses(db: SessionDep):
+    return course_service.fetch_all_courses(db)

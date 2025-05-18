@@ -1,84 +1,71 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { allCourses } from "./CourseData"
+import { useState, useEffect, useMemo } from "react";
 
-export default function useCourses() {
-  const [courses, setCourses] = useState([])
-  const [filteredCourses, setFilteredCourses] = useState([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("Svi kursevi")
-  const [sortBy, setSortBy] = useState("newest")
-  const coursesPerPage = 8
+export default function useCourses(initialOptions = {}) {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 8;
 
-  // Učitaj kurseve pri prvom renderiranju
+  // Fetch courses
   useEffect(() => {
-    setCourses(allCourses)
-    setFilteredCourses(allCourses)
-  }, [])
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/all-courses");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        const transformedCourses = data.map(course => ({
+          ...course,
+          image_thumbnail: course.image_thumbnail ? 
+            `http://localhost:8000/${course.image_thumbnail.replace(/\\/g, '/')}` : 
+            null
+        }));
+        
+        setCourses(transformedCourses);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Filtriraj i sortiraj kurseve kada se promijene parametri
-  useEffect(() => {
-    let result = [...courses]
+    fetchCourses();
+  }, []);
 
-    // Filtriranje po kategoriji
-    if (selectedCategory !== "Svi kursevi") {
-      result = result.filter((course) => course.category === selectedCategory)
-    }
+  // Filter and sort logic
+  const filteredCourses = useMemo(() => {
+    return courses.filter(course => {
+      const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          course.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    }).sort((a, b) => {
+      switch(sortBy) {
+        case "price-asc": return a.price - b.price;
+        case "price-desc": return b.price - a.price;
+        case "rating-desc": return b.average_rating - a.average_rating;
+        case "newest": return new Date(b.created_at) - new Date(a.created_at);
+        default: return 0;
+      }
+    });
+  }, [courses, searchTerm, selectedCategory, sortBy]);
 
-    // Filtriranje po pretrazi
-    if (searchTerm) {
-      const searchTermLower = searchTerm.toLowerCase()
-      result = result.filter(
-        (course) =>
-          course.title.toLowerCase().includes(searchTermLower) ||
-          course.instructor.toLowerCase().includes(searchTermLower) ||
-          course.category.toLowerCase().includes(searchTermLower),
-      )
-    }
+  // Pagination logic
+  const currentCourses = useMemo(() => {
+    const indexOfLastCourse = currentPage * coursesPerPage;
+    const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
+    return filteredCourses.slice(indexOfFirstCourse, indexOfLastCourse);
+  }, [filteredCourses, currentPage]);
 
-    // Sortiranje
-    switch (sortBy) {
-      case "newest":
-        result.sort((a, b) => new Date(b.date) - new Date(a.date))
-        break
-      case "oldest":
-        result.sort((a, b) => new Date(a.date) - new Date(b.date))
-        break
-      case "price-asc":
-        result.sort((a, b) => a.price - b.price)
-        break
-      case "price-desc":
-        result.sort((a, b) => b.price - a.price)
-        break
-      case "rating-asc":
-        result.sort((a, b) => a.rating - b.rating)
-        break
-      case "rating-desc":
-        result.sort((a, b) => b.rating - a.rating)
-        break
-      default:
-        break
-    }
+  const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
 
-    setFilteredCourses(result)
-    setCurrentPage(1) // Resetuj paginaciju kada se promijene filteri
-  }, [courses, searchTerm, selectedCategory, sortBy])
-
-  // Izračunaj trenutne kurseve za prikaz
-  const indexOfLastCourse = currentPage * coursesPerPage
-  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage
-  const currentCourses = filteredCourses.slice(indexOfFirstCourse, indexOfLastCourse)
-  const totalPages = Math.ceil(filteredCourses.length / coursesPerPage)
-
-  // Funkcija za promjenu stranice
-  const paginate = (pageNumber) => {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber)
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    }
-  }
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return {
     currentCourses,
@@ -92,5 +79,7 @@ export default function useCourses() {
     setSortBy,
     paginate,
     filteredCourses,
-  }
+    loading,
+    error
+  };
 }
