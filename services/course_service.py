@@ -9,6 +9,11 @@ import shutil
 import jwt
 import os
 import uuid
+from sqlmodel import Session, select
+from models.course_model import Course
+from sqlmodel import Session
+from typing import List
+from repositories import course_repository
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
@@ -50,12 +55,11 @@ def create_course(
     return course_repository.create_course(db, new_course)
 
 
+def fetch_all_courses(db: Session) -> List[dict]:
+    courses = course_repository.get_all_courses(db)
+    return [course.dict() for course in courses]
+
 def update_user_data(user_data: UserUpdate, db: Session, current_user: User):
     return course_repository.r_update_user(db, user_data, current_user)
-
-
-
-
-
 
 

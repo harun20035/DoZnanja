@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
 from models.course_model import Course
+from sqlmodel import Session, select
+from typing import List
 from models.user_model import User
 from fastapi import HTTPException
 from schemas.course_schema import UserUpdate
@@ -10,6 +12,10 @@ def create_course(db: Session, course: Course) -> Course:
     db.refresh(course)
     return course
 
+def get_all_courses(db: Session) -> List[Course]:
+    statement = select(Course)
+    results = db.execute(statement).scalars()
+    return results.all()
 
 
 def r_update_user(db: Session, user_data: UserUpdate, current_user: User):
@@ -42,8 +48,4 @@ def r_update_user(db: Session, user_data: UserUpdate, current_user: User):
     db.commit()
     db.refresh(user_db)
     return user_db
-
-
-
-
 
