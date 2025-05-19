@@ -3,16 +3,14 @@ from database import database
 from init_db import create_db_and_tables
 from controllers import user_controller, course_controller
 from fastapi.middleware.cors import CORSMiddleware
+
 from fastapi.staticfiles import StaticFiles
 
-
-
-
-
-
-
-
 app = FastAPI()
+
+
+# Serve images folder
+app.mount("/images", StaticFiles(directory="images"), name="images")
 
 app.add_middleware(
     CORSMiddleware,
@@ -43,4 +41,3 @@ async def test_connection():
 
 app.include_router(user_controller.router, prefix="/users", tags=["Users"])
 app.include_router(course_controller.router, prefix="/course", tags=["Course"])
-app.mount("/images", StaticFiles(directory="images"), name="images")
