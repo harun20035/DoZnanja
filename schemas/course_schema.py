@@ -37,3 +37,8 @@ class UserUpdate(BaseModel):
     username : Optional[str]
     email : Optional[str]
     
+
+
+class ChangePassword(BaseModel) :
+    current_password : str
+    new_password : str

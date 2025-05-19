@@ -102,7 +102,7 @@ const EditProfile = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem("auth_token");
     if (!token) {
       alert("Niste prijavljeni!");
       return;
@@ -114,7 +114,7 @@ const EditProfile = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/users/change-password", {
+      const response = await fetch("http://localhost:8000/course/change-password", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -128,7 +128,7 @@ const EditProfile = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Greška pri promeni lozinke:", errorData);
+        console.error("Greška pri promjeni lozinke:", errorData);
         alert("Greška pri promeni lozinke!");
         return;
       }

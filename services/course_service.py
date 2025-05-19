@@ -1,7 +1,7 @@
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session
 from models.course_model import Course
-from schemas.course_schema import CourseCreate, UserUpdate
+from schemas.course_schema import CourseCreate, UserUpdate, ChangePassword
 from repositories import course_repository
 from datetime import datetime
 from models.user_model import User
@@ -14,9 +14,11 @@ from models.course_model import Course
 from sqlmodel import Session
 from typing import List
 from repositories import course_repository
+from passlib.context import CryptContext
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def save_file(file: UploadFile, folder: str) -> str:
     ext = file.filename.split('.')[-1]
@@ -61,5 +63,19 @@ def fetch_all_courses(db: Session) -> List[dict]:
 
 def update_user_data(user_data: UserUpdate, db: Session, current_user: User):
     return course_repository.r_update_user(db, user_data, current_user)
+
+
+def change_password_data(user_data : ChangePassword, db : Session, current_user : User) :
+    user_id = current_user.id
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Korisnik nije pronadjen")
+    if not pwd_context.verify(user_data.current_password, user.password_hash):
+        raise HTTPException(status_code=404, detail="Unijeli ste netačnu lozinku")
+    
+    user.password_hash = pwd_context.hash(user_data.new_password)
+
+    return course_repository.change_password(db, user)
 
 

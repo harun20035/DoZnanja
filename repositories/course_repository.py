@@ -23,23 +23,20 @@ def r_update_user(db: Session, user_data: UserUpdate, current_user: User):
     if not user_db:
         raise HTTPException(status_code=404, detail="Korisnik nije pronađen")
 
-    # Username: ako se promenio, proveri da li je zauzet
     if user_data.username is not None:
         if user_data.username != user_db.username:
             existing_user = db.query(User).filter(User.username == user_data.username).first()
             if existing_user and existing_user.id != current_user.id:
                 raise HTTPException(status_code=400, detail="Korisničko ime je već zauzeto")
-        user_db.username = user_data.username  # postavi i ako je isto
+        user_db.username = user_data.username
 
-    # Email: isto kao za username
     if user_data.email is not None:
         if user_data.email != user_db.email:
             existing_user = db.query(User).filter(User.email == user_data.email).first()
             if existing_user and existing_user.id != current_user.id:
                 raise HTTPException(status_code=400, detail="Email adresa je već zauzeta")
-        user_db.email = user_data.email  # postavi i ako je isto
+        user_db.email = user_data.email 
 
-    # Ostala polja
     if user_data.name is not None:
         user_db.name = user_data.name
     if user_data.surname is not None:
@@ -49,3 +46,10 @@ def r_update_user(db: Session, user_data: UserUpdate, current_user: User):
     db.refresh(user_db)
     return user_db
 
+
+def change_password(db : Session, user : User):
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"message": "Lozinka uspješno promijenjena"}
