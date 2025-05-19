@@ -28,3 +28,12 @@ class CourseCreate(BaseModel):
     discount_percent: int
     status: Status = Status.PENDING
     category : Category
+
+
+
+class UserUpdate(BaseModel):
+    name : Optional[str]
+    surname : Optional[str]
+    username : Optional[str]
+    email : Optional[str]
+    

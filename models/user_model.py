@@ -20,3 +20,4 @@ class User(SQLModel, table=True):
     role: Role  # 'student', 'creator', 'admin'
     credits: int = 0
     google_id: Optional[str] = None
+    profile_image: Optional[str] = None

@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import Annotated
 from database import engine
-from schemas.course_schema import CourseCreate, Category
-from services.course_service import create_course
+from schemas.course_schema import CourseCreate, Category, UserUpdate
+from services.course_service import create_course, update_user_data
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 import os
@@ -19,7 +19,6 @@ router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 SECRET_KEY = os.getenv("SECRET_KEY")
-print(SECRET_KEY)
 ALGORITHM = "HS256"
 
 def get_session():
@@ -73,8 +72,21 @@ def create_course_controller(
         return {"message": "Course created", "course_id": course.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
     
 
 @router.get("/all-courses")
 def get_all_courses(db: SessionDep):
     return course_service.fetch_all_courses(db)
+
+
+
+@router.get("/me")
+def get_user(db:SessionDep,current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.put("/update")
+def update_user(user_data : UserUpdate, db : SessionDep, current_user : User = Depends(get_current_user)):
+    return update_user_data(user_data, db, current_user)
+

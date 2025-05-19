@@ -5,8 +5,13 @@ from controllers import user_controller, course_controller
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
+
+
+# Serve images folder
+app.mount("/images", StaticFiles(directory="images"), name="images")
 
 app.add_middleware(
     CORSMiddleware,

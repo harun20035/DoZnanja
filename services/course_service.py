@@ -1,10 +1,12 @@
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 from models.course_model import Course
-from schemas.course_schema import CourseCreate
+from schemas.course_schema import CourseCreate, UserUpdate
 from repositories import course_repository
 from datetime import datetime
+from models.user_model import User
 import shutil
+import jwt
 import os
 import uuid
 from sqlmodel import Session, select
@@ -12,6 +14,9 @@ from models.course_model import Course
 from sqlmodel import Session
 from typing import List
 from repositories import course_repository
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = "HS256"
 
 def save_file(file: UploadFile, folder: str) -> str:
     ext = file.filename.split('.')[-1]
@@ -53,3 +58,8 @@ def create_course(
 def fetch_all_courses(db: Session) -> List[dict]:
     courses = course_repository.get_all_courses(db)
     return [course.dict() for course in courses]
+
+def update_user_data(user_data: UserUpdate, db: Session, current_user: User):
+    return course_repository.r_update_user(db, user_data, current_user)
+
+
