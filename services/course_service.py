@@ -84,3 +84,8 @@ def change_photo_data(db: Session, profile_image: UploadFile,  current_user: Use
     current_user.profile_image = image_path
 
     return course_repository.change_photo(db, current_user)
+
+
+def get_creator_courses_list(db : Session, current_user : User) -> List[dict] :
+    courses = course_repository.get_creator_courses(db, current_user.id)
+    return [course.dict() for course in courses]

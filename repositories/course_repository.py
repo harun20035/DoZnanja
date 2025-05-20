@@ -5,6 +5,7 @@ from typing import List
 from models.user_model import User
 from fastapi import HTTPException
 from schemas.course_schema import UserUpdate
+from sqlalchemy import select
 
 def create_course(db: Session, course: Course) -> Course:
     db.add(course)
@@ -61,3 +62,9 @@ def change_photo(db : Session, user : User) :
     db.refresh(user)
 
     return {"message": "Slika uspješno promijenjena"}
+
+def get_creator_courses(db: Session, creator_id: int):
+    statement = select(Course).where(Course.creator_id == creator_id)
+    result = db.execute(statement)
+    courses = result.scalars().all() 
+    return courses
