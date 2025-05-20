@@ -53,3 +53,11 @@ def change_password(db : Session, user : User):
     db.refresh(user)
 
     return {"message": "Lozinka uspješno promijenjena"}
+
+
+def change_photo(db : Session, user : User) :
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"message": "Slika uspješno promijenjena"}

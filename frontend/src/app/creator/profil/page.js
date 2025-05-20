@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User, Mail, Key, AtSign, Save, Eye, EyeOff } from 'lucide-react';
-import './profile.css';
+import "./profile.css";
 
 const EditProfile = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -18,40 +18,116 @@ const EditProfile = () => {
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    profile_image: '',
+    profile_image: '', // putanja slike
     role: ''
   });
+
+  const fileInputRef = useRef(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     if (!token) return;
 
     fetch("http://localhost:8000/course/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` }
     })
-      .then((res) => {
+      .then(res => {
         if (!res.ok) throw new Error("Greška pri dohvaćanju korisnika");
         return res.json();
       })
-      .then((data) => {
-        setFormData((prev) => ({
-          ...prev,
-          firstName: data.name,
-          lastName: data.surname,
-          nickname: data.username,
-          email: data.email,
-          profile_image: data.profile_image,
-          role: data.role
-        }));
+      .then(data => {
+        const normalizedImagePath = data.profile_image ? data.profile_image.replace(/\\/g, '/') : null;
+
+        setFormData({
+          firstName: data.name || '',
+          lastName: data.surname || '',
+          nickname: data.username || '',
+          email: data.email || '',
+          profile_image: normalizedImagePath || '',
+          role: data.role || '',
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+
+        if (normalizedImagePath) {
+          setPreviewImage(`http://localhost:8000/${normalizedImagePath}`);
+        } else {
+          setPreviewImage(null);
+        }
       })
-      .catch((err) => console.error("Greška:", err));
+      .catch(err => console.error("Greška:", err));
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const openFileDialog = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setPreviewImage(URL.createObjectURL(file));
+
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      alert("Niste prijavljeni!");
+      return;
+    }
+
+    const formPayload = new FormData();
+    formPayload.append('profile_image', file);
+
+    try {
+      const response = await fetch("http://localhost:8000/course/change-photo", {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formPayload,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Greška pri uploadu slike:", errorData);
+        alert("Greška pri uploadu slike!");
+
+        // Vrati preview na staru sliku jer upload nije uspeo
+        if (formData.profile_image) {
+          setPreviewImage(`http://localhost:8000/${formData.profile_image}`);
+        } else {
+          setPreviewImage(null);
+        }
+        return;
+      }
+
+      const data = await response.json();
+      const normalizedImagePath = data.profile_image ? data.profile_image.replace(/\\/g, '/') : null;
+
+      alert("Slika uspešno promenjena!");
+
+      setFormData(prev => ({
+        ...prev,
+        profile_image: normalizedImagePath || '',
+      }));
+
+      if (normalizedImagePath) {
+        setPreviewImage(`http://localhost:8000/${normalizedImagePath}`);
+      }
+
+    } catch (err) {
+      console.error("Greška:", err);
+      alert("Došlo je do greške prilikom upload-a slike!");
+      if (formData.profile_image) {
+        setPreviewImage(`http://localhost:8000/${formData.profile_image}`);
+      } else {
+        setPreviewImage(null);
+      }
+    }
   };
 
   const handleProfileSubmit = async (e) => {
@@ -74,6 +150,7 @@ const EditProfile = () => {
           surname: formData.lastName,
           username: formData.nickname,
           email: formData.email,
+          // profile_image se ne šalje ovde
         }),
       });
 
@@ -85,15 +162,17 @@ const EditProfile = () => {
       }
 
       const updatedData = await response.json();
+
       alert("Profil uspešno ažuriran!");
 
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
-        firstName: updatedData.name,
-        lastName: updatedData.surname,
-        nickname: updatedData.username,
-        email: updatedData.email,
+        firstName: updatedData.name || prev.firstName,
+        lastName: updatedData.surname || prev.lastName,
+        nickname: updatedData.username || prev.nickname,
+        email: updatedData.email || prev.email,
       }));
+
     } catch (err) {
       console.error("Greška:", err);
       alert("Došlo je do greške!");
@@ -135,7 +214,7 @@ const EditProfile = () => {
 
       alert("Lozinka uspešno promenjena!");
 
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         currentPassword: '',
         newPassword: '',
@@ -167,11 +246,11 @@ const EditProfile = () => {
         </div>
 
         <div className="profile-container">
-          <div className="avatar-container">
+          <div className="avatar-container" onClick={openFileDialog} style={{ cursor: "pointer" }}>
             <div className="avatar">
-              {formData.profile_image ? (
+              {previewImage ? (
                 <img
-                  src={`http://localhost:8000/images/${formData.profile_image}`}
+                  src={previewImage}
                   alt="Profile"
                   className="avatar-img"
                 />
@@ -184,18 +263,25 @@ const EditProfile = () => {
                 <p>Change Photo</p>
               </div>
             </div>
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
           </div>
         </div>
 
         <div className="tabs">
           <div className="tabs-list">
-            <button 
+            <button
               className={`tab-button ${activeTab === 'profile' ? 'active' : ''}`}
               onClick={() => setActiveTab('profile')}
             >
               Profile Information
             </button>
-            <button 
+            <button
               className={`tab-button ${activeTab === 'password' ? 'active' : ''}`}
               onClick={() => setActiveTab('password')}
             >
@@ -307,10 +393,11 @@ const EditProfile = () => {
                           onChange={handleChange}
                           required
                         />
-                        <button 
+                        <button
                           type="button"
                           className="password-toggle"
                           onClick={() => setShowPassword(!showPassword)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
                         >
                           {showPassword ? <EyeOff /> : <Eye />}
                         </button>
@@ -329,15 +416,15 @@ const EditProfile = () => {
                           onChange={handleChange}
                           required
                         />
-                        <button 
+                        <button
                           type="button"
                           className="password-toggle"
                           onClick={() => setShowNewPassword(!showNewPassword)}
+                          aria-label={showNewPassword ? "Hide password" : "Show password"}
                         >
                           {showNewPassword ? <EyeOff /> : <Eye />}
                         </button>
                       </div>
-                      <p className="input-help">Password must be at least 8 characters long</p>
                     </div>
 
                     <div className="form-group">
@@ -352,10 +439,11 @@ const EditProfile = () => {
                           onChange={handleChange}
                           required
                         />
-                        <button 
+                        <button
                           type="button"
                           className="password-toggle"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                         >
                           {showConfirmPassword ? <EyeOff /> : <Eye />}
                         </button>
@@ -366,8 +454,8 @@ const EditProfile = () => {
                   <div className="card-footer">
                     <button type="button" className="button-secondary">Cancel</button>
                     <button type="submit" className="button-primary">
-                      <Key className="button-icon" />
-                      Update Password
+                      <Save className="button-icon" />
+                      Change Password
                     </button>
                   </div>
                 </form>

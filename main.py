@@ -40,7 +40,6 @@ async def test_connection():
     return {"vreme_na_bazi": result[0]}
 
 
-app.mount("/images", StaticFiles(directory="images"), name="images")
 
 
 app.include_router(user_controller.router, prefix="/users", tags=["Users"])

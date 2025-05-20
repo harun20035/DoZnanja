@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import Annotated
 from database import engine
-from schemas.course_schema import CourseCreate, Category, UserUpdate, ChangePassword
-from services.course_service import create_course, update_user_data, change_password_data
+from schemas.course_schema import CourseCreate, Category, UserUpdate, ChangePassword, ChangePhoto
+from services.course_service import create_course, update_user_data, change_password_data, change_photo_data
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 import os
@@ -94,3 +94,10 @@ def update_user(user_data : UserUpdate, db : SessionDep, current_user : User = D
 @router.put("/change-password")
 def change_password(user_data : ChangePassword, db : SessionDep, current_user : User = Depends(get_current_user)):
     return change_password_data(user_data, db, current_user)
+
+
+
+
+@router.put("/change-photo")
+def change_photo(db: SessionDep, profile_image: UploadFile = File(...) , current_user: User = Depends(get_current_user)):
+    return change_photo_data(db, profile_image, current_user)

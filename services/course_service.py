@@ -1,7 +1,7 @@
 from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session
 from models.course_model import Course
-from schemas.course_schema import CourseCreate, UserUpdate, ChangePassword
+from schemas.course_schema import CourseCreate, UserUpdate, ChangePassword, ChangePhoto
 from repositories import course_repository
 from datetime import datetime
 from models.user_model import User
@@ -79,3 +79,8 @@ def change_password_data(user_data : ChangePassword, db : Session, current_user 
     return course_repository.change_password(db, user)
 
 
+def change_photo_data(db: Session, profile_image: UploadFile,  current_user: User):
+    image_path = save_file(profile_image, "images")
+    current_user.profile_image = image_path
+
+    return course_repository.change_photo(db, current_user)

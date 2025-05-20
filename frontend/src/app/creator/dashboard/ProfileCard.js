@@ -34,6 +34,11 @@ export default function ProfileCard() {
 
   if (!userData) return <p>Učitavanje profila...</p>;
 
+  // Normalizuj putanju slike (zamena '\' sa '/')
+  const normalizedImagePath = userData.profile_image
+    ? userData.profile_image.replace(/\\/g, "/")
+    : null;
+
   return (
     <div className="card profile-card">
       <div className="card-header purple-header">
@@ -45,17 +50,16 @@ export default function ProfileCard() {
 
       <div className="card-content profile-content">
         <div className="avatar-container">
-          {userData.profile_image ? (
-            <img src={`http://localhost:8000/images/${userData.profile_image}`} alt="Profile" className="avatar-img" />
-
+          {normalizedImagePath ? (
+            <img
+              src={`http://localhost:8000/${normalizedImagePath}`}
+              alt="Profile"
+              className="avatar-img"
+            />
           ) : (
-            <>
-  
-
-              <div className="avatar-fallback">
-                {getInitials(userData.name, userData.surname)}
-              </div>
-            </>
+            <div className="avatar-fallback">
+              {getInitials(userData.name, userData.surname)}
+            </div>
           )}
         </div>
 
