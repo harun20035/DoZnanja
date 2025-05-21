@@ -76,3 +76,9 @@ def create_step(db: Session, step: CourseStep):
     db.commit()
     db.refresh(step)
     return {"message": "Step uspješno napravljen"}
+
+def get_step(db:Session,course_id:int):
+    statement = select(CourseStep).where(CourseStep.course_id == course_id)
+    result = db.execute(statement)
+    steps = result.scalars().all()
+    return steps

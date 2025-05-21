@@ -9,6 +9,41 @@ const CourseStepEditor = () => {
   const params = useParams();
   const courseId = params.course_id || 1;
 
+ useEffect(() => {
+  const fetchSteps = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/course/${courseId}`);
+      if (!response.ok) throw new Error("Greška pri dohvaćanju koraka.");
+
+      const data = await response.json();
+
+      const enhancedSteps = data.map(step => {
+        // Normalize slashes za image i video
+        const normalizedVideo = step.video_url ? step.video_url.replace(/\\/g, '/') : null;
+        const normalizedImage = step.image_url ? step.image_url.replace(/\\/g, '/') : null;
+
+        return {
+          ...step,
+          video_url: normalizedVideo ? `http://localhost:8000/${normalizedVideo}` : null,
+          image_url: normalizedImage ? `http://localhost:8000/${normalizedImage}` : null,
+          isExpanded: false,
+          isEditing: false,
+        };
+      });
+
+      setSteps(enhancedSteps);
+    } catch (err) {
+      console.error("Fetch greška:", err);
+      alert("Nismo mogli dohvatiti korake za ovaj kurs.");
+    }
+  };
+
+  if (courseId) {
+    fetchSteps();
+  }
+}, [courseId]);
+
+
   useEffect(() => {
     console.log("COURSE ID iz URL-a:", courseId);
   }, [courseId]);

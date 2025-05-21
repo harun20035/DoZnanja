@@ -113,3 +113,9 @@ def create_step_course_service(
     )
 
     return course_repository.create_step(db, new_step)
+
+def get_step_course_service(db:Session,course_id:int):
+    steps=course_repository.get_step(db,course_id)
+    print(steps)
+    return [step.dict() for step in steps]
+

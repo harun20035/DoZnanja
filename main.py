@@ -12,6 +12,7 @@ app = FastAPI()
 
 # Serve images folder
 app.mount("/images", StaticFiles(directory="images"), name="images")
+app.mount("/videos", StaticFiles(directory="videos"), name="videos")
 
 app.add_middleware(
     CORSMiddleware,
