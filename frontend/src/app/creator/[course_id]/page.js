@@ -23,34 +23,34 @@ const CourseStepEditor = () => {
   });
   const [showAddForm, setShowAddForm] = useState(false);
 
+  const fetchSteps = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/course/${courseId}`);
+      if (!response.ok) throw new Error("Greška pri dohvaćanju koraka.");
+
+      const data = await response.json();
+
+      const enhancedSteps = data.map(step => {
+        const normalizedVideo = step.video_url ? step.video_url.replace(/\\/g, '/') : null;
+        const normalizedImage = step.image_url ? step.image_url.replace(/\\/g, '/') : null;
+
+        return {
+          ...step,
+          video_url: normalizedVideo ? `http://localhost:8000/${normalizedVideo}` : null,
+          image_url: normalizedImage ? `http://localhost:8000/${normalizedImage}` : null,
+          isExpanded: false,
+          isEditing: false,
+        };
+      });
+
+      setSteps(enhancedSteps);
+    } catch (err) {
+      console.error("Fetch greška:", err);
+      alert("Nismo mogli dohvatiti korake za ovaj kurs.");
+    }
+  };
+
   useEffect(() => {
-    const fetchSteps = async () => {
-      try {
-        const response = await fetch(`http://localhost:8000/course/${courseId}`);
-        if (!response.ok) throw new Error("Greška pri dohvaćanju koraka.");
-
-        const data = await response.json();
-
-        const enhancedSteps = data.map(step => {
-          const normalizedVideo = step.video_url ? step.video_url.replace(/\\/g, '/') : null;
-          const normalizedImage = step.image_url ? step.image_url.replace(/\\/g, '/') : null;
-
-          return {
-            ...step,
-            video_url: normalizedVideo ? `http://localhost:8000/${normalizedVideo}` : null,
-            image_url: normalizedImage ? `http://localhost:8000/${normalizedImage}` : null,
-            isExpanded: false,
-            isEditing: false,
-          };
-        });
-
-        setSteps(enhancedSteps);
-      } catch (err) {
-        console.error("Fetch greška:", err);
-        alert("Nismo mogli dohvatiti korake za ovaj kurs.");
-      }
-    };
-
     if (courseId) {
       fetchSteps();
     }
@@ -105,13 +105,10 @@ const CourseStepEditor = () => {
 
       if (!response.ok) throw new Error("Greška pri dodavanju koraka.");
 
-      const data = await response.json();
-      setSteps([...steps, {
-        ...data,
-        isExpanded: false,
-        isEditing: false
-      }]);
+      // Umesto ručnog dodavanja, osveži sve korake
+      await fetchSteps();
 
+      // Resetuj formu
       setNewStep({ title: '', description: '' });
       setNewStepFiles({ video_file: null, image_file: null });
       setShowAddForm(false);
@@ -135,9 +132,7 @@ const CourseStepEditor = () => {
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Neuspješno brisanje koraka.");
-      }
+      if (!response.ok) throw new Error("Neuspješno brisanje koraka.");
 
       setSteps(prevSteps => prevSteps.filter(step => step.id !== stepId));
     } catch (error) {
