@@ -2,51 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { ChevronDown, ChevronUp, Plus, Edit, Trash, Video, Image, Save, CheckCircle } from 'lucide-react';
-import "./edit_course.css"
+import {
+  ChevronDown, ChevronUp, Plus, Edit, Trash,
+  Video, Image, Save, CheckCircle
+} from 'lucide-react';
+import "./edit_course.css";
 
 const CourseStepEditor = () => {
   const params = useParams();
   const courseId = params.course_id || 1;
-
- useEffect(() => {
-  const fetchSteps = async () => {
-    try {
-      const response = await fetch(`http://localhost:8000/course/${courseId}`);
-      if (!response.ok) throw new Error("Greška pri dohvaćanju koraka.");
-
-      const data = await response.json();
-
-      const enhancedSteps = data.map(step => {
-        // Normalize slashes za image i video
-        const normalizedVideo = step.video_url ? step.video_url.replace(/\\/g, '/') : null;
-        const normalizedImage = step.image_url ? step.image_url.replace(/\\/g, '/') : null;
-
-        return {
-          ...step,
-          video_url: normalizedVideo ? `http://localhost:8000/${normalizedVideo}` : null,
-          image_url: normalizedImage ? `http://localhost:8000/${normalizedImage}` : null,
-          isExpanded: false,
-          isEditing: false,
-        };
-      });
-
-      setSteps(enhancedSteps);
-    } catch (err) {
-      console.error("Fetch greška:", err);
-      alert("Nismo mogli dohvatiti korake za ovaj kurs.");
-    }
-  };
-
-  if (courseId) {
-    fetchSteps();
-  }
-}, [courseId]);
-
-
-  useEffect(() => {
-    console.log("COURSE ID iz URL-a:", courseId);
-  }, [courseId]);
 
   const [steps, setSteps] = useState([]);
   const [newStep, setNewStep] = useState({
@@ -59,20 +23,53 @@ const CourseStepEditor = () => {
   });
   const [showAddForm, setShowAddForm] = useState(false);
 
+  useEffect(() => {
+    const fetchSteps = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/course/${courseId}`);
+        if (!response.ok) throw new Error("Greška pri dohvaćanju koraka.");
+
+        const data = await response.json();
+
+        const enhancedSteps = data.map(step => {
+          const normalizedVideo = step.video_url ? step.video_url.replace(/\\/g, '/') : null;
+          const normalizedImage = step.image_url ? step.image_url.replace(/\\/g, '/') : null;
+
+          return {
+            ...step,
+            video_url: normalizedVideo ? `http://localhost:8000/${normalizedVideo}` : null,
+            image_url: normalizedImage ? `http://localhost:8000/${normalizedImage}` : null,
+            isExpanded: false,
+            isEditing: false,
+          };
+        });
+
+        setSteps(enhancedSteps);
+      } catch (err) {
+        console.error("Fetch greška:", err);
+        alert("Nismo mogli dohvatiti korake za ovaj kurs.");
+      }
+    };
+
+    if (courseId) {
+      fetchSteps();
+    }
+  }, [courseId]);
+
   const toggleExpand = (stepId) => {
-    setSteps(steps.map(step => 
+    setSteps(steps.map(step =>
       step.id === stepId ? { ...step, isExpanded: !step.isExpanded } : step
     ));
   };
 
   const toggleEdit = (stepId) => {
-    setSteps(steps.map(step => 
+    setSteps(steps.map(step =>
       step.id === stepId ? { ...step, isEditing: !step.isEditing } : step
     ));
   };
 
   const handleStepChange = (stepId, field, value) => {
-    setSteps(steps.map(step => 
+    setSteps(steps.map(step =>
       step.id === stepId ? { ...step, [field]: value } : step
     ));
   };
@@ -101,7 +98,7 @@ const CourseStepEditor = () => {
       const response = await fetch(`http://localhost:8000/course/${courseId}`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, // NE STAVLJAJ Content-Type!
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
@@ -115,14 +112,8 @@ const CourseStepEditor = () => {
         isEditing: false
       }]);
 
-      setNewStep({
-        title: '',
-        description: '',
-      });
-      setNewStepFiles({
-        video_file: null,
-        image_file: null,
-      });
+      setNewStep({ title: '', description: '' });
+      setNewStepFiles({ video_file: null, image_file: null });
       setShowAddForm(false);
     } catch (err) {
       console.error(err);
@@ -130,9 +121,28 @@ const CourseStepEditor = () => {
     }
   };
 
-  const deleteStep = (stepId) => {
-    if (confirm('Are you sure you want to delete this step?')) {
-      setSteps(steps.filter(step => step.id !== stepId));
+  const deleteStep = async (stepId) => {
+    const confirmed = confirm('Are you sure you want to delete this step?');
+    if (!confirmed) return;
+
+    const token = localStorage.getItem("auth_token");
+
+    try {
+      const response = await fetch(`http://localhost:8000/course/${stepId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Neuspješno brisanje koraka.");
+      }
+
+      setSteps(prevSteps => prevSteps.filter(step => step.id !== stepId));
+    } catch (error) {
+      console.error("Greška pri brisanju:", error);
+      alert("Došlo je do greške pri brisanju koraka.");
     }
   };
 
@@ -145,7 +155,7 @@ const CourseStepEditor = () => {
     <div className="course-step-editor">
       <div className="editor-header">
         <h2>Course Steps for Course ID: {courseId}</h2>
-        <button 
+        <button
           className="add-step-button"
           onClick={() => setShowAddForm(!showAddForm)}
         >
@@ -158,7 +168,7 @@ const CourseStepEditor = () => {
         <div className="step-form-container">
           <form onSubmit={addStep} className="step-form">
             <h3>Add New Step</h3>
-            
+
             <div className="form-group">
               <label htmlFor="title">Step Title</label>
               <input
@@ -170,7 +180,7 @@ const CourseStepEditor = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="description">Description</label>
               <textarea
@@ -183,7 +193,7 @@ const CourseStepEditor = () => {
                 required
               />
             </div>
-            
+
             <div className="form-row">
               <div className="form-group file-upload-group">
                 <label>Upload Video (optional)</label>
@@ -204,7 +214,7 @@ const CourseStepEditor = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="form-group file-upload-group">
                 <label>Upload Image (optional)</label>
                 <label htmlFor="image_file" className="upload-icon-button" title="Dodaj sliku">
@@ -225,7 +235,7 @@ const CourseStepEditor = () => {
                 )}
               </div>
             </div>
-            
+
             <div className="form-actions">
               <button type="button" className="button-secondary" onClick={() => setShowAddForm(false)}>
                 Cancel
@@ -249,7 +259,7 @@ const CourseStepEditor = () => {
             <div key={step.id} className="step-item">
               <div className="step-header">
                 <div className="step-number">{index + 1}</div>
-                
+
                 {step.isEditing ? (
                   <input
                     value={step.title}
@@ -259,40 +269,28 @@ const CourseStepEditor = () => {
                 ) : (
                   <h3 className="step-title">{step.title}</h3>
                 )}
-                
+
                 <div className="step-actions">
                   {step.isEditing ? (
-                    <button 
-                      className="action-button save"
-                      onClick={() => saveStep(step.id)}
-                    >
+                    <button className="action-button save" onClick={() => saveStep(step.id)}>
                       <Save size={16} />
                     </button>
                   ) : (
-                    <button 
-                      className="action-button edit"
-                      onClick={() => toggleEdit(step.id)}
-                    >
+                    <button className="action-button edit" onClick={() => toggleEdit(step.id)}>
                       <Edit size={16} />
                     </button>
                   )}
-                  
-                  <button 
-                    className="action-button delete"
-                    onClick={() => deleteStep(step.id)}
-                  >
+
+                  <button className="action-button delete" onClick={() => deleteStep(step.id)}>
                     <Trash size={16} />
                   </button>
-                  
-                  <button 
-                    className="action-button expand"
-                    onClick={() => toggleExpand(step.id)}
-                  >
+
+                  <button className="action-button expand" onClick={() => toggleExpand(step.id)}>
                     {step.isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
                 </div>
               </div>
-              
+
               {step.isExpanded && (
                 <div className="step-details">
                   {step.isEditing ? (
@@ -305,7 +303,7 @@ const CourseStepEditor = () => {
                           rows={4}
                         />
                       </div>
-                      
+
                       <div className="form-row">
                         <div className="form-group">
                           <label>Video URL</label>
@@ -318,7 +316,7 @@ const CourseStepEditor = () => {
                             />
                           </div>
                         </div>
-                        
+
                         <div className="form-group">
                           <label>Image URL</label>
                           <div className="input-with-icon">
@@ -337,7 +335,7 @@ const CourseStepEditor = () => {
                       <div className="step-description">
                         <p>{step.description}</p>
                       </div>
-                      
+
                       <div className="step-media">
                         {step.video_url && (
                           <div className="video-container">

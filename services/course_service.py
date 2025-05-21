@@ -119,3 +119,7 @@ def get_step_course_service(db:Session,course_id:int):
     print(steps)
     return [step.dict() for step in steps]
 
+def delete_step_course_service(db:Session,step_id:int):
+    step=course_repository.get_step_delete(db,step_id)
+    course_repository.delete_step(db,step)
+

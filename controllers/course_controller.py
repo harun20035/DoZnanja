@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from database import engine
 from schemas.course_schema import CourseCreate, Category, UserUpdate, ChangePassword, ChangePhoto, StepDate
-from services.course_service import create_course, update_user_data, change_password_data, change_photo_data,get_creator_courses_list,create_step_course_service,get_step_course_service
+from services.course_service import create_course, update_user_data, change_password_data, change_photo_data,get_creator_courses_list,create_step_course_service,get_step_course_service,delete_step_course_service
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 import os
@@ -114,3 +114,7 @@ def create_step_course(db: SessionDep, course_id: int, title: str = Form(...), d
 @router.get("/{course_id}")
 def get_step_course(db:SessionDep,course_id:int):
     return get_step_course_service(db,course_id)
+
+@router.delete("/{step_id}")
+def delete_step_course(db:SessionDep,step_id:int):
+    return delete_step_course_service(db,step_id)

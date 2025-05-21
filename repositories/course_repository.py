@@ -82,3 +82,13 @@ def get_step(db:Session,course_id:int):
     result = db.execute(statement)
     steps = result.scalars().all()
     return steps
+
+def get_step_delete(db: Session, step_id: int):
+    return db.query(CourseStep).filter(CourseStep.id == step_id).first()
+
+
+
+
+def delete_step(db:Session,step:CourseStep):
+    db.delete(step)
+    db.commit()
