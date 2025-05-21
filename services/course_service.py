@@ -1,10 +1,11 @@
 from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session
 from models.course_model import Course
-from schemas.course_schema import CourseCreate, UserUpdate, ChangePassword, ChangePhoto
+from schemas.course_schema import CourseCreate, UserUpdate, ChangePassword, ChangePhoto, StepDate
 from repositories import course_repository
 from datetime import datetime
 from models.user_model import User
+from models.courseStep_model import CourseStep
 import shutil
 import jwt
 import os
@@ -15,6 +16,7 @@ from sqlmodel import Session
 from typing import List
 from repositories import course_repository
 from passlib.context import CryptContext
+from typing import Optional
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
@@ -89,3 +91,25 @@ def change_photo_data(db: Session, profile_image: UploadFile,  current_user: Use
 def get_creator_courses_list(db : Session, current_user : User) -> List[dict] :
     courses = course_repository.get_creator_courses(db, current_user.id)
     return [course.dict() for course in courses]
+
+
+
+def create_step_course_service(
+    db: Session, 
+    course_id: int, 
+    step_data: StepDate, 
+    video_file: Optional[UploadFile] = None, 
+    image_file: Optional[UploadFile] = None
+):
+    video_path = save_file(video_file, "videos") if video_file else None
+    image_path = save_file(image_file, "images") if image_file else None
+
+    new_step = CourseStep(
+        course_id=course_id,
+        title=step_data.title,
+        description=step_data.description,
+        video_url=video_path,
+        image_url=image_path
+    )
+
+    return course_repository.create_step(db, new_step)

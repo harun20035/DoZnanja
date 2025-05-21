@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from models.course_model import Course
+from models.courseStep_model import CourseStep
 from sqlmodel import Session, select
 from typing import List
 from models.user_model import User
@@ -68,3 +69,10 @@ def get_creator_courses(db: Session, creator_id: int):
     result = db.execute(statement)
     courses = result.scalars().all() 
     return courses
+
+
+def create_step(db: Session, step: CourseStep):
+    db.add(step)
+    db.commit()
+    db.refresh(step)
+    return {"message": "Step uspješno napravljen"}

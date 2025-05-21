@@ -48,3 +48,9 @@ class ChangePassword(BaseModel) :
 
 class ChangePhoto(BaseModel) : 
     profile_image : UploadFile
+
+
+class StepDate(BaseModel) : 
+    title : str
+    description : str
+    

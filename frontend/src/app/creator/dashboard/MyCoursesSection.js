@@ -12,17 +12,13 @@ export default function MyCoursesSection() {
 
   const normalizeImageUrl = (path) => {
     if (!path) return null;
-
     let fixedPath = path.replace(/\\/g, "/");
-
     if (fixedPath.startsWith("http://") || fixedPath.startsWith("https://")) {
       return fixedPath;
     }
-
     if (!fixedPath.startsWith("/")) {
       fixedPath = "/" + fixedPath;
     }
-
     return `http://localhost:8000${fixedPath}`;
   };
 
@@ -134,7 +130,7 @@ export default function MyCoursesSection() {
                 <div className="course-header">
                   <h3 className="course-title">{course.title}</h3>
                   <div className="course-actions">
-                    <button className="btn-outline">✏ Edit</button>
+                    <Link href={`/creator/${course.id}`} className="btn-outline">✏ Edit</Link>
                     <button className="btn-outline">👁 Preview</button>
                     <button className="btn-outline">📊 Stats</button>
                   </div>
