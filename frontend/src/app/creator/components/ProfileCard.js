@@ -76,7 +76,7 @@ export default function ProfileCard() {
       </div>
 
       <div className="card-footer">
-        <Link href="/creator/profile" className="btn-outline-purple">
+        <Link href="/creator/profil" className="btn-outline-purple">
           ⚙ Edit Profile
         </Link>
       </div>

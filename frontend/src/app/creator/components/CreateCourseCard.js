@@ -16,7 +16,7 @@ export default function CreateCourseCard() {
         </p>
       </div>
       <div className="card-footer">
-        <Link href="/creator" className="btn-purple">
+        <Link href="/creator/create" className="btn-purple">
           Create Course
         </Link>
       </div>
