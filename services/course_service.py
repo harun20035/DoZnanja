@@ -64,7 +64,29 @@ def fetch_all_courses(db: Session) -> List[dict]:
     return [course.dict() for course in courses]
 
 def update_user_data(user_data: UserUpdate, db: Session, current_user: User):
-    return course_repository.r_update_user(db, user_data, current_user)
+    user_db = course_repository.get_user_by_id(db, current_user.id)
+    if not user_db:
+        raise HTTPException(status_code=404, detail="Korisnik nije pronađen")
+
+    if user_data.username is not None and user_data.username != user_db.username:
+        existing_user = course_repository.get_user_by_username(db, user_data.username)
+        if existing_user and existing_user.id != current_user.id:
+            raise HTTPException(status_code=400, detail="Korisničko ime je već zauzeto")
+        user_db.username = user_data.username
+
+    if user_data.email is not None and user_data.email != user_db.email:
+        existing_user = course_repository.get_user_by_email(db, user_data.email)
+        if existing_user and existing_user.id != current_user.id:
+            raise HTTPException(status_code=400, detail="Email adresa je već zauzeta")
+        user_db.email = user_data.email
+
+    if user_data.name is not None:
+        user_db.name = user_data.name
+
+    if user_data.surname is not None:
+        user_db.surname = user_data.surname
+
+    return course_repository.update_user(db, user_db)
 
 
 def change_password_data(user_data : ChangePassword, db : Session, current_user : User) :

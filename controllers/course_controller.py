@@ -45,28 +45,9 @@ def get_current_user(db: SessionDep, token: str = Depends(oauth2_scheme)) -> Use
         raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.post("/create")
-def create_course_controller(
-    db: SessionDep,
-    title: str = Form(...),
-    description: str = Form(...),
-    price: float = Form(...),
-    discount_percent: int = Form(...),
-    category: Category = Form(...),
-    image_thumbnail: UploadFile = File(...),
-    video_demo: UploadFile = File(...),
-    current_user: User = Depends(get_current_user)
-):
+def create_course_controller(db: SessionDep,title: str = Form(...),description: str = Form(...),price: float = Form(...),discount_percent: int = Form(...),category: Category = Form(...),image_thumbnail: UploadFile = File(...),video_demo: UploadFile = File(...),current_user: User = Depends(get_current_user)):
     try:
-        course = create_course(
-            db=db,
-            creator_id=current_user.id,
-            course_data=CourseCreate(
-                title=title,
-                description=description,
-                price=price,
-                discount_percent=discount_percent,
-                category=category
-            ),
+        course = create_course(db=db, creator_id=current_user.id,course_data=CourseCreate(title=title,description=description,price=price,discount_percent=discount_percent,category=category),
             image_thumbnail=image_thumbnail,
             video_demo=video_demo
         )
