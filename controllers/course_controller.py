@@ -4,6 +4,7 @@ from typing import Annotated
 from database import engine
 from schemas.course_schema import CourseCreate, Category, UserUpdate, ChangePassword, ChangePhoto, StepDate
 from services.course_service import create_course, update_user_data, change_password_data, change_photo_data,get_creator_courses_list,create_step_course_service,get_step_course_service,delete_step_course_service
+from services.course_service import update_step_course_service
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 import os
@@ -57,10 +58,6 @@ def create_course_controller(db: SessionDep,title: str = Form(...),description: 
 
     
 
-@router.get("/all-courses")
-def get_all_courses(db: SessionDep):
-    return course_service.fetch_all_courses(db)
-
 
 @router.get("/me")
 def get_user(db:SessionDep,current_user: User = Depends(get_current_user)):
@@ -99,3 +96,8 @@ def get_step_course(db:SessionDep,course_id:int):
 @router.delete("/{step_id}")
 def delete_step_course(db:SessionDep,step_id:int):
     return delete_step_course_service(db,step_id)
+
+@router.put("/{step_id}")
+def update_step_course(db : SessionDep, step_id : int, title: str = Form(...), description: str = Form(...), video_url: Optional[ UploadFile]= File(None),image_url: Optional[ UploadFile] = File(None)):
+    step_data = StepDate(title=title, description=description)
+    return update_step_course_service(db, step_id, step_data, video_url, image_url)

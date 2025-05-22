@@ -145,3 +145,22 @@ def delete_step_course_service(db:Session,step_id:int):
     step=course_repository.get_step_delete(db,step_id)
     course_repository.delete_step(db,step)
 
+def update_step_course_service(
+    db: Session, 
+    step_id: int, 
+    step_data: StepDate, 
+    video_file: Optional[UploadFile] = None, 
+    image_file: Optional[UploadFile] = None
+):
+    step_db = course_repository.get_step_delete(db, step_id)
+
+    step_db.title = step_data.title
+    step_db.description = step_data.description
+
+    if video_file:
+        step_db.video_url = save_file(video_file, "videos")
+
+    if image_file:
+        step_db.image_url = save_file(image_file, "images")
+
+    return course_repository.update_step_course(db, step_db)

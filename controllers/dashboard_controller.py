@@ -5,7 +5,6 @@ from database import engine
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from services import course_service
-from fastapi import APIRouter, Depends
 from services import course_service
 
 
