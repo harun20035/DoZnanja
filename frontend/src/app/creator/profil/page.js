@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { User, Mail, Key, AtSign, Save, Eye, EyeOff } from 'lucide-react';
-import "./profile.css";
+import styles from "./profile.module.css";
 
 const EditProfile = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -232,34 +232,34 @@ const EditProfile = () => {
   };
 
   return (
-    <div className="page-container">
-      <header className="header">
-        <div className="header-content">
-          <div className="logo">EduCreator</div>
+    <div className={styles.pageContainer}>
+      <header className={styles.header}>
+        <div className={styles.headerContent}>
+          <div className={styles.logo}>EduCreator</div>
         </div>
       </header>
 
-      <main className="main-content">
-        <div className="page-header">
-          <h1 className="page-title">Edit Profile</h1>
-          <div className="role-badge">{formData.role}</div>
+      <main className={styles.mainContent}>
+        <div className={styles.pageHeader}>
+          <h1 className={styles.pageTitle}>Edit Profile</h1>
+          <div className={styles.roleBadge}>{formData.role}</div>
         </div>
 
-        <div className="profile-container">
-          <div className="avatar-container" onClick={openFileDialog} style={{ cursor: "pointer" }}>
-            <div className="avatar">
+        <div className={styles.profileContainer}>
+          <div className={styles.avatarContainer} onClick={openFileDialog} style={{ cursor: "pointer" }}>
+            <div className={styles.avatar}>
               {previewImage ? (
                 <img
-                  src={previewImage}
+                  src={previewImage || "/placeholder.svg"}
                   alt="Profile"
-                  className="avatar-img"
+                  className={styles.avatarImg}
                 />
               ) : (
-                <div className="avatar-placeholder">
+                <div className={styles.avatarPlaceholder}>
                   {getInitials(formData.firstName, formData.lastName)}
                 </div>
               )}
-              <div className="avatar-overlay">
+              <div className={styles.avatarOverlay}>
                 <p>Change Photo</p>
               </div>
             </div>
@@ -273,81 +273,84 @@ const EditProfile = () => {
           </div>
         </div>
 
-        <div className="tabs">
-          <div className="tabs-list">
+        <div className={styles.tabs}>
+          <div className={styles.tabsList}>
             <button
-              className={`tab-button ${activeTab === 'profile' ? 'active' : ''}`}
+              className={`${styles.tabButton} ${activeTab === 'profile' ? styles.active : ''}`}
               onClick={() => setActiveTab('profile')}
             >
               Profile Information
             </button>
             <button
-              className={`tab-button ${activeTab === 'password' ? 'active' : ''}`}
+              className={`${styles.tabButton} ${activeTab === 'password' ? styles.active : ''}`}
               onClick={() => setActiveTab('password')}
             >
               Change Password
             </button>
           </div>
 
-          <div className="tab-content">
+          <div className={styles.tabContent}>
             {activeTab === 'profile' && (
-              <div className="card">
-                <div className="card-header">
-                  <h2 className="card-title">Personal Information</h2>
-                  <p className="card-description">
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h2 className={styles.cardTitle}>Personal Information</h2>
+                  <p className={styles.cardDescription}>
                     Update your personal details here. These details will be displayed on your public profile.
                   </p>
                 </div>
                 <form onSubmit={handleProfileSubmit}>
-                  <div className="card-content">
-                    <div className="form-row">
-                      <div className="form-group">
+                  <div className={styles.cardContent}>
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
                         <label htmlFor="firstName">First Name</label>
-                        <div className="input-with-icon">
-                          <User className="input-icon" />
+                        <div className={styles.inputWithIcon}>
+                          <User className={styles.inputIcon} />
                           <input
                             id="firstName"
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleChange}
                             required
+                            className={styles.input}
                           />
                         </div>
                       </div>
 
-                      <div className="form-group">
+                      <div className={styles.formGroup}>
                         <label htmlFor="lastName">Last Name</label>
-                        <div className="input-with-icon">
-                          <User className="input-icon" />
+                        <div className={styles.inputWithIcon}>
+                          <User className={styles.inputIcon} />
                           <input
                             id="lastName"
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleChange}
                             required
+                            className={styles.input}
                           />
                         </div>
                       </div>
                     </div>
 
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       <label htmlFor="nickname">Nickname</label>
-                      <div className="input-with-icon">
-                        <AtSign className="input-icon" />
+                      <div className={styles.inputWithIcon}>
+                        <AtSign className={styles.inputIcon} />
                         <input
                           id="nickname"
                           name="nickname"
                           value={formData.nickname}
                           onChange={handleChange}
+                          className={styles.input}
                         />
                       </div>
-                      <p className="input-help">This will be displayed publicly on your profile</p>
+                      <p className={styles.inputHelp}>This will be displayed publicly on your profile</p>
                     </div>
 
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       <label htmlFor="email">Email Address</label>
-                      <div className="input-with-icon">
-                        <Mail className="input-icon" />
+                      <div className={styles.inputWithIcon}>
+                        <Mail className={styles.inputIcon} />
                         <input
                           id="email"
                           name="email"
@@ -355,15 +358,16 @@ const EditProfile = () => {
                           value={formData.email}
                           onChange={handleChange}
                           required
+                          className={styles.input}
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="card-footer">
-                    <button type="button" className="button-secondary">Cancel</button>
-                    <button type="submit" className="button-primary">
-                      <Save className="button-icon" />
+                  <div className={styles.cardFooter}>
+                    <button type="button" className={styles.buttonSecondary}>Cancel</button>
+                    <button type="submit" className={styles.buttonPrimary}>
+                      <Save className={styles.buttonIcon} />
                       Save Changes
                     </button>
                   </div>
@@ -372,19 +376,19 @@ const EditProfile = () => {
             )}
 
             {activeTab === 'password' && (
-              <div className="card">
-                <div className="card-header">
-                  <h2 className="card-title">Change Password</h2>
-                  <p className="card-description">
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h2 className={styles.cardTitle}>Change Password</h2>
+                  <p className={styles.cardDescription}>
                     Update your password to keep your account secure.
                   </p>
                 </div>
                 <form onSubmit={handlePasswordSubmit}>
-                  <div className="card-content">
-                    <div className="form-group">
+                  <div className={styles.cardContent}>
+                    <div className={styles.formGroup}>
                       <label htmlFor="currentPassword">Current Password</label>
-                      <div className="input-with-icon">
-                        <Key className="input-icon" />
+                      <div className={styles.inputWithIcon}>
+                        <Key className={styles.inputIcon} />
                         <input
                           id="currentPassword"
                           name="currentPassword"
@@ -392,10 +396,11 @@ const EditProfile = () => {
                           value={formData.currentPassword}
                           onChange={handleChange}
                           required
+                          className={styles.input}
                         />
                         <button
                           type="button"
-                          className="password-toggle"
+                          className={styles.passwordToggle}
                           onClick={() => setShowPassword(!showPassword)}
                           aria-label={showPassword ? "Hide password" : "Show password"}
                         >
@@ -404,10 +409,10 @@ const EditProfile = () => {
                       </div>
                     </div>
 
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       <label htmlFor="newPassword">New Password</label>
-                      <div className="input-with-icon">
-                        <Key className="input-icon" />
+                      <div className={styles.inputWithIcon}>
+                        <Key className={styles.inputIcon} />
                         <input
                           id="newPassword"
                           name="newPassword"
@@ -415,10 +420,11 @@ const EditProfile = () => {
                           value={formData.newPassword}
                           onChange={handleChange}
                           required
+                          className={styles.input}
                         />
                         <button
                           type="button"
-                          className="password-toggle"
+                          className={styles.passwordToggle}
                           onClick={() => setShowNewPassword(!showNewPassword)}
                           aria-label={showNewPassword ? "Hide password" : "Show password"}
                         >
@@ -427,10 +433,10 @@ const EditProfile = () => {
                       </div>
                     </div>
 
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                       <label htmlFor="confirmPassword">Confirm New Password</label>
-                      <div className="input-with-icon">
-                        <Key className="input-icon" />
+                      <div className={styles.inputWithIcon}>
+                        <Key className={styles.inputIcon} />
                         <input
                           id="confirmPassword"
                           name="confirmPassword"
@@ -438,10 +444,11 @@ const EditProfile = () => {
                           value={formData.confirmPassword}
                           onChange={handleChange}
                           required
+                          className={styles.input}
                         />
                         <button
                           type="button"
-                          className="password-toggle"
+                          className={styles.passwordToggle}
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                         >
@@ -451,10 +458,10 @@ const EditProfile = () => {
                     </div>
                   </div>
 
-                  <div className="card-footer">
-                    <button type="button" className="button-secondary">Cancel</button>
-                    <button type="submit" className="button-primary">
-                      <Save className="button-icon" />
+                  <div className={styles.cardFooter}>
+                    <button type="button" className={styles.buttonSecondary}>Cancel</button>
+                    <button type="submit" className={styles.buttonPrimary}>
+                      <Save className={styles.buttonIcon} />
                       Change Password
                     </button>
                   </div>
