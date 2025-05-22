@@ -43,7 +43,7 @@ export default function HomePage() {
                   <Link href="/login" className="text-decoration-none text-secondary fw-medium">
                     Prijava
                   </Link>
-                  <Link href="/signup" className="btn btn-primary d-flex align-items-center">
+                  <Link href="/register" className="btn btn-primary d-flex align-items-center">
                     <span className="me-2">➡️</span>
                     Registracija
                   </Link>
@@ -89,7 +89,7 @@ export default function HomePage() {
           <div className="container">
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
               <div className="mb-3 mb-md-0">
-                <h2 className="fw-bold mb-2">Popularne kategorije</h2>
+                <h2 className="fw-bold">Popularne kategorije</h2>
                 <p className="text-secondary">Istraži najpopularnije oblasti učenja</p>
               </div>
               <Link href="/categories" className="text-decoration-none text-primary d-flex align-items-center">
@@ -127,7 +127,7 @@ export default function HomePage() {
                 <p className="text-secondary">Najpopularniji kursevi ove nedelje</p>
               </div>
               <Link href="/courses" className="text-decoration-none text-primary d-flex align-items-center">
-                <span className="fw-medium">Svi kursevi</span>
+                <span className="text-primary">Svi kursevi</span>
                 <span className="ms-1">▶️</span>
               </Link>
             </div>
@@ -206,13 +206,13 @@ export default function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-5 bg-primary text-white">
+        <section className="py-5 bg-purple text-white">
           <div className="container py-3 text-center">
-            <h2 className="fw-bold mb-3">Spremni da započnete svoje putovanje učenja?</h2>
+            <h3  className="fw-bold mb-3">Spremni da započnete svoje putovanje učenja?</h3>
             <p className="mx-auto mb-4" style={{ maxWidth: "600px" }}>
               Pridružite se hiljadama polaznika koji svakodnevno unapređuju svoje veštine na DoZnanja platformi.
             </p>
-            <a href="/signup" className="btn btn-light btn-lg px-4 fw-medium text-primary">
+            <a href="/register" className="btn btn-light btn-lg px-4 fw-medium text-purple">
               Registruj se besplatno
             </a>
           </div>
