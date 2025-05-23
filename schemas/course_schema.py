@@ -2,12 +2,12 @@ from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
 from fastapi import UploadFile
+from datetime import datetime
 
 class Status(str, Enum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
-
 
 
 class Category(str, Enum):
@@ -53,4 +53,19 @@ class ChangePhoto(BaseModel) :
 class StepDate(BaseModel) : 
     title : str
     description : str
+
+
+class CourseSchema(BaseModel):
+    id: int
+    creator_id: int
+    title: str
+    description: str
+    price: float
+    discount_percent: int
+    status: Status
+    category: Category
+    created_at: datetime
+    image_thumbnail: Optional[str] = None
+    video_demo: Optional[str] = None
+    average_rating: float = 0
     

@@ -1,4 +1,4 @@
-from fastapi import UploadFile, HTTPException
+from fastapi import UploadFile, HTTPException, status
 from sqlalchemy.orm import Session
 from models.course_model import Course
 from schemas.course_schema import CourseCreate, UserUpdate, ChangePassword, ChangePhoto, StepDate
@@ -17,6 +17,7 @@ from typing import List
 from repositories import course_repository
 from passlib.context import CryptContext
 from typing import Optional
+from repositories.course_repository import get_course_by_id, get_all_courses
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
@@ -164,3 +165,13 @@ def update_step_course_service(
         step_db.image_url = save_file(image_file, "images")
 
     return course_repository.update_step_course(db, step_db)
+
+
+def get_course(session, course_id: int) -> Course:
+    course = get_course_by_id(session, course_id)
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Course not found"
+        )
+    return course
