@@ -33,7 +33,7 @@ export default function UnauthorizedPage() {
           </p>
           <button 
             onClick={redirectToDashboard}
-            className="btn btn-purple"
+            className="btn-purple"
           >
             Vratite se na Dashboard
           </button>
