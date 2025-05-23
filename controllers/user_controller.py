@@ -64,7 +64,7 @@ def login_user(user_data: UserLogin, db: SessionDep):
     if user is None or not verify_password(user_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    access_token = create_access_token(data={"sub": str(user.id)})
+    access_token = create_access_token(data={"sub": str(user.id), "role": user.role.value})
     return {"access_token": access_token, "token_type": "bearer"}
 
 # === Google OAuth2 login ===
@@ -80,7 +80,7 @@ async def google_login():
 def google_callback(code: str, session: Session = Depends(get_session)):
     try:
         user = handle_google_callback(code, session)
-        access_token = create_access_token(data={"sub": str(user.id)})
+        access_token = create_access_token(data={"sub": str(user.id), "role": user.role.value})
         return RedirectResponse(
             url="http://localhost:3000/login/dashboard",
             status_code=303,
