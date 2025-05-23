@@ -23,15 +23,15 @@ body {
 }
 
 .btn-purple {
-  background-color: var(--primary-purple);
+  background-color: var(--primary-purple) !important;
   border-color: var(--primary-purple);
-  color: white;
+  color: white !important;
 }
 
 .btn-purple:hover {
-  background-color: var(--primary-purple-dark);
+  background-color: var(--primary-purple-dark) !important;
   border-color: var(--primary-purple-dark);
-  color: white;
+  color: white !important;
 }
 
 .btn-outline-purple {
