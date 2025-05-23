@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
+from fastapi import UploadFile
 
 class Status(str, Enum):
     PENDING = "PENDING"
@@ -36,4 +37,20 @@ class UserUpdate(BaseModel):
     surname : Optional[str]
     username : Optional[str]
     email : Optional[str]
+    
+
+
+class ChangePassword(BaseModel) :
+    current_password : str
+    new_password : str
+
+
+
+class ChangePhoto(BaseModel) : 
+    profile_image : UploadFile
+
+
+class StepDate(BaseModel) : 
+    title : str
+    description : str
     

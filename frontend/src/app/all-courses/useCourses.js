@@ -16,7 +16,7 @@ export default function useCourses(initialOptions = {}) {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/all-courses");
+        const response = await fetch("http://localhost:8000/user/all-courses");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
         const data = await response.json();
