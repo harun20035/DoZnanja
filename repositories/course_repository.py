@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from models.course_model import Course
 from models.courseStep_model import CourseStep
 from sqlmodel import Session, select
-from typing import List
+from typing import List, Optional
 from models.user_model import User
 from fastapi import HTTPException
 from schemas.course_schema import UserUpdate
@@ -85,3 +85,8 @@ def update_step_course(db : Session, step : CourseStep) :
     db.refresh(step)
 
     return {"message" : "Step uspjesno azuriran"}
+
+
+def get_course_by_id(session: Session, course_id: int) -> Optional[Course]:
+    statement = select(Course).where(Course.id == course_id)
+    return session.exec(statement).first()

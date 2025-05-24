@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import Annotated
 from database import engine
-from schemas.course_schema import CourseCreate, Category, UserUpdate, ChangePassword, ChangePhoto, StepDate
+from schemas.course_schema import CourseCreate, Category, UserUpdate, ChangePassword, ChangePhoto, StepDate, CourseSchema
 from services.course_service import create_course, update_user_data, change_password_data, change_photo_data,get_creator_courses_list,create_step_course_service,get_step_course_service,delete_step_course_service
 from services.course_service import update_step_course_service
 from fastapi.security import OAuth2PasswordBearer
@@ -16,6 +16,7 @@ from models.course_model import Course
 from fastapi import APIRouter, Depends
 from services import course_service
 from typing import Optional
+from services.course_service import get_course
 
 router = APIRouter()
 
@@ -101,3 +102,8 @@ def delete_step_course(db:SessionDep,step_id:int):
 def update_step_course(db : SessionDep, step_id : int, title: str = Form(...), description: str = Form(...), video_url: Optional[ UploadFile]= File(None),image_url: Optional[ UploadFile] = File(None)):
     step_data = StepDate(title=title, description=description)
     return update_step_course_service(db, step_id, step_data, video_url, image_url)
+
+
+@router.get("/{id}", response_model=CourseSchema)
+def get_course_endpoint(course_id: int, session: Session = Depends(get_session)):
+    return get_course(session, course_id)
