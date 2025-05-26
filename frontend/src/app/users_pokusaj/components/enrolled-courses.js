@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { Star } from "lucide-react"
+import { Button, Card, CardContent, LinearProgress, Typography } from "@mui/material"
 import styles from "./enrolled-courses.module.css"
 
 export function EnrolledCourses() {
@@ -53,7 +54,9 @@ export function EnrolledCourses() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>My Enrolled Courses</h2>
+        <Typography variant="h5" component="h2" className={styles.title}>
+          My Enrolled Courses
+        </Typography>
         <div className={styles.filterContainer}>
           <select className={styles.filterSelect}>
             <option>All Categories</option>
@@ -72,24 +75,18 @@ export function EnrolledCourses() {
 
       <div className={styles.courseGrid}>
         {courses.map((course) => (
-          <div key={course.id} className={styles.courseCard}>
-            <div className={styles.imageContainer}>
-              <Image
-                src={course.image || "/placeholder.svg"}
-                alt={course.title}
-                fill
-                className={styles.courseImage}
-                sizes="(max-width: 768px) 100vw,
-                       (max-width: 1024px) 50vw,
-                       25vw"
-                priority={false}
-              />
+          <Card key={course.id} className={styles.courseCard}>
+            <div className={styles.imageContainer} style={{ position: "relative", width: "280px", height: "160px" }}>
+              <Image src={course.image || "/placeholder.svg"} alt={course.title} fill className={styles.courseImage} style={{ objectFit: "cover" }} />
               <div className={styles.categoryBadge}>{course.category}</div>
             </div>
-
-            <div className={styles.cardContent}>
-              <h3 className={styles.courseTitle}>{course.title}</h3>
-              <p className={styles.courseInstructor}>by {course.instructor}</p>
+            <CardContent className={styles.cardContent}>
+              <Typography variant="h6" component="h3" className={styles.courseTitle}>
+                {course.title}
+              </Typography>
+              <Typography variant="body2" className={styles.courseInstructor}>
+                by {course.instructor}
+              </Typography>
 
               <div className={styles.progressContainer}>
                 <div className={styles.progressHeader}>
@@ -98,13 +95,7 @@ export function EnrolledCourses() {
                     {course.completedHours}/{course.totalHours} hours
                   </span>
                 </div>
-
-                <div className={styles.progressBar}>
-                  <div
-                    className={styles.progressFill}
-                    style={{ width: `${course.progress}%` }}
-                  ></div>
-                </div>
+                <LinearProgress variant="determinate" value={course.progress} className={styles.progressBar} />
               </div>
 
               <div className={styles.courseFooter}>
@@ -112,16 +103,19 @@ export function EnrolledCourses() {
                   <Star className={styles.starIcon} />
                   <span>{course.rating}</span>
                 </div>
-
-                <button className={styles.continueButton}>Continue</button>
+                <Button size="small" variant="contained" className={styles.continueButton}>
+                  Continue
+                </Button>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
       <div className={styles.viewAllContainer}>
-        <button className={styles.viewAllButton}>View All My Courses</button>
+        <Button variant="outlined" className={styles.viewAllButton}>
+          View All My Courses
+        </Button>
       </div>
     </div>
   )

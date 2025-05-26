@@ -1,25 +1,28 @@
 import { Clock, Award, Calendar, BookOpen } from "lucide-react"
+import { Card, CardContent, CardHeader, Typography } from "@mui/material"
 import styles from "./learning-stats.module.css"
 
 export function LearningStats() {
   return (
-    <div className={styles.card}>
-      <header className={styles.cardHeader}>
-        <h2 className={styles.cardTitle}>
-          <Award className={styles.titleIcon} />
-          Learning Stats
-        </h2>
-      </header>
-      <section className={styles.cardContent}>
+    <Card className={styles.card}>
+      <CardHeader className={styles.cardHeader} 
+        title={
+          <Typography variant="h6" className={styles.cardTitle} component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Award className={styles.titleIcon} />
+            Learning Stats
+          </Typography>
+        }
+      />
+      <CardContent className={styles.cardContent}>
         <div className={styles.statsList}>
           <div className={styles.statItem}>
             <div className={styles.statIconWrapper}>
               <Clock className={styles.statIcon} />
             </div>
             <div className={styles.statInfo}>
-              <p className={styles.statLabel}>Learning Time</p>
-              <p className={styles.statValue}>86 hours total</p>
-              <p className={styles.statChange}>+5 hours this week</p>
+              <Typography variant="body2" className={styles.statLabel}>Learning Time</Typography>
+              <Typography variant="subtitle1" className={styles.statValue}>86 hours total</Typography>
+              <Typography variant="caption" className={styles.statChange}>+5 hours this week</Typography>
             </div>
           </div>
 
@@ -28,9 +31,9 @@ export function LearningStats() {
               <BookOpen className={styles.statIcon} />
             </div>
             <div className={styles.statInfo}>
-              <p className={styles.statLabel}>Courses Completed</p>
-              <p className={styles.statValue}>12 of 19</p>
-              <p className={styles.statChange}>2 completed this month</p>
+              <Typography variant="body2" className={styles.statLabel}>Courses Completed</Typography>
+              <Typography variant="subtitle1" className={styles.statValue}>12 of 19</Typography>
+              <Typography variant="caption" className={styles.statChange}>2 completed this month</Typography>
             </div>
           </div>
 
@@ -39,13 +42,13 @@ export function LearningStats() {
               <Calendar className={styles.statIcon} />
             </div>
             <div className={styles.statInfo}>
-              <p className={styles.statLabel}>Learning Streak</p>
-              <p className={styles.statValue}>8 days</p>
-              <p className={styles.statStreak}>Keep it up!</p>
+              <Typography variant="body2" className={styles.statLabel}>Learning Streak</Typography>
+              <Typography variant="subtitle1" className={styles.statValue}>8 days</Typography>
+              <Typography variant="caption" className={styles.statStreak}>Keep it up!</Typography>
             </div>
           </div>
         </div>
-      </section>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

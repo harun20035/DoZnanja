@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { MessageSquare } from "lucide-react"; // Ikonicu možeš zameniti ili skinuti sa interneta ako ne koristiš lucide
-
-import styles from "./chat-preview.module.css";
+import Link from "next/link"
+import { MessageSquare } from "lucide-react"
+import { Button, Card, CardContent, CardActions, CardHeader, Avatar, Typography } from "@mui/material"
+import styles from "./chat-preview.module.css"
 
 export function UserChatPreview() {
   const messages = [
@@ -23,31 +23,26 @@ export function UserChatPreview() {
       avatar: "SW",
       unread: false,
     },
-  ];
+  ]
 
   return (
-    <div className={styles.card}>
-      <header className={styles.cardHeader}>
-        <h2 className={styles.cardTitle}>
-          <MessageSquare className={styles.titleIcon} />
-          Recent Messages
-        </h2>
-      </header>
-
-      <main className={styles.cardContent}>
+    <Card className={styles.card}>
+      <CardHeader className={styles.cardHeader}
+        title={
+          <Typography component="div" className={styles.cardTitle}>
+            <MessageSquare className={styles.titleIcon} />
+            Recent Messages
+          </Typography>
+        }
+      />
+      <CardContent className={styles.cardContent}>
         <div className={styles.messageList}>
           {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`${styles.messageItem} ${
-                message.unread ? styles.unread : ""
-              }`}
-            >
-              <div className={styles.messageAvatar}>
-                {/* Avatar fallback */}
-                <div className={styles.avatarFallback}>{message.avatar}</div>
-              </div>
-
+            <div key={message.id} className={`${styles.messageItem} ${message.unread ? styles.unread : ""}`}>
+              <Avatar className={styles.messageAvatar} src={`/placeholder.svg?height=40&width=40`}>
+                {/* fallback: ako nema slike, pokaži avatar tekst */}
+                {message.avatar}
+              </Avatar>
               <div className={styles.messageContent}>
                 <div className={styles.messageHeader}>
                   <div>
@@ -57,23 +52,20 @@ export function UserChatPreview() {
                   <span className={styles.messageTime}>{message.time}</span>
                 </div>
                 <p className={styles.messageText}>{message.message}</p>
-                {message.unread && (
-                  <span className={styles.unreadIndicator}></span>
-                )}
+                {message.unread && <span className={styles.unreadIndicator}></span>}
               </div>
             </div>
           ))}
         </div>
-      </main>
-
-      <footer className={styles.cardFooter}>
-        <Link href="/user/chat" className={styles.viewAllLink}>
-          <button className={styles.viewAllButton}>
+      </CardContent>
+      <CardActions className={styles.cardFooter}>
+        <Button variant="outlined" className={styles.viewAllButton}>
+          <Link href="/user/chat" className={styles.viewAllLink}>
             <MessageSquare className={styles.buttonIcon} />
             View All Messages
-          </button>
-        </Link>
-      </footer>
-    </div>
-  );
+          </Link>
+        </Button>
+      </CardActions>
+    </Card>
+  )
 }

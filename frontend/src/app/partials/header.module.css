@@ -1,0 +1,215 @@
+.header {
+  background-color: #6b46c1;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+}
+
+.logoNav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  font-size: 2.25rem;
+  font-weight: 900;
+  text-decoration: none;
+  color: white;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.logo > span:first-child {
+  font-size: 2.5rem;
+}
+
+
+
+.desktopNav {
+  display: none;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .desktopNav {
+    display: flex;
+  }
+}
+
+.navLink {
+  color: white;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.navLink:hover {
+  color: #e9d5ff;
+}
+
+.searchBar {
+  display: none;
+  position: relative;
+  background-color: #5a32a3;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  width: 16rem;
+}
+
+@media (min-width: 768px) {
+  .searchBar {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.searchIcon {
+  height: 1rem;
+  width: 1rem;
+  color: #e9d5ff;
+  margin-right: 0.5rem;
+}
+
+.searchInput {
+  background-color: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+}
+
+.searchInput::placeholder {
+  color: #e9d5ff;
+}
+
+.searchInput:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.iconButton {
+  color: white;
+  position: relative;
+}
+
+.iconButton:hover {
+  background-color: #5a32a3;
+}
+
+.actionIcon {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+.cartBadge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+  height: 1.25rem;
+  width: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar {
+  height: 2.5rem;
+  width: 2.5rem;
+}
+
+.avatarFallback {
+  background-color: #5a32a3;
+}
+
+.menuToggle {
+  display: flex;
+  color: white;
+}
+
+@media (min-width: 768px) {
+  .menuToggle {
+    display: none;
+  }
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 0 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .mobileNav {
+    display: none;
+  }
+}
+
+.mobileSearchBar {
+  display: flex;
+  align-items: center;
+  background-color: #5a32a3;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.mobileSearchIcon {
+  height: 1rem;
+  width: 1rem;
+  color: #e9d5ff;
+  margin-right: 0.5rem;
+}
+
+.mobileSearchInput {
+  background-color: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+}
+
+.mobileSearchInput::placeholder {
+  color: #e9d5ff;
+}
+
+.mobileSearchInput:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.mobileNavLink {
+  display: block;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  color: white;
+  text-decoration: none;
+}
+
+.mobileNavLink:hover {
+  background-color: #5a32a3;
+}

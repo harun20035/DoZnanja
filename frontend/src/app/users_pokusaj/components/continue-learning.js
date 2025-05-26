@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Play, Clock } from "lucide-react"
+import { Button, Card, CardContent, LinearProgress, Typography } from "@mui/material"
 import styles from "./continue-learning.module.css"
 
 export function ContinueLearning() {
@@ -28,7 +29,9 @@ export function ContinueLearning() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Continue Learning</h2>
+        <Typography variant="h5" component="h2" className={styles.title}>
+          Continue Learning
+        </Typography>
         <Link href="/user/courses" className={styles.viewAllLink}>
           View all my courses
         </Link>
@@ -36,40 +39,37 @@ export function ContinueLearning() {
 
       <div className={styles.courseGrid}>
         {inProgressCourses.map((course) => (
-          <div key={course.id} className={styles.courseCard}>
-            <div className={styles.cardContent}>
+          <Card key={course.id} className={styles.courseCard}>
+            <CardContent className={styles.cardContent}>
               <div className={styles.courseLayout}>
-                <div className={styles.imageContainer}>
+                <div className={styles.imageContainer} style={{ position: "relative", width: "200px", height: "120px" }}>
                   <Image
                     src={course.image || "/placeholder.svg"}
                     alt={course.title}
                     fill
                     className={styles.courseImage}
+                    style={{ objectFit: "cover" }}
                   />
                 </div>
+
                 <div className={styles.courseInfo}>
-                  <h3 className={styles.courseTitle}>{course.title}</h3>
-                  <p className={styles.courseInstructor}>by {course.instructor}</p>
+                  <Typography variant="h6" component="h3" className={styles.courseTitle}>
+                    {course.title}
+                  </Typography>
+                  <Typography variant="body2" className={styles.courseInstructor}>
+                    by {course.instructor}
+                  </Typography>
 
                   <div className={styles.progressContainer}>
                     <div className={styles.progressHeader}>
                       <span className={styles.progressText}>{course.progress}% complete</span>
                       <span className={styles.lessonText}>{course.lastLesson}</span>
                     </div>
-                    <div
+                    <LinearProgress
+                      variant="determinate"
+                      value={course.progress}
                       className={styles.progressBar}
-                      style={{ position: "relative", height: "0.5rem", backgroundColor: "#f3e8ff", borderRadius: "9999px" }}
-                    >
-                      <div
-                        style={{
-                          width: `${course.progress}%`,
-                          height: "100%",
-                          backgroundColor: "#6b46c1",
-                          borderRadius: "9999px",
-                          transition: "width 0.3s ease",
-                        }}
-                      ></div>
-                    </div>
+                    />
                   </div>
 
                   <div className={styles.courseActions}>
@@ -77,15 +77,14 @@ export function ContinueLearning() {
                       <Clock className={styles.timeIcon} />
                       <span>{course.timeLeft} left</span>
                     </div>
-                    <button className={styles.continueButton}>
-                      <Play className={styles.playIcon} />
+                    <Button size="small" variant="contained" className={styles.continueButton} startIcon={<Play className={styles.playIcon} />}>
                       Continue
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
