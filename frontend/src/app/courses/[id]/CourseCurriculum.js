@@ -71,7 +71,7 @@ export default function CourseCurriculum({ course }) {
                 <i className={`bi ${openSection === section.id ? "bi-chevron-down" : "bi-chevron-right"} me-2`}></i>
                 {section.title}
               </h5>
-              <span className="badge badge-light-purple">{section.lessons.length} lekcija</span>
+              <span className="badge-light-purple">{section.lessons.length} lekcija</span>
             </div>
 
             {openSection === section.id && (

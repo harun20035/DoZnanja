@@ -1,96 +1,81 @@
+import React from "react";
+
 export default function CourseDescription({ course }) {
   return (
-    <div className="course-description">
-      <div className="course-section">
-        <h3 className="course-section-title">Opis kursa</h3>
-        <p>{course.description}</p>
-      </div>
+    <div className="course-description bg-white p-4 rounded shadow-sm">
+      {/* Opis kursa */}
+      <Section title="Opis kursa">
+        <p className="text-muted">{course.description}</p>
+      </Section>
 
-      <div className="course-section">
-        <h3 className="course-section-title">Šta ćete naučiti</h3>
+      {/* Šta ćete naučiti */}
+      <Section title="Šta ćete naučiti">
         <div className="row">
           <div className="col-md-6">
-            <ul className="course-list">
-              <li>
-                <i className="bi bi-check-circle-fill"></i>
-                <span>Osnove programiranja u odabranom jeziku</span>
-              </li>
-              <li>
-                <i className="bi bi-check-circle-fill"></i>
-                <span>Rad sa bazama podataka</span>
-              </li>
-              <li>
-                <i className="bi bi-check-circle-fill"></i>
-                <span>Kreiranje web aplikacija</span>
-              </li>
-              <li>
-                <i className="bi bi-check-circle-fill"></i>
-                <span>Implementacija sigurnosnih mehanizama</span>
-              </li>
-            </ul>
+            <CourseList items={[
+              "Osnove programiranja u odabranom jeziku",
+              "Rad sa bazama podataka",
+              "Kreiranje web aplikacija",
+              "Implementacija sigurnosnih mehanizama"
+            ]} />
           </div>
           <div className="col-md-6">
-            <ul className="course-list">
-              <li>
-                <i className="bi bi-check-circle-fill"></i>
-                <span>Optimizacija performansi</span>
-              </li>
-              <li>
-                <i className="bi bi-check-circle-fill"></i>
-                <span>Testiranje i debugging</span>
-              </li>
-              <li>
-                <i className="bi bi-check-circle-fill"></i>
-                <span>Deployment aplikacija</span>
-              </li>
-              <li>
-                <i className="bi bi-check-circle-fill"></i>
-                <span>Najbolje prakse u industriji</span>
-              </li>
-            </ul>
+            <CourseList items={[
+              "Optimizacija performansi",
+              "Testiranje i debugging",
+              "Deployment aplikacija",
+              "Najbolje prakse u industriji"
+            ]} />
           </div>
         </div>
-      </div>
+      </Section>
 
-      <div className="course-section">
-        <h3 className="course-section-title">Preduslovi</h3>
-        <ul className="course-list">
-          <li>
-            <i className="bi bi-arrow-right-circle-fill"></i>
-            <span>Osnovno poznavanje rada na računaru</span>
-          </li>
-          <li>
-            <i className="bi bi-arrow-right-circle-fill"></i>
-            <span>Osnovno razumijevanje programskih koncepata</span>
-          </li>
-          <li>
-            <i className="bi bi-arrow-right-circle-fill"></i>
-            <span>Želja za učenjem i napredovanjem</span>
-          </li>
-        </ul>
-      </div>
+      {/* Preduslovi */}
+      <Section title="Preduslovi">
+        <CourseList 
+          items={[
+            "Osnovno poznavanje rada na računaru",
+            "Osnovno razumijevanje programskih koncepata",
+            "Želja za učenjem i napredovanjem"
+          ]} 
+          icon="bi-arrow-right-circle-fill"
+        />
+      </Section>
 
-      <div className="course-section">
-        <h3 className="course-section-title">Za koga je ovaj kurs</h3>
-        <ul className="course-list">
-          <li>
-            <i className="bi bi-person-fill"></i>
-            <span>Početnici koji žele naučiti programiranje</span>
-          </li>
-          <li>
-            <i className="bi bi-person-fill"></i>
-            <span>Studenti informatičkih smjerova</span>
-          </li>
-          <li>
-            <i className="bi bi-person-fill"></i>
-            <span>Profesionalci koji žele proširiti znanje</span>
-          </li>
-          <li>
-            <i className="bi bi-person-fill"></i>
-            <span>Entuzijasti koji žele razviti vlastite projekte</span>
-          </li>
-        </ul>
-      </div>
+      {/* Za koga je kurs */}
+      <Section title="Za koga je ovaj kurs">
+        <CourseList 
+          items={[
+            "Početnici koji žele naučiti programiranje",
+            "Studenti informatičkih smjerova",
+            "Profesionalci koji žele proširiti znanje",
+            "Entuzijasti koji žele razviti vlastite projekte"
+          ]} 
+          icon="bi-person-fill"
+        />
+      </Section>
     </div>
-  )
+  );
+}
+
+function Section({ title, children }) {
+  return (
+    <div className="course-section mb-4">
+      <h3 className="course-section-title text-purple mb-3">{title}</h3>
+      {children}
+    </div>
+  );
+}
+
+function CourseList({ items, icon = "bi-check-circle-fill" }) {
+  return (
+    <ul className="list-unstyled course-list">
+      {items.map((item, index) => (
+        <li key={index} className="d-flex align-items-start mb-2">
+          <i className={`bi ${icon} text-purple me-2 mt-1`}></i>
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
 }

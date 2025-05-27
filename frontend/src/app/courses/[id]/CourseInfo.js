@@ -66,7 +66,7 @@ export default function CourseInfo({ course }) {
                     type="button"
                   >
                     <i className="bi bi-list-check me-2"></i>
-                    Kurikulum
+                    Sadržaj
                   </button>
                 </li>
                 <li className="nav-item" role="presentation">
@@ -138,7 +138,7 @@ export default function CourseInfo({ course }) {
                     <span>Pristup na svim uređajima</span>
                   </li>
                 </ul>
-                <button className="btn btn-purple w-100 mb-3">
+                <button className="btn-purple w-100 mb-3">
                   <i className="bi bi-cart-plus me-2"></i>
                   Dodaj u korpu
                 </button>
