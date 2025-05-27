@@ -1,12 +1,24 @@
-import { User, Settings } from "lucide-react"
+import Link from "next/link"
+import { Person as UserIcon, Settings as SettingsIcon } from "@mui/icons-material"
 import styles from "./profile-card.module.css"
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+  Typography,
+  Stack,
+} from "@mui/material"
 
 export function UserProfileCard() {
-  // Hardkodirani user podaci
   const userData = {
-    name: "Jovan Jovanović",
+    name: "John Doe",
     role: "Student",
-    avatar: "", // ili neka URL slika ako imaš, npr "/avatar.jpg"
+    avatar: "", // prazan string za inicijale
   }
 
   const getInitials = (name) => {
@@ -18,112 +30,90 @@ export function UserProfileCard() {
       .toUpperCase()
   }
 
-  // Simple Button komponenta
-  const Button = ({ children, variant, className, ...props }) => {
-    const baseClass = variant === "outline" ? styles.editButton : ""
-    return (
-      <button className={`${baseClass} ${className || ""}`} {...props}>
-        {children}
-      </button>
-    )
-  }
-
-  // Simple Card komponenta
-  const Card = ({ children, className }) => (
-    <div className={`${styles.card} ${className || ""}`}>{children}</div>
-  )
-  const CardHeader = ({ children, className }) => (
-    <div className={`${styles.cardHeader} ${className || ""}`}>{children}</div>
-  )
-  const CardTitle = ({ children, className }) => (
-    <h2 className={`${styles.cardTitle} ${className || ""}`}>{children}</h2>
-  )
-  const CardContent = ({ children, className }) => (
-    <div className={`${styles.cardContent} ${className || ""}`}>{children}</div>
-  )
-  const CardFooter = ({ children, className }) => (
-    <div className={`${styles.cardFooter} ${className || ""}`}>{children}</div>
-  )
-
-  // Simple Avatar komponenta
-  const Avatar = ({ src, alt, fallback, className }) => (
-    <div className={`${styles.avatar} ${className || ""}`}>
-      {src ? (
-        <img
-          src={src}
-          alt={alt}
-          style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
-        />
-      ) : (
-        <div className={styles.avatarFallback}>{fallback}</div>
-      )}
-    </div>
-  )
-
-  // Simple Progress bar
-  const Progress = ({ value, className }) => (
-    <div
-      className={className}
-      style={{ backgroundColor: "#f3e8ff", borderRadius: "4px", overflow: "hidden" }}
-    >
-      <div
-        style={{
-          width: `${value}%`,
-          height: "0.5rem",
-          backgroundColor: "#6b46c1",
-          transition: "width 0.3s ease",
-        }}
-      />
-    </div>
-  )
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <User className={styles.titleIcon} />
-          My Profile
-        </CardTitle>
-      </CardHeader>
+    <Card className={styles.card} sx={{ maxWidth: 360, m: 2 }}>
+      <CardHeader
+        avatar={<UserIcon color="primary" className={styles.titleIcon} />}
+        title={<Typography variant="h6" className={styles.cardTitle}>My Profile</Typography>}
+        className={styles.cardHeader}
+      />
 
-      <CardContent>
-        <Avatar src={userData.avatar} alt="Profile" fallback={getInitials(userData.name)} />
+      <CardContent className={styles.cardContent}>
+        <Stack alignItems="center" spacing={1} mb={2}>
+          <Avatar
+            src={userData.avatar || ""}
+            alt="Profile"
+            className={styles.avatar}
+          >
+            {!userData.avatar && (
+              <Typography className={styles.avatarFallback}>
+                {getInitials(userData.name)}
+              </Typography>
+            )}
+          </Avatar>
+          <Typography className={styles.userName}>{userData.name}</Typography>
+          <Typography className={styles.userRole}>{userData.role}</Typography>
+        </Stack>
 
-        <h3 className={styles.userName}>{userData.name}</h3>
-        <p className={styles.userRole}>{userData.role}</p>
-
-        <div className={styles.goalsSection}>
-          <div className={styles.goalHeader}>
+        <Box className={styles.goalsSection}>
+          <Box className={styles.goalHeader}>
             <span className={styles.goalLabel}>Learning Goals</span>
             <span className={styles.goalProgress}>3/5 completed</span>
-          </div>
-          <Progress value={60} className={styles.progressBar} />
-        </div>
+          </Box>
+          <Box position="relative" display="inline-flex" width="100%">
+            <CircularProgress
+              variant="determinate"
+              value={60}
+              size={24}
+              thickness={5}
+              sx={{ color: "primary.main" }}
+              className={styles.progressBar}
+            />
+            <Box
+              top={0}
+              left={0}
+              bottom={0}
+              right={0}
+              position="absolute"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Typography variant="caption" component="div" color="text.primary">
+                60%
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
 
-        <div className={styles.statsGrid}>
-          <div className={styles.statItem}>
-            <p className={styles.statValue}>7</p>
-            <p className={styles.statLabel}>Courses</p>
-          </div>
-          <div className={styles.statItem}>
-            <p className={styles.statValue}>12</p>
-            <p className={styles.statLabel}>Certificates</p>
-          </div>
-          <div className={styles.statItem}>
-            <p className={styles.statValue}>86h</p>
-            <p className={styles.statLabel}>Learning</p>
-          </div>
-        </div>
+        <Box className={styles.statsGrid}>
+          <Box className={styles.statItem}>
+            <Typography className={styles.statValue}>7</Typography>
+            <Typography className={styles.statLabel}>Courses</Typography>
+          </Box>
+          <Box className={styles.statItem}>
+            <Typography className={styles.statValue}>12</Typography>
+            <Typography className={styles.statLabel}>Certificates</Typography>
+          </Box>
+          <Box className={styles.statItem}>
+            <Typography className={styles.statValue}>86h</Typography>
+            <Typography className={styles.statLabel}>Learning</Typography>
+          </Box>
+        </Box>
       </CardContent>
 
-      <CardFooter>
-        <Button variant="outline">
-          <a href="/user/profile/edit" className={styles.editButtonLink}>
-            <Settings className={styles.editButtonIcon} />
-            Edit Profile
-          </a>
+      <CardActions className={styles.cardFooter} sx={{ justifyContent: "center" }}>
+        <Button
+          variant="outlined"
+          startIcon={<SettingsIcon className={styles.editButtonIcon} />}
+          component={Link}
+          href="/user/profile/edit"
+          className={styles.editButton}
+          sx={{ textTransform: "none" }}
+        >
+          <span className={styles.editButtonLink}>Edit Profile</span>
         </Button>
-      </CardFooter>
+      </CardActions>
     </Card>
   )
 }

@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Star, Users, Clock } from "lucide-react"
+import { Button, Card, CardContent, Typography, Box } from "@mui/material"
 import styles from "./popular-courses.module.css"
 
 export function PopularCourses() {
@@ -61,7 +62,9 @@ export function PopularCourses() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Popular Courses</h2>
+        <Typography variant="h5" component="h2" className={styles.title}>
+          Popular Courses
+        </Typography>
         <Link href="/courses" className={styles.browseLink}>
           Browse all courses
         </Link>
@@ -69,52 +72,61 @@ export function PopularCourses() {
 
       <div className={styles.courseGrid}>
         {courses.map((course) => (
-          <article key={course.id} className={styles.courseCard}>
-            <div className={styles.imageContainer}>
+          <Card key={course.id} className={styles.courseCard}>
+            <Box className={styles.imageContainer} position="relative">
               <Image
                 src={course.image || "/placeholder.svg"}
                 alt={course.title}
                 fill
                 className={styles.courseImage}
               />
-              {course.badge && (
-                <div className={styles.badgeContainer}>{course.badge}</div>
-              )}
+              {course.badge && <div className={styles.badgeContainer}>{course.badge}</div>}
               <div className={styles.levelBadge}>{course.level}</div>
-            </div>
+            </Box>
+            <CardContent className={styles.cardContent}>
+              <Typography variant="h6" className={styles.courseTitle}>
+                {course.title}
+              </Typography>
+              <Typography variant="body2" className={styles.courseInstructor}>
+                by {course.instructor}
+              </Typography>
 
-            <div className={styles.cardContent}>
-              <h3 className={styles.courseTitle}>{course.title}</h3>
-              <p className={styles.courseInstructor}>by {course.instructor}</p>
-
-              <div className={styles.courseStats}>
-                <div className={styles.rating}>
+              <Box className={styles.courseStats} display="flex" alignItems="center" gap={1}>
+                <Box className={styles.rating} display="flex" alignItems="center" gap={0.5}>
                   <Star className={styles.starIcon} />
-                  <span className={styles.ratingValue}>{course.rating}</span>
-                </div>
+                  <Typography variant="body2" className={styles.ratingValue}>
+                    {course.rating}
+                  </Typography>
+                </Box>
                 <div className={styles.statDivider}>|</div>
-                <div className={styles.students}>
+                <Box className={styles.students} display="flex" alignItems="center" gap={0.5}>
                   <Users className={styles.studentsIcon} />
-                  {course.students.toLocaleString()} students
-                </div>
-              </div>
+                  <Typography variant="body2">
+                    {course.students.toLocaleString()} students
+                  </Typography>
+                </Box>
+              </Box>
 
-              <div className={styles.courseDuration}>
+              <Box className={styles.courseDuration} display="flex" alignItems="center" gap={0.5}>
                 <Clock className={styles.durationIcon} />
-                {course.hours} total hours
-              </div>
+                <Typography variant="body2">{course.hours} total hours</Typography>
+              </Box>
 
-              <div className={styles.courseFooter}>
-                <div className={styles.priceContainer}>
-                  <span className={styles.salePrice}>${course.salePrice}</span>
-                  <span className={styles.originalPrice}>${course.price}</span>
-                </div>
-                <button className={styles.addButton} type="button">
+              <Box className={styles.courseFooter} display="flex" justifyContent="space-between" alignItems="center">
+                <Box className={styles.priceContainer}>
+                  <Typography variant="h6" component="span" className={styles.salePrice}>
+                    ${course.salePrice}
+                  </Typography>
+                  <Typography variant="body2" component="span" className={styles.originalPrice} sx={{ marginLeft: 1 }}>
+                    ${course.price}
+                  </Typography>
+                </Box>
+                <Button size="small" className={styles.addButton}>
                   Add to Cart
-                </button>
-              </div>
-            </div>
-          </article>
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
