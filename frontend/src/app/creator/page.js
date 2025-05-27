@@ -10,20 +10,22 @@ import userData from "./components/ProfileCard"
 import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { UserDashboardHeader } from "../partials/header"
+import getHeaderByRole from "../../components/layoutComponents"
 import { Footer } from "../partials/footer"
 
 export default function DashboardPage() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [username, setUsername] = useState('');
+  const [role, setRole] = useState(null); // Dodajte stanje za role
 
   useEffect(() => {
     const checkAuthorization = () => {
       try {
         const role = getRoleFromToken();
+        setRole(role); // Spremite role u stanje
         console.log("Dobijena role:", role);
-        const user = getUserDataFromToken(); // Dodajte ovu funkciju u auth.js
+        const user = getUserDataFromToken();
         
         if (role === "CREATOR") {
           setUsername(user?.username || '');
@@ -43,12 +45,11 @@ export default function DashboardPage() {
     return null; // Ili neki loading spinner
   }
 
-
   return (
     <>
-      <UserDashboardHeader />
+      {role && getHeaderByRole(role)} {/* Dodajte provjeru da role postoji */}
       <div className="dashboard-container">
-        <h1 className="welcome-title">Welcome {userData.username}</h1>
+        <h1 className="welcome-title">Welcome {username}</h1> {/* Koristite username iz stanja */}
         <div className="dashboard-grid">
           <CreateCourseCard />
           <ProfileCard />
