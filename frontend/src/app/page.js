@@ -3,57 +3,16 @@
 import Link from "next/link"
 import Image from "next/image"
 import "./styles.css"
+import Header from "../components/header/Header"
+import Footer from "../components/footer/Footer"
+
 
 export default function HomePage() {
   // Nema potrebe za useEffect za učitavanje Bootstrap-a jer je već učitan preko CDN-a u layout.jsx
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      {/* Header/Navigation */}
-      <header className="sticky-top border-bottom bg-white">
-        <div className="container">
-          <nav className="navbar navbar-expand-lg navbar-light py-3">
-            <div className="container-fluid px-0">
-              <Link href="/" className="navbar-brand d-flex align-items-center">
-                <span className="fs-3 me-2">📚</span>
-                <span className="fw-bold">DoZnanja</span>
-              </Link>
-
-              <button
-                className="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarContent"
-              >
-                <span className="navbar-toggler-icon"></span>
-              </button>
-
-              <div className="collapse navbar-collapse" id="navbarContent">
-                <form className="d-none d-md-flex mx-auto position-relative">
-                  <span className="position-absolute top-50 start-0 translate-middle-y ms-3">🔍</span>
-                  <input
-                    type="search"
-                    className="form-control ps-5"
-                    placeholder="Pretraži kurseve..."
-                    style={{ width: "350px" }}
-                  />
-                </form>
-
-                <div className="ms-auto d-flex align-items-center gap-3">
-                  <Link href="/login" className="text-decoration-none text-secondary fw-medium">
-                    Prijava
-                  </Link>
-                  <Link href="/signup" className="btn btn-primary d-flex align-items-center">
-                    <span className="me-2">➡️</span>
-                    Registracija
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </header>
-
+     <Header role="guest" />
       <main className="flex-grow-1">
         {/* Hero Section */}
         <section className="bg-light py-5">
@@ -89,7 +48,7 @@ export default function HomePage() {
           <div className="container">
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
               <div className="mb-3 mb-md-0">
-                <h2 className="fw-bold mb-2">Popularne kategorije</h2>
+                <h2 className="fw-bold">Popularne kategorije</h2>
                 <p className="text-secondary">Istraži najpopularnije oblasti učenja</p>
               </div>
               <Link href="/categories" className="text-decoration-none text-primary d-flex align-items-center">
@@ -206,93 +165,20 @@ export default function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-5 bg-primary text-white">
+        <section className="py-5 bg-purple text-white">
           <div className="container py-3 text-center">
-            <h2 className="fw-bold mb-3">Spremni da započnete svoje putovanje učenja?</h2>
+            <h3  className="fw-bold mb-3">Spremni da započnete svoje putovanje učenja?</h3>
             <p className="mx-auto mb-4" style={{ maxWidth: "600px" }}>
               Pridružite se hiljadama polaznika koji svakodnevno unapređuju svoje veštine na DoZnanja platformi.
             </p>
-            <a href="/signup" className="btn btn-light btn-lg px-4 fw-medium text-primary">
+            <a href="/register" className="btn btn-light btn-lg px-4 fw-medium text-purple">
               Registruj se besplatno
             </a>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-top bg-white py-5">
-        <div className="container">
-          <div className="row g-4">
-            <div className="col-md-6 col-lg-3 mb-4 mb-lg-0">
-              <div className="d-flex align-items-center mb-3">
-                <span className="fs-4 me-2">📚</span>
-                <span className="fs-5 fw-bold">DoZnanja</span>
-              </div>
-              <p className="text-secondary small">
-                Platforma za online učenje koja povezuje studente sa kvalitetnim kursevima.
-              </p>
-            </div>
-            <div className="col-6 col-lg-3 mb-4 mb-lg-0">
-              <h5 className="fs-6 fw-medium mb-3">Linkovi</h5>
-              <ul className="nav flex-column">
-                <li className="nav-item mb-2">
-                  <Link href="/about" className="nav-link p-0 text-secondary">
-                    O nama
-                  </Link>
-                </li>
-                <li className="nav-item mb-2">
-                  <Link href="/courses" className="nav-link p-0 text-secondary">
-                    Kursevi
-                  </Link>
-                </li>
-                <li className="nav-item mb-2">
-                  <Link href="/instructors" className="nav-link p-0 text-secondary">
-                    Predavači
-                  </Link>
-                </li>
-                <li className="nav-item mb-2">
-                  <Link href="/blog" className="nav-link p-0 text-secondary">
-                    Blog
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="col-6 col-lg-3 mb-4 mb-lg-0">
-              <h5 className="fs-6 fw-medium mb-3">Podrška</h5>
-              <ul className="nav flex-column">
-                <li className="nav-item mb-2">
-                  <Link href="/help" className="nav-link p-0 text-secondary">
-                    Pomoć
-                  </Link>
-                </li>
-                <li className="nav-item mb-2">
-                  <Link href="/faq" className="nav-link p-0 text-secondary">
-                    Česta pitanja
-                  </Link>
-                </li>
-                <li className="nav-item mb-2">
-                  <Link href="/contact" className="nav-link p-0 text-secondary">
-                    Kontakt
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="col-md-6 col-lg-3">
-              <h5 className="fs-6 fw-medium mb-3">Pretplati se</h5>
-              <p className="text-secondary small mb-3">Budite u toku sa najnovijim kursevima i popustima.</p>
-              <div className="input-group">
-                <input type="email" className="form-control" placeholder="Email adresa" aria-label="Email adresa" />
-                <button className="btn btn-primary" type="button">
-                  Prijavi se
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="d-flex justify-content-center pt-4 mt-4 border-top text-secondary small">
-            &copy; {new Date().getFullYear()} DoZnanja. Sva prava zadržana.
-          </div>
-        </div>
-      </footer>
+      <Footer/>
     </div>
   )
 }
