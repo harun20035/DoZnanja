@@ -52,7 +52,7 @@ const Login = () => {
 
       if (data.access_token) {
         localStorage.setItem('auth_token', data.access_token);
-        window.location.href = '/creator';
+        window.location.href = '/user/dashboard';
       }
     } catch (error) {
       setErrorMessage(error.message);
