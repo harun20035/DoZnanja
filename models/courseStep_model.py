@@ -1,7 +1,6 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
 
-
 class CourseStep(SQLModel, table=True):
     __tablename__ = "course_steps"
 
@@ -9,5 +8,5 @@ class CourseStep(SQLModel, table=True):
     course_id: int = Field(foreign_key="courses.id")
     title: str
     description: str
-    video_url: Optional[str] = None
-    image_url: Optional[str] = None
+    video_url: Optional[str] = Field(default=None, nullable=True)
+    image_url: Optional[str] = Field(default=None, nullable=True)

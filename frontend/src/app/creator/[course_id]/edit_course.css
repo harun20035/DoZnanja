@@ -1,0 +1,347 @@
+/* course-step-editor.css */
+
+.course-step-editor {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.editor-header h2 {
+  font-size: 1.5rem;
+  color: #6b46c1;
+  font-weight: bold;
+}
+
+.add-step-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #6b46c1;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.add-step-button:hover {
+  background-color: #5a32a3;
+}
+
+/* Step Form */
+.step-form-container {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.step-form {
+  padding: 1.5rem;
+}
+
+.step-form h3 {
+  font-size: 1.25rem;
+  color: #6b46c1;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+label {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+input, textarea {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon input {
+  padding-left: 2.5rem;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #6b46c1;
+  box-shadow: 0 0 0 2px rgba(107, 70, 193, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* Steps List */
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.no-steps {
+  background-color: white;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  color: #6b7280;
+}
+
+.step-item {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background-color: #6b46c1;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  margin-right: 1rem;
+}
+
+.step-title {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.step-title-input {
+  flex: 1;
+  margin-right: 1rem;
+}
+
+.step-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  color: #6b7280;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.action-button:hover {
+  background-color: #f3f4f6;
+}
+
+.action-button.edit:hover {
+  color: #6b46c1;
+}
+
+.action-button.delete:hover {
+  color: #ef4444;
+}
+
+.action-button.save {
+  color: #10b981;
+}
+
+.action-button.save:hover {
+  background-color: #ecfdf5;
+}
+
+/* Step Details */
+.step-details {
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.step-description {
+  margin-bottom: 1.5rem;
+}
+
+.step-media {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .step-media {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.video-container, .image-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.video-container h4, .image-container h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.video-placeholder, .image-placeholder {
+  padding: 2rem;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+}
+
+.video-placeholder p, .image-placeholder p {
+  color: #6b7280;
+  font-size: 0.875rem;
+  word-break: break-all;
+}
+
+/* Buttons */
+.button-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #6b46c1;
+  color: white;
+  border: none;
+  padding: 0.625rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.button-primary:hover {
+  background-color: #5a32a3;
+}
+
+.button-secondary {
+  background-color: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 0.625rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.button-secondary:hover {
+  background-color: #f9fafb;
+}
+
+.button-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.step-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 0.375rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}

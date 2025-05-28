@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import Annotated
 from database import engine
-from schemas.course_schema import CourseCreate, Category, UserUpdate
-from services.course_service import create_course, update_user_data
+from schemas.course_schema import CourseCreate, Category, UserUpdate, ChangePassword, ChangePhoto, StepDate, CourseSchema
+from services.course_service import create_course, update_user_data, change_password_data, change_photo_data,get_creator_courses_list,create_step_course_service,get_step_course_service,delete_step_course_service
+from services.course_service import update_step_course_service
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 import os
@@ -14,6 +15,8 @@ from services import course_service
 from models.course_model import Course
 from fastapi import APIRouter, Depends
 from services import course_service
+from typing import Optional
+from services.course_service import get_course
 
 router = APIRouter()
 
@@ -44,28 +47,9 @@ def get_current_user(db: SessionDep, token: str = Depends(oauth2_scheme)) -> Use
         raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.post("/create")
-def create_course_controller(
-    db: SessionDep,
-    title: str = Form(...),
-    description: str = Form(...),
-    price: float = Form(...),
-    discount_percent: int = Form(...),
-    category: Category = Form(...),
-    image_thumbnail: UploadFile = File(...),
-    video_demo: UploadFile = File(...),
-    current_user: User = Depends(get_current_user)
-):
+def create_course_controller(db: SessionDep,title: str = Form(...),description: str = Form(...),price: float = Form(...),discount_percent: int = Form(...),category: Category = Form(...),image_thumbnail: UploadFile = File(...),video_demo: UploadFile = File(...),current_user: User = Depends(get_current_user)):
     try:
-        course = create_course(
-            db=db,
-            creator_id=current_user.id,
-            course_data=CourseCreate(
-                title=title,
-                description=description,
-                price=price,
-                discount_percent=discount_percent,
-                category=category
-            ),
+        course = create_course(db=db, creator_id=current_user.id,course_data=CourseCreate(title=title,description=description,price=price,discount_percent=discount_percent,category=category),
             image_thumbnail=image_thumbnail,
             video_demo=video_demo
         )
@@ -74,11 +58,6 @@ def create_course_controller(
         raise HTTPException(status_code=500, detail=str(e))
 
     
-
-@router.get("/all-courses")
-def get_all_courses(db: SessionDep):
-    return course_service.fetch_all_courses(db)
-
 
 
 @router.get("/me")
@@ -90,3 +69,41 @@ def get_user(db:SessionDep,current_user: User = Depends(get_current_user)):
 def update_user(user_data : UserUpdate, db : SessionDep, current_user : User = Depends(get_current_user)):
     return update_user_data(user_data, db, current_user)
 
+
+@router.put("/change-password")
+def change_password(user_data : ChangePassword, db : SessionDep, current_user : User = Depends(get_current_user)):
+    return change_password_data(user_data, db, current_user)
+
+
+@router.put("/change-photo")
+def change_photo(db: SessionDep, profile_image: UploadFile = File(...) , current_user: User = Depends(get_current_user)):
+    return change_photo_data(db, profile_image, current_user)
+
+
+@router.get("/creator-courses")
+def get_creator_courses(db : SessionDep, current_user : User = Depends(get_current_user)):
+    return get_creator_courses_list(db, current_user)
+
+
+@router.post("/{course_id}")
+def create_step_course(db: SessionDep, course_id: int, title: str = Form(...), description: str = Form(...), video_url: Optional[ UploadFile]= File(None),image_url: Optional[ UploadFile] = File(None)) :
+    step_data = StepDate(title=title, description=description)
+    return create_step_course_service(db, course_id, step_data, video_url, image_url)
+
+@router.get("/{course_id}")
+def get_step_course(db:SessionDep,course_id:int):
+    return get_step_course_service(db,course_id)
+
+@router.delete("/{step_id}")
+def delete_step_course(db:SessionDep,step_id:int):
+    return delete_step_course_service(db,step_id)
+
+@router.put("/{step_id}")
+def update_step_course(db : SessionDep, step_id : int, title: str = Form(...), description: str = Form(...), video_url: Optional[ UploadFile]= File(None),image_url: Optional[ UploadFile] = File(None)):
+    step_data = StepDate(title=title, description=description)
+    return update_step_course_service(db, step_id, step_data, video_url, image_url)
+
+
+@router.get("/{id}", response_model=CourseSchema)
+def get_course_endpoint(course_id: int, session: Session = Depends(get_session)):
+    return get_course(session, course_id)

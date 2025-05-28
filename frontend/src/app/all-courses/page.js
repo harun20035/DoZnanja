@@ -1,5 +1,10 @@
 "use client"
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
+import getHeaderByRole from "../../components/layoutComponents"
+import { Footer } from "../partials/footer"
 import Link from "next/link"
 import CoursesList from "./CoursesList"
 import CategoryFilter from "./CategoryFilter"
@@ -39,40 +44,79 @@ export default function AllCoursesPage() {
     error
   } = useCourses();
 
+  const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const checkAuthorization = () => {
+      try {
+        const role = getRoleFromToken();
+        setRole(role);
+        const user = getUserDataFromToken();
+        setUsername(user?.username || '');
+        
+        // Ako korisnik ima bilo koju rolu, smatramo ga autoriziranim
+        if (role) {
+          // Dodatna logika ako je potrebno
+        } else {
+          router.push("/login"); // Preusmjeri na login ako nema role
+        }
+      } catch (error) {
+        console.error("Authorization error:", error);
+        router.push("/login");
+      }
+    };
+
+    checkAuthorization();
+  }, [router]);
+
+  if (!role) {
+    return <div>Loading...</div>; // Bolje od null za UX
+  }
+
   return (
-    <div className="container-fluid p-4">
-      <h2 className="mb-4">Svi kursevi</h2>
+    <>
+      {getHeaderByRole(role)}
+      <div className="container-fluid p-4">
+        <h2 className="mb-4">Svi kursevi</h2>
 
-      <SearchAndSort
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        sortOptions={sortOptions}
-      />
+        <SearchAndSort
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortOptions={sortOptions}
+        />
 
-      <CategoryFilter
-        categories={categories}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+        />
 
-      {filteredCourses.length === 0 ? (
-        <NoResults />
-      ) : (
-        <>
-          <CoursesList 
-            courses={currentCourses} 
-            loading={loading} 
-            error={error} 
-          />
-          <Pagination 
-            currentPage={currentPage} 
-            totalPages={totalPages} 
-            paginate={paginate} 
-          />
-        </>
-      )}
-    </div>
+        {loading ? (
+          <div>Loading courses...</div>
+        ) : error ? (
+          <div>Error: {error.message}</div>
+        ) : filteredCourses.length === 0 ? (
+          <NoResults />
+        ) : (
+          <>
+            <CoursesList 
+              courses={currentCourses} 
+              loading={loading} 
+              error={error} 
+            />
+            <Pagination 
+              currentPage={currentPage} 
+              totalPages={totalPages} 
+              paginate={paginate} 
+            />
+          </>
+        )}
+      </div>
+      <Footer />
+    </>
   )
 }

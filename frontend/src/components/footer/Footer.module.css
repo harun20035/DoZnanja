@@ -1,0 +1,53 @@
+.footer {
+  background-color: #6f42c1;
+  color: #fff;
+}
+
+.footer h5,
+.footer p,
+.footer a {
+  color: #fff;
+}
+
+.footer a:hover {
+  color: #d5bfff;
+  text-decoration: underline;
+}
+
+.footer input[type="email"] {
+  border: none;
+  border-radius: 0.375rem 0 0 0.375rem;
+}
+
+.footer .btn-primary {
+  background-color: #fff;
+  color: #6f42c1;
+  border: none;
+  border-radius: 0 0.375rem 0.375rem 0;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.footer .btn-primary:hover {
+  background-color: #f5f0fa;
+  color: #5a32a3;
+}
+
+.footer .border-top {
+  border-color: #d5bfff !important;
+}
+
+.btnLjubicasto {
+  background-color: #5a32a3;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0 0.375rem 0.375rem 0;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btnLjubicasto:hover {
+  background-color: #4b288f;
+  color: white;
+}

@@ -1,0 +1,57 @@
+/* Bijelo-ljubičasta tema */
+:root {
+  --primary-purple: #6f42c1;
+  --light-purple: #f8f9fa;
+}
+
+.unauthorized-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--light-purple);
+  padding: 20px;
+}
+
+.unauthorized-card {
+  max-width: 500px;
+  width: 100%;
+  border: none;
+  border-radius: 15px;
+  background-color: white;
+}
+
+.text-purple {
+  color: var(--primary-purple);
+}
+
+.btn-purple {
+  background-color: var(--primary-purple);
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 50px;
+  transition: all 0.3s;
+}
+
+.btn-purple:hover {
+  background-color: #5a32a8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(111, 66, 193, 0.2);
+}
+
+.icon-container {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}

@@ -1,0 +1,131 @@
+.card {
+  border: 2px solid #e9d5ff;
+  transition: border-color 0.2s;
+}
+
+.card:hover {
+  border-color: #c084fc;
+}
+
+.cardHeader {
+  background-color: #f3e8ff;
+  padding: 1rem;
+}
+
+.cardTitle {
+  color: #6b46c1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.titleIcon {
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+.cardContent {
+  padding: 1.5rem 1rem 1rem;
+}
+
+.messageList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.messageItem {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.unread {
+  background-color: #f3e8ff;
+}
+
+.messageAvatar {
+  height: 2.5rem;
+  width: 2.5rem;
+  flex-shrink: 0;
+}
+
+.avatarFallback {
+  background-color: #e9d5ff;
+  color: #6b46c1;
+  font-size: 0.75rem;
+}
+
+.messageContent {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+.messageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.25rem;
+}
+
+.messageSender {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.messageRole {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.messageTime {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.messageText {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-top: 0.25rem;
+}
+
+.unreadIndicator {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #6b46c1;
+  border-radius: 9999px;
+  margin-top: 0.25rem;
+}
+
+.cardFooter {
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.viewAllButton {
+  width: 100%;
+  border-color: #e9d5ff;
+  color: #6b46c1;
+}
+
+.viewAllButton:hover {
+  background-color: #f3e8ff;
+}
+
+.viewAllLink {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttonIcon {
+  margin-right: 0.5rem;
+  height: 1rem;
+  width: 1rem;
+}
