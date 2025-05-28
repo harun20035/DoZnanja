@@ -11,7 +11,7 @@ import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import getHeaderByRole from "../../components/layoutComponents"
-import { Footer } from "../partials/footer"
+import Footer from "../../components/footer/Footer";
 
 export default function DashboardPage() {
   const router = useRouter();

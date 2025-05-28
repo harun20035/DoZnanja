@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
-import getHeaderByRole from "../../components/layoutComponents"
-import { Footer } from "../partials/footer"
+import getHeaderByRole from "../../components/layoutComponents";
+import Footer from "../../components/footer/Footer";
 import Link from "next/link"
 import CoursesList from "./CoursesList"
 import CategoryFilter from "./CategoryFilter"
@@ -116,7 +116,7 @@ export default function AllCoursesPage() {
           </>
         )}
       </div>
-      <Footer />
+      {<Footer />}
     </>
   )
 }
