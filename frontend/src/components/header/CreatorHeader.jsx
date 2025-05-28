@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function UserHeader({ role }) {
+export default function CreatorHeader({ role }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function UserHeader({ role }) {
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
-    router.push('/login'); // ili '/' ako želiš početnu
+    router.push('/login');
   };
 
   useEffect(() => {
@@ -33,7 +33,6 @@ export default function UserHeader({ role }) {
       <Link href="/blog" className={styles.link}>Blog</Link>
       <Link href="/categories" className={styles.link}>Kategorije</Link>
       <Link href="/instructors" className={styles.link}>Predavači</Link>
-      <Link href="/formakreatora" className={styles.link}>Postani Kreator</Link>
     </>
   );
 
@@ -47,7 +46,7 @@ export default function UserHeader({ role }) {
         </Link>
 
         {/* Navigacija */}
-        <nav className={`d-flex flex-wrap align-items-center ${styles.nav}`}>
+        <nav className={`d-flex flex-wrap align-items-center gap-4 ${styles.nav}`}>
           {renderLinks()}
         </nav>
 

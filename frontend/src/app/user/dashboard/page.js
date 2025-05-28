@@ -100,7 +100,7 @@ export default function DashboardPage({ userData }) {
       </main>
 
       {/* Dodaj footer ispod main */}
-      <Footer />
+      <Footer/>
     </>
   )
 }
