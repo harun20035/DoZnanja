@@ -12,7 +12,10 @@ export default function HomePage() {
 
   return (
     <div className="d-flex flex-column min-vh-100">
+
+
      <Header role="guest" />
+
       <main className="flex-grow-1">
         {/* Hero Section */}
         <section className="bg-light py-5">
@@ -86,7 +89,7 @@ export default function HomePage() {
                 <p className="text-secondary">Najpopularniji kursevi ove nedelje</p>
               </div>
               <Link href="/courses" className="text-decoration-none text-primary d-flex align-items-center">
-                <span className="fw-medium">Svi kursevi</span>
+                <span className="text-primary">Svi kursevi</span>
                 <span className="ms-1">▶️</span>
               </Link>
             </div>

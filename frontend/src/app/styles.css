@@ -2,6 +2,101 @@
 
 /* Stilovi za kategorije */
 .category-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Stilovi za kurseve */
+.course-image-container {
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.course-image {
+  transition: transform 0.3s ease;
+  object-fit: cover;
+  height: 100%;
+  width: 100%;
+}
+
+.hover-card:hover .course-image {
+  transform: scale(1.05);
+}
+
+.hover-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.course-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Zaobljeni uglovi */
+.rounded-4 {
+  border-radius: 0.5rem;
+}
+
+/* Dodatni utility za gap */
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 1rem;
+}
+
+.gap-4 {
+  gap: 1.5rem;
+}
+
+/* Prilagođena ljubičasta pozadina */
+.bg-primary-subtle {
+  background-color: #f3e8ff; /* svijetla ljubičasta, alternativa za plavi rgba(13,110,253,0.1) */
+}
+
+/* Glavna ljubičasta boja za tekst, dugmad itd. */
+.btn-primary {
+  color: #fff !important;
+  background-color: #6b21a8 !important;
+  border-color: #6b21a8 !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #5a189a !important;
+  border-color: #5a189a !important;
+}
+
+.bg-primary {
+  background-color: #6b21a8 !important;
+}
+
+.border-primary {
+  border-color: #6b21a8 !important;
+}
+
+h2 {
+  color: #6b21a8 !important;
+}
+.bg-purple {
+  background-color: #6b21a8;
+}
+
+.text-purple {
+  color: #6b21a8 !important;
+}
+=======
     width: 60px;
     height: 60px;
     display: flex;
