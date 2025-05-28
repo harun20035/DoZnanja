@@ -7,8 +7,11 @@ import { EnrolledCourses } from "./components/enrolled-courses"
 import { LearningStats } from "./components/learning-stats"
 import { PopularCourses } from "./components/popular-courses"
 import { UserProfileCard } from "./components/profile-card"
-import { UserDashboardHeader } from "../../partials/header";
-import { Footer } from "../../partials/footer";
+import UserHeader from "../../../components/header/UserHeader"
+import Footer from "../../../components/footer/Footer"
+
+
+
 
 export default function DashboardPage({ userData }) {
   const cardsGridStyle = {
@@ -35,7 +38,7 @@ export default function DashboardPage({ userData }) {
   return (
     <>
       <main style={{ minHeight: "100vh", backgroundColor: "white" }}>
-        <UserDashboardHeader userData={userData} />
+        <UserHeader />
 
         <div
           style={{
@@ -68,7 +71,7 @@ export default function DashboardPage({ userData }) {
       </main>
 
       {/* Dodaj footer ispod main */}
-      <Footer />
+      <Footer/>
     </>
   )
 }
