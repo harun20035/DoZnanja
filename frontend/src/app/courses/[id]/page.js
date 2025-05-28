@@ -6,12 +6,18 @@ import CourseHeader from "./CourseHeader"
 import CourseInfo from "./CourseInfo"
 import RelatedCourses from "./RelatedCourses"
 import "./page.css"
+import { useRouter } from 'next/navigation';
+import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
+import getHeaderByRole from "../../../components/layoutComponents";
+import Footer from "../../../components/footer/Footer";
 
 export default function CourseDetailPage() {
   const { id } = useParams()
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [role, setRole] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -68,6 +74,32 @@ export default function CourseDetailPage() {
     }
   }, [id])
 
+  useEffect(() => {
+    const checkAuthorization = () => {
+      try {
+        const role = getRoleFromToken();
+        setRole(role);
+        const user = getUserDataFromToken();
+        
+        // Ako korisnik ima bilo koju rolu, smatramo ga autoriziranim
+        if (role) {
+          // Dodatna logika ako je potrebno
+        } else {
+          router.push("/login"); // Preusmjeri na login ako nema role
+        }
+      } catch (error) {
+        console.error("Authorization error:", error);
+        router.push("/login");
+      }
+    };
+
+    checkAuthorization();
+  }, [router]);
+
+  if (!role) {
+    return <div>Loading...</div>; // Bolje od null za UX
+  }
+
   if (loading) {
     return (
       <div className="course-detail-container d-flex justify-content-center align-items-center">
@@ -110,10 +142,14 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="course-detail-container">
-      <CourseHeader course={course} />
-      <CourseInfo course={course} />
-      <RelatedCourses />
-    </div>
+    <>
+      {getHeaderByRole(role)}
+      <div className="course-detail-container">
+        <CourseHeader course={course} />
+        <CourseInfo course={course} />
+        <RelatedCourses />
+      </div>
+      <Footer />
+    </>
   )
 }
