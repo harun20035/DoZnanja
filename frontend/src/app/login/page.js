@@ -11,6 +11,12 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
+    sessionStorage.clear();
+  }, []);
+
+  useEffect(() => {
     if (showErrorModal) {
       const timer = setTimeout(() => {
         setShowErrorModal(false);
@@ -88,9 +94,13 @@ const Login = () => {
           {isLoading ? 'Prijava u toku...' : 'Prijavi se'}
         </button>
 
-        <a href="http://localhost:8000/users/google/login" className="google-button">
-          <FaGoogle className="google-icon" /> Prijavi se sa Google
+        <a
+          href="http://localhost:8000/users/google/login?redirect_uri=http://localhost:3000/google/callback"
+          className="google-button"
+        >
+        <FaGoogle className="google-icon" /> Prijavi se sa Google
         </a>
+
       </form>
 
       {showErrorModal && (
