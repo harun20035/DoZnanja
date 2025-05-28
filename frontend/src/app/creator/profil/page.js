@@ -3,12 +3,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User, Mail, Key, AtSign, Save, Eye, EyeOff } from 'lucide-react';
 import styles from "./profile.module.css";
+import { useParams } from "next/navigation"
+import { useRouter } from 'next/navigation';
+import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
+import getHeaderByRole from "../../../components/layoutComponents";
+import Footer from "../../../components/footer/Footer";
 
 const EditProfile = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [username, setUsername] = useState('');
+  const [role, setRole] = useState(null);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -59,6 +68,32 @@ const EditProfile = () => {
       })
       .catch(err => console.error("Greška:", err));
   }, []);
+
+  useEffect(() => {
+    const checkAuthorization = () => {
+      try {
+        const role = getRoleFromToken();
+        setRole(role); // Spremite role u stanje
+        console.log("Dobijena role:", role);
+        const user = getUserDataFromToken();
+        
+        if (role === "CREATOR") {
+          setUsername(user?.username || '');
+          setIsAuthorized(true);
+        } else {
+          router.push("/unauthorized");
+        }
+      } catch (error) {
+        console.error("Authorization error:", error);
+      }
+    };
+
+    checkAuthorization();
+  }, [router]);
+
+  if (!isAuthorized) {
+    return null; // Ili neki loading spinner
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -232,246 +267,250 @@ const EditProfile = () => {
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <div className={styles.logo}>EduCreator</div>
-        </div>
-      </header>
+    <>
+      {role && getHeaderByRole(role)}
+      <div className={styles.pageContainer}>
+        <header className={styles.header}>
+          <div className={styles.headerContent}>
+            <div className={styles.logo}>EduCreator</div>
+          </div>
+        </header>
 
-      <main className={styles.mainContent}>
-        <div className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>Edit Profile</h1>
-          <div className={styles.roleBadge}>{formData.role}</div>
-        </div>
+        <main className={styles.mainContent}>
+          <div className={styles.pageHeader}>
+            <h1 className={styles.pageTitle}>Edit Profile</h1>
+            <div className={styles.roleBadge}>{formData.role}</div>
+          </div>
 
-        <div className={styles.profileContainer}>
-          <div className={styles.avatarContainer} onClick={openFileDialog} style={{ cursor: "pointer" }}>
-            <div className={styles.avatar}>
-              {previewImage ? (
-                <img
-                  src={previewImage || "/placeholder.svg"}
-                  alt="Profile"
-                  className={styles.avatarImg}
-                />
-              ) : (
-                <div className={styles.avatarPlaceholder}>
-                  {getInitials(formData.firstName, formData.lastName)}
+          <div className={styles.profileContainer}>
+            <div className={styles.avatarContainer} onClick={openFileDialog} style={{ cursor: "pointer" }}>
+              <div className={styles.avatar}>
+                {previewImage ? (
+                  <img
+                    src={previewImage || "/placeholder.svg"}
+                    alt="Profile"
+                    className={styles.avatarImg}
+                  />
+                ) : (
+                  <div className={styles.avatarPlaceholder}>
+                    {getInitials(formData.firstName, formData.lastName)}
+                  </div>
+                )}
+                <div className={styles.avatarOverlay}>
+                  <p>Change Photo</p>
+                </div>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                ref={fileInputRef}
+                onChange={handleFileChange}
+              />
+            </div>
+          </div>
+
+          <div className={styles.tabs}>
+            <div className={styles.tabsList}>
+              <button
+                className={`${styles.tabButton} ${activeTab === 'profile' ? styles.active : ''}`}
+                onClick={() => setActiveTab('profile')}
+              >
+                Profile Information
+              </button>
+              <button
+                className={`${styles.tabButton} ${activeTab === 'password' ? styles.active : ''}`}
+                onClick={() => setActiveTab('password')}
+              >
+                Change Password
+              </button>
+            </div>
+
+            <div className={styles.tabContent}>
+              {activeTab === 'profile' && (
+                <div className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <h2 className={styles.cardTitle}>Personal Information</h2>
+                    <p className={styles.cardDescription}>
+                      Update your personal details here. These details will be displayed on your public profile.
+                    </p>
+                  </div>
+                  <form onSubmit={handleProfileSubmit}>
+                    <div className={styles.cardContent}>
+                      <div className={styles.formRow}>
+                        <div className={styles.formGroup}>
+                          <label htmlFor="firstName">First Name</label>
+                          <div className={styles.inputWithIcon}>
+                            <User className={styles.inputIcon} />
+                            <input
+                              id="firstName"
+                              name="firstName"
+                              value={formData.firstName}
+                              onChange={handleChange}
+                              required
+                              className={styles.input}
+                            />
+                          </div>
+                        </div>
+
+                        <div className={styles.formGroup}>
+                          <label htmlFor="lastName">Last Name</label>
+                          <div className={styles.inputWithIcon}>
+                            <User className={styles.inputIcon} />
+                            <input
+                              id="lastName"
+                              name="lastName"
+                              value={formData.lastName}
+                              onChange={handleChange}
+                              required
+                              className={styles.input}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label htmlFor="nickname">Nickname</label>
+                        <div className={styles.inputWithIcon}>
+                          <AtSign className={styles.inputIcon} />
+                          <input
+                            id="nickname"
+                            name="nickname"
+                            value={formData.nickname}
+                            onChange={handleChange}
+                            className={styles.input}
+                          />
+                        </div>
+                        <p className={styles.inputHelp}>This will be displayed publicly on your profile</p>
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label htmlFor="email">Email Address</label>
+                        <div className={styles.inputWithIcon}>
+                          <Mail className={styles.inputIcon} />
+                          <input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                            className={styles.input}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.cardFooter}>
+                      <button type="button" className={styles.buttonSecondary}>Cancel</button>
+                      <button type="submit" className={styles.buttonPrimary}>
+                        <Save className={styles.buttonIcon} />
+                        Save Changes
+                      </button>
+                    </div>
+                  </form>
                 </div>
               )}
-              <div className={styles.avatarOverlay}>
-                <p>Change Photo</p>
-              </div>
+
+              {activeTab === 'password' && (
+                <div className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <h2 className={styles.cardTitle}>Change Password</h2>
+                    <p className={styles.cardDescription}>
+                      Update your password to keep your account secure.
+                    </p>
+                  </div>
+                  <form onSubmit={handlePasswordSubmit}>
+                    <div className={styles.cardContent}>
+                      <div className={styles.formGroup}>
+                        <label htmlFor="currentPassword">Current Password</label>
+                        <div className={styles.inputWithIcon}>
+                          <Key className={styles.inputIcon} />
+                          <input
+                            id="currentPassword"
+                            name="currentPassword"
+                            type={showPassword ? "text" : "password"}
+                            value={formData.currentPassword}
+                            onChange={handleChange}
+                            required
+                            className={styles.input}
+                          />
+                          <button
+                            type="button"
+                            className={styles.passwordToggle}
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                          >
+                            {showPassword ? <EyeOff /> : <Eye />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label htmlFor="newPassword">New Password</label>
+                        <div className={styles.inputWithIcon}>
+                          <Key className={styles.inputIcon} />
+                          <input
+                            id="newPassword"
+                            name="newPassword"
+                            type={showNewPassword ? "text" : "password"}
+                            value={formData.newPassword}
+                            onChange={handleChange}
+                            required
+                            className={styles.input}
+                          />
+                          <button
+                            type="button"
+                            className={styles.passwordToggle}
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            aria-label={showNewPassword ? "Hide password" : "Show password"}
+                          >
+                            {showNewPassword ? <EyeOff /> : <Eye />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label htmlFor="confirmPassword">Confirm New Password</label>
+                        <div className={styles.inputWithIcon}>
+                          <Key className={styles.inputIcon} />
+                          <input
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            required
+                            className={styles.input}
+                          />
+                          <button
+                            type="button"
+                            className={styles.passwordToggle}
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                          >
+                            {showConfirmPassword ? <EyeOff /> : <Eye />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.cardFooter}>
+                      <button type="button" className={styles.buttonSecondary}>Cancel</button>
+                      <button type="submit" className={styles.buttonPrimary}>
+                        <Save className={styles.buttonIcon} />
+                        Change Password
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
             </div>
-            <input
-              type="file"
-              accept="image/*"
-              style={{ display: "none" }}
-              ref={fileInputRef}
-              onChange={handleFileChange}
-            />
           </div>
-        </div>
-
-        <div className={styles.tabs}>
-          <div className={styles.tabsList}>
-            <button
-              className={`${styles.tabButton} ${activeTab === 'profile' ? styles.active : ''}`}
-              onClick={() => setActiveTab('profile')}
-            >
-              Profile Information
-            </button>
-            <button
-              className={`${styles.tabButton} ${activeTab === 'password' ? styles.active : ''}`}
-              onClick={() => setActiveTab('password')}
-            >
-              Change Password
-            </button>
-          </div>
-
-          <div className={styles.tabContent}>
-            {activeTab === 'profile' && (
-              <div className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <h2 className={styles.cardTitle}>Personal Information</h2>
-                  <p className={styles.cardDescription}>
-                    Update your personal details here. These details will be displayed on your public profile.
-                  </p>
-                </div>
-                <form onSubmit={handleProfileSubmit}>
-                  <div className={styles.cardContent}>
-                    <div className={styles.formRow}>
-                      <div className={styles.formGroup}>
-                        <label htmlFor="firstName">First Name</label>
-                        <div className={styles.inputWithIcon}>
-                          <User className={styles.inputIcon} />
-                          <input
-                            id="firstName"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleChange}
-                            required
-                            className={styles.input}
-                          />
-                        </div>
-                      </div>
-
-                      <div className={styles.formGroup}>
-                        <label htmlFor="lastName">Last Name</label>
-                        <div className={styles.inputWithIcon}>
-                          <User className={styles.inputIcon} />
-                          <input
-                            id="lastName"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            required
-                            className={styles.input}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label htmlFor="nickname">Nickname</label>
-                      <div className={styles.inputWithIcon}>
-                        <AtSign className={styles.inputIcon} />
-                        <input
-                          id="nickname"
-                          name="nickname"
-                          value={formData.nickname}
-                          onChange={handleChange}
-                          className={styles.input}
-                        />
-                      </div>
-                      <p className={styles.inputHelp}>This will be displayed publicly on your profile</p>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label htmlFor="email">Email Address</label>
-                      <div className={styles.inputWithIcon}>
-                        <Mail className={styles.inputIcon} />
-                        <input
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          required
-                          className={styles.input}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.cardFooter}>
-                    <button type="button" className={styles.buttonSecondary}>Cancel</button>
-                    <button type="submit" className={styles.buttonPrimary}>
-                      <Save className={styles.buttonIcon} />
-                      Save Changes
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {activeTab === 'password' && (
-              <div className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <h2 className={styles.cardTitle}>Change Password</h2>
-                  <p className={styles.cardDescription}>
-                    Update your password to keep your account secure.
-                  </p>
-                </div>
-                <form onSubmit={handlePasswordSubmit}>
-                  <div className={styles.cardContent}>
-                    <div className={styles.formGroup}>
-                      <label htmlFor="currentPassword">Current Password</label>
-                      <div className={styles.inputWithIcon}>
-                        <Key className={styles.inputIcon} />
-                        <input
-                          id="currentPassword"
-                          name="currentPassword"
-                          type={showPassword ? "text" : "password"}
-                          value={formData.currentPassword}
-                          onChange={handleChange}
-                          required
-                          className={styles.input}
-                        />
-                        <button
-                          type="button"
-                          className={styles.passwordToggle}
-                          onClick={() => setShowPassword(!showPassword)}
-                          aria-label={showPassword ? "Hide password" : "Show password"}
-                        >
-                          {showPassword ? <EyeOff /> : <Eye />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label htmlFor="newPassword">New Password</label>
-                      <div className={styles.inputWithIcon}>
-                        <Key className={styles.inputIcon} />
-                        <input
-                          id="newPassword"
-                          name="newPassword"
-                          type={showNewPassword ? "text" : "password"}
-                          value={formData.newPassword}
-                          onChange={handleChange}
-                          required
-                          className={styles.input}
-                        />
-                        <button
-                          type="button"
-                          className={styles.passwordToggle}
-                          onClick={() => setShowNewPassword(!showNewPassword)}
-                          aria-label={showNewPassword ? "Hide password" : "Show password"}
-                        >
-                          {showNewPassword ? <EyeOff /> : <Eye />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label htmlFor="confirmPassword">Confirm New Password</label>
-                      <div className={styles.inputWithIcon}>
-                        <Key className={styles.inputIcon} />
-                        <input
-                          id="confirmPassword"
-                          name="confirmPassword"
-                          type={showConfirmPassword ? "text" : "password"}
-                          value={formData.confirmPassword}
-                          onChange={handleChange}
-                          required
-                          className={styles.input}
-                        />
-                        <button
-                          type="button"
-                          className={styles.passwordToggle}
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                        >
-                          {showConfirmPassword ? <EyeOff /> : <Eye />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.cardFooter}>
-                    <button type="button" className={styles.buttonSecondary}>Cancel</button>
-                    <button type="submit" className={styles.buttonPrimary}>
-                      <Save className={styles.buttonIcon} />
-                      Change Password
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+      <Footer />
+    </>
   );
 };
 
