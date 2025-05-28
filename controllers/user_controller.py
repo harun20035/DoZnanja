@@ -82,7 +82,7 @@ def google_callback(code: str, session: Session = Depends(get_session)):
         user = handle_google_callback(code, session)
         access_token = create_access_token(data={"sub": str(user.id), "role": user.role.value})
         return RedirectResponse(
-            url="http://localhost:3000/login/dashboard",
+            url="http://localhost:3000/user/dashboard",
             status_code=303,
             headers={"Authorization": f"Bearer {access_token}"}
         )
