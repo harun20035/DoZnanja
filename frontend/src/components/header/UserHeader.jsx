@@ -8,11 +8,13 @@ export default function UserHeader({ role }) {
   const dropdownRef = useRef(null);
   const router = useRouter();
 
+  const [user, setUser] = useState(null); // Dodano: user state
+
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
-    router.push('/login'); // ili '/' ako želiš početnu
+    router.push('/login');
   };
 
   useEffect(() => {
@@ -25,6 +27,27 @@ export default function UserHeader({ role }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("auth_token");
+      if (!token) return;
+
+      try {
+        const res = await fetch("http://localhost:8000/api/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        setUser({ name: data.username, coins: data.credits });
+      } catch (err) {
+        console.error("Greška:", err);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   const renderLinks = () => (
     <>
       <Link href="/all-courses" className={styles.link}>Kursevi</Link>
@@ -33,7 +56,7 @@ export default function UserHeader({ role }) {
       <Link href="/blog" className={styles.link}>Blog</Link>
       <Link href="/categories" className={styles.link}>Kategorije</Link>
       <Link href="/instructors" className={styles.link}>Predavači</Link>
-      <Link href="/formakreatora" className={styles.link}>Postani Kreator</Link>
+      <Link href="/formakreatora" className={styles.ctaLink}>Postani Kreator</Link>
     </>
   );
 
@@ -51,8 +74,14 @@ export default function UserHeader({ role }) {
           {renderLinks()}
         </nav>
 
-        {/* Avatar i dropdown */}
-        <div className="position-relative" ref={dropdownRef}>
+        {/* User info i avatar */}
+        <div className="d-flex align-items-center gap-2 position-relative" ref={dropdownRef}>
+          {user && (
+            <div className="text-end me-2">
+              <div className="fw-semibold">@{user.name}</div>
+              <div className="text-muted small">💰 {user.coins} Token/a</div>
+            </div>
+          )}
           <div className={styles.avatar} onClick={toggleDropdown}>👤</div>
           {dropdownOpen && (
             <div className={styles.dropdown}>
