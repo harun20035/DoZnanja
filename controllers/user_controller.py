@@ -1,8 +1,10 @@
 from sqlmodel import Session
 from typing import Annotated
 from fastapi import Depends, APIRouter, HTTPException, Request
+from controllers.course_controller import get_current_user
 from schemas.user_schema import UserCreate, UserLogin
-from services.user_service import create_user, verify_password
+
+from services.user_service import create_user, get_user_summary, verify_password
 from fastapi.responses import RedirectResponse
 from database import engine
 from models.user_model import User, Role
@@ -88,4 +90,8 @@ def google_callback(code: str, session: Session = Depends(get_session)):
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get("/me")
+def get_me(user: User = Depends(get_current_user)):
+    return get_user_summary(user)
 

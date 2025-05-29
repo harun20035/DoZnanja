@@ -46,3 +46,4 @@ async def test_connection():
 app.include_router(user_controller.router, prefix="/users", tags=["Users"])
 app.include_router(course_controller.router, prefix="/course", tags=["Course"])
 app.include_router(dashboard_controller.router, prefix="/user", tags=["User"])
+app.include_router(user_controller.router, prefix="/api", tags=["User"])

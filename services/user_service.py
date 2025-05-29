@@ -87,3 +87,10 @@ def handle_google_callback(code: str, session: Session) -> User:
         user = user_repository.create_user(session, user)  # Repozitorijum samo spašava
 
     return user
+
+
+def get_user_summary(user: User):
+    return {
+        "username": user.username,
+        "credits": user.credits
+    }

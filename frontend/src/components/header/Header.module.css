@@ -93,3 +93,20 @@
   background-color: #f5f0fa;
   border-color: #fff;
 }
+
+.ctaLink {
+  background-color: #fff;
+  color: #6f42c1;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.ctaLink:hover {
+  background-color: #f5f0fa;
+  border-color: #fff;
+  color: #5a32a3;
+}
