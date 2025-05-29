@@ -87,7 +87,7 @@ export default function CreatorHeader({ role }) {
             <div className={styles.dropdown}>
               <Link href="/notifications" className={styles.dropdownItem}>🔔 Notifikacije</Link>
               <Link href="/cart" className={styles.dropdownItem}>🛒 Korpa</Link>
-              <Link href="/profile" className={styles.dropdownItem}>👤Profil</Link>
+              <Link href="/profil" className={styles.dropdownItem}>👤Profil</Link>
               <Link href="/coins" className={styles.dropdownItem}>💰Tokeni</Link>
               <div onClick={handleLogout} className={styles.dropdownItem} role="button">🚪 Odjava</div>
             </div>
