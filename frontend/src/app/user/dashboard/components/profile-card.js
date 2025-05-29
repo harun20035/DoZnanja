@@ -107,7 +107,7 @@ export function UserProfileCard() {
           variant="outlined"
           startIcon={<SettingsIcon className={styles.editButtonIcon} />}
           component={Link}
-          href="/user/profile/edit"
+          href="/profil"
           className={styles.editButton}
           sx={{ textTransform: "none" }}
         >

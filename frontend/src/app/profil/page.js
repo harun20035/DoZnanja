@@ -6,8 +6,8 @@ import styles from "./profile.module.css";
 import { useParams } from "next/navigation"
 import { useRouter } from 'next/navigation';
 import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
-import getHeaderByRole from "../../../components/layoutComponents";
-import Footer from "../../../components/footer/Footer";
+import getHeaderByRole from "../../components/layoutComponents";
+import Footer from "../../components/footer/Footer";
 
 const EditProfile = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -70,26 +70,28 @@ const EditProfile = () => {
   }, []);
 
   useEffect(() => {
-    const checkAuthorization = () => {
-      try {
-        const role = getRoleFromToken();
-        setRole(role); // Spremite role u stanje
-        console.log("Dobijena role:", role);
-        const user = getUserDataFromToken();
-        
-        if (role === "CREATOR") {
+      const checkAuthorization = () => {
+        try {
+          const role = getRoleFromToken();
+          setRole(role);
+          const user = getUserDataFromToken();
           setUsername(user?.username || '');
-          setIsAuthorized(true);
-        } else {
-          router.push("/unauthorized");
+          
+          // Ako korisnik ima bilo koju rolu, smatramo ga autoriziranim
+          if (role) {
+            setIsAuthorized(true);
+            // Dodatna logika ako je potrebno
+          } else {
+            router.push("/login"); // Preusmjeri na login ako nema role
+          }
+        } catch (error) {
+          console.error("Authorization error:", error);
+          router.push("/login");
         }
-      } catch (error) {
-        console.error("Authorization error:", error);
-      }
-    };
-
-    checkAuthorization();
-  }, [router]);
+      };
+  
+      checkAuthorization();
+    }, [router]);
 
   if (!isAuthorized) {
     return null; // Ili neki loading spinner
@@ -270,12 +272,6 @@ const EditProfile = () => {
     <>
       {role && getHeaderByRole(role)}
       <div className={styles.pageContainer}>
-        <header className={styles.header}>
-          <div className={styles.headerContent}>
-            <div className={styles.logo}>EduCreator</div>
-          </div>
-        </header>
-
         <main className={styles.mainContent}>
           <div className={styles.pageHeader}>
             <h1 className={styles.pageTitle}>Edit Profile</h1>
