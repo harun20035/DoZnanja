@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from database import database
 from init_db import create_db_and_tables
-from controllers import user_controller, course_controller, dashboard_controller
+from controllers import user_controller, course_controller, dashboard_controller, tokens_controller
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -47,3 +47,4 @@ app.include_router(user_controller.router, prefix="/users", tags=["Users"])
 app.include_router(course_controller.router, prefix="/course", tags=["Course"])
 app.include_router(dashboard_controller.router, prefix="/user", tags=["User"])
 app.include_router(user_controller.router, prefix="/api", tags=["User"])
+app.include_router(tokens_controller.router)

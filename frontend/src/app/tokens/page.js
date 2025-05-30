@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
 import getHeaderByRole from "../../components/layoutComponents";
 import Footer from "../../components/footer/Footer";
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import TokenInfo from "./components/TokenInfo"
 import TokenPurchase from "./components/TokenPurchase"
 import "./tokens.css"
@@ -14,27 +14,33 @@ export default function TokensPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [role, setRole] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  // Fetch podataka o korisniku (uključujući credits)
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch("http://localhost:8000/users/me", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`, // zamijeni ako token čuvaš drugdje
-          },
-        })
+  // Memoizirana funkcija za dobijanje korisničkih podataka
+  const fetchUserData = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:8000/users/me", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+        },
+      });
 
-        const data = await response.json()
-        // Ako je response tipa { username: ..., credits: ... }
-        setCurrentTokens(data.credits)
-      } catch (error) {
-        console.error("Greška pri dohvaćanju korisničkih podataka:", error)
-      }
+      const data = await response.json();
+
+      const user = getUserDataFromToken();
+      console.log("User data from token:", getUserDataFromToken());
+
+      // OVJERENJE: POSTAVI userId NA sub iz tokena, a ne na id
+      setUserId(user?.sub || null);  // <- Ovdje je ključna promjena
+      setCurrentTokens(data.credits);
+    } catch (error) {
+      console.error("Greška pri dohvaćanju korisničkih podataka:", error)
     }
+  }, []);
 
-    fetchUserData()
-  }, [])
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
 
   useEffect(() => {
     const checkAuthorization = () => {
@@ -42,13 +48,12 @@ export default function TokensPage() {
         const role = getRoleFromToken();
         setRole(role);
         const user = getUserDataFromToken();
+
+        // Ako user nema username, stavi prazan string
         setUsername(user?.username || '');
-        
-        // Ako korisnik ima bilo koju rolu, smatramo ga autoriziranim
-        if (role) {
-          // Dodatna logika ako je potrebno
-        } else {
-          router.push("/login"); // Preusmjeri na login ako nema role
+
+        if (!role) {
+          router.push("/login");
         }
       } catch (error) {
         console.error("Authorization error:", error);
@@ -59,16 +64,46 @@ export default function TokensPage() {
     checkAuthorization();
   }, [router]);
 
-  if (!role) {
-    return <div>Loading...</div>; // Bolje od null za UX
-  }
+  const handleTokenPurchase = async (tokenAmount) => {
+    setIsAddingTokens(true);
+    try {
+      // Koristimo userId iz stanja koji je već postavljen
+      if (!userId) {
+        throw new Error("Korisnik nije autentificiran");
+      }
 
-  const handleTokenPurchase = (tokenAmount) => {
-    setIsAddingTokens(true)
-    setTimeout(() => {
-      setCurrentTokens((prev) => prev + tokenAmount)
-      setIsAddingTokens(false)
-    }, 1500)
+      const response = await fetch("http://localhost:8000/tokens/purchase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+        },
+        body: JSON.stringify({
+          user_id: userId, // Koristimo userId iz stanja
+          amount: tokenAmount,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Kupovina tokena nije uspjela");
+      }
+
+      const data = await response.json();
+      setCurrentTokens(data.new_balance);
+
+      // Osvježite podatke nakon uspješne kupovine
+      await fetchUserData();
+    } catch (error) {
+      console.error("Greška pri kupovini:", error.message);
+      // Ovdje možete dodati prikaz greške korisniku
+    } finally {
+      setIsAddingTokens(false);
+    }
+  };
+
+  if (!role) {
+    return <div>Loading...</div>;
   }
 
   return (
