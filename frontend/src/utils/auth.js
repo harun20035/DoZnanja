@@ -25,13 +25,14 @@ export const getRoleFromToken = () => {
 
 // Dodatna funkcija za dobijanje korisničkih podataka
 export const getUserDataFromToken = () => {
-  const token = getLocalStorage("access_token");
+  const token = getLocalStorage("auth_token");
   if (!token) return null;
 
   try {
     const decoded = jwtDecode(token);
     return {
-      username: decoded.username || decoded.sub,
+      sub: decoded.sub,
+      username: decoded.username,
       email: decoded.email,
       role: decoded.role
     };
