@@ -27,3 +27,8 @@ def get_all_courses(db: SessionDep):
 @router.get("/user-courses")
 def get_user_coursesdb(db : SessionDep, current_user : User = Depends(get_current_user)) :
     return dashboard_service.user_courses(db, current_user)
+
+
+@router.get("/popular-courses") 
+def popular_courses(db : SessionDep) :
+    return dashboard_service.get_top_courses(db)

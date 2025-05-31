@@ -200,3 +200,17 @@
 .addButton:hover {
   background-color: #5a32a3;
 }
+
+
+.courseDuration {
+  margin-top: 10px;
+}
+
+.courseDuration .durationIcon {
+  color: #4caf50; /* Zeleni icon za duration */
+}
+
+.courseDuration .steps {
+  font-weight: bold;
+  color: #ff9800; /* Narandžasti tekst za broj koraka */
+}
