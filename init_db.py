@@ -4,6 +4,8 @@ from models.user_model import User
 from models.course_model import Course
 from models.courseStep_model import CourseStep
 from models.courseEnrollment_model import CourseEnrollment
+from models.reviewCourses_model import Review
+
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(bind=engine)

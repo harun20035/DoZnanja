@@ -23,7 +23,12 @@ def user_courses(db: Session, current_user: User):
         if not courses:
             raise HTTPException(status_code=404, detail="No courses found for this user")
         
+        print("Dohvaćeni kursevi:", courses)  # Dodaj log za debagiranje
         return courses
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+def get_top_courses(db : Session) :
+    return dashboard_repository.get_top_courses_from_db(db)
