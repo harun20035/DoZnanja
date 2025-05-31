@@ -1,6 +1,10 @@
 .card {
   border: 2px solid #e9d5ff;
   transition: border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0 !important;
 }
 
 .card:hover {
@@ -31,90 +35,66 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex-grow: 1;  /* Ovo omogućava da se sadržaj širi i potiskuje prema dnu */
+  margin-bottom: 1.5rem;  /* Povećan razmak prema dnu kartice */
 }
 
 .avatar {
-  height: 5rem;
-  width: 5rem;
-  margin-bottom: 1rem;
+  height: 5rem !important;  /* Povećana slika */
+  width: 5rem !important;  /* Povećana slika */
+  margin-bottom: 1.5rem; /* Veći razmak između slike i ostatka sadržaja */
 }
 
 .avatarFallback {
   background-color: #6b46c1;
   color: white;
-  font-size: 1.5rem;
+  font-size: 2rem;  /* Povećan font za inicijale */
 }
 
 .userName {
-  font-size: 1.125rem;
+  font-size: 1.00rem;  /* Povećan font za ime */
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem; /* Veći razmak između imena i statistike */
 }
 
 .userRole {
   color: #6b7280;
+  font-size: 1rem;
   margin-bottom: 1.5rem;
-}
-
-.goalsSection {
-  width: 100%;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.goalHeader {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-}
-
-.goalLabel {
-  font-weight: 500;
-}
-
-.goalProgress {
-  color: #6b46c1;
-}
-
-.progressBar {
-  height: 0.5rem;
-  background-color: #f3e8ff;
-}
-
-.progressBar[data-state="loading"] div {
-  background-color: #6b46c1;
 }
 
 .statsGrid {
   width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
+  display: flex;  /* Promijenjeno u flex umjesto grid */
+  justify-content: flex-start;  /* Poravnanje kockica prema lijevo */
+  gap: 0.5rem;  /* Razmak između kockica */
   text-align: center;
-  margin-top: 1rem;
+  margin-top: auto;  /* Pomaknut prema dnu kartice */
 }
 
 .statItem {
   background-color: #f3e8ff;
-  padding: 0.5rem;
+  padding: 1rem; /* Povećan padding za bolji izgled */
   border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Dodan efekat sjenčanja */
+  width: 100px;  /* Povećan fiksni width za kockice */
 }
 
 .statValue {
-  font-size: 1.125rem;
+  font-size: 1.5rem;  /* Povećan font za statistike */
   font-weight: 700;
   color: #6b46c1;
 }
 
 .statLabel {
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: #6b7280;
 }
 
 .cardFooter {
   padding: 1rem;
   border-top: 1px solid #e5e7eb;
+  margin-top: auto;  /* Osigurava da footer bude na dnu */
 }
 
 .editButton {

@@ -1,6 +1,7 @@
-import Link from "next/link"
-import { Person as UserIcon, Settings as SettingsIcon } from "@mui/icons-material"
-import styles from "./profile-card.module.css"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Person as UserIcon, Settings as SettingsIcon } from "@mui/icons-material";
+import styles from "./profile-card.module.css";
 import {
   Avatar,
   Box,
@@ -9,26 +10,48 @@ import {
   CardActions,
   CardContent,
   CardHeader,
-  CircularProgress,
   Typography,
   Stack,
-} from "@mui/material"
+} from "@mui/material";
 
 export function UserProfileCard() {
-  const userData = {
-    name: "John Doe",
-    role: "Student",
-    avatar: "", // prazan string za inicijale
-  }
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+
+    if (!token) return;
+
+    fetch("http://localhost:8000/course/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Greška pri dohvaćanju korisnika");
+        return res.json();
+      })
+      .then((data) => {
+        setUserData(data);
+      })
+      .catch((err) => console.error("Greška:", err));
+  }, []);
 
   const getInitials = (name) => {
-    if (!name) return "U"
+    if (!name) return "U";
     return name
       .split(" ")
       .map((n) => n[0])
       .join("")
-      .toUpperCase()
-  }
+      .toUpperCase();
+  };
+
+  if (!userData) return <div>Učitavanje profila...</div>;
+
+  // Normalizuj putanju slike (zamena '\' sa '/')
+  const normalizedImagePath = userData.profile_image
+    ? userData.profile_image.replace(/\\/g, "/")
+    : null;
 
   return (
     <Card className={styles.card} sx={{ maxWidth: 360, m: 2 }}>
@@ -41,50 +64,19 @@ export function UserProfileCard() {
       <CardContent className={styles.cardContent}>
         <Stack alignItems="center" spacing={1} mb={2}>
           <Avatar
-            src={userData.avatar || ""}
+            src={normalizedImagePath ? `http://localhost:8000/${normalizedImagePath}` : ""}
             alt="Profile"
             className={styles.avatar}
           >
-            {!userData.avatar && (
+            {!normalizedImagePath && (
               <Typography className={styles.avatarFallback}>
                 {getInitials(userData.name)}
               </Typography>
             )}
           </Avatar>
-          <Typography className={styles.userName}>{userData.name}</Typography>
-          <Typography className={styles.userRole}>{userData.role}</Typography>
+          <Typography className={styles.userName}>{userData.name} {userData.surname}</Typography> {/* Prikazujemo ime i prezime */}
+          <Typography className={styles.userRole}>@{userData.username}</Typography> {/* Prikazujemo nickname (username) */}
         </Stack>
-
-        <Box className={styles.goalsSection}>
-          <Box className={styles.goalHeader}>
-            <span className={styles.goalLabel}>Learning Goals</span>
-            <span className={styles.goalProgress}>3/5 completed</span>
-          </Box>
-          <Box position="relative" display="inline-flex" width="100%">
-            <CircularProgress
-              variant="determinate"
-              value={60}
-              size={24}
-              thickness={5}
-              sx={{ color: "primary.main" }}
-              className={styles.progressBar}
-            />
-            <Box
-              top={0}
-              left={0}
-              bottom={0}
-              right={0}
-              position="absolute"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Typography variant="caption" component="div" color="text.primary">
-                60%
-              </Typography>
-            </Box>
-          </Box>
-        </Box>
 
         <Box className={styles.statsGrid}>
           <Box className={styles.statItem}>
@@ -115,5 +107,5 @@ export function UserProfileCard() {
         </Button>
       </CardActions>
     </Card>
-  )
+  );
 }
