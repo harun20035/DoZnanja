@@ -1,0 +1,87 @@
+.dashboardContainer {
+  padding: 2rem;
+  background-color: #f9f6ff;
+  min-height: 100vh;
+}
+
+.courseCard {
+  background-color: #fff;
+  border: 2px solid #e9d5ff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(155, 81, 224, 0.15);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.courseCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(155, 81, 224, 0.3);
+  border-color: #c084fc;
+}
+
+.imageContainer {
+  height: 180px;
+  overflow: hidden;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.courseImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardContent {
+  padding: 1rem;
+  flex: 1;
+}
+
+.courseTitle {
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #6b46c1;
+  margin-bottom: 0.5rem;
+}
+
+.courseInstructor {
+  font-size: 0.875rem;
+  color: #7e22ce;
+  margin-bottom: 0.5rem;
+}
+
+.salePrice {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #9f7aea;
+  margin-top: 0.75rem;
+}
+
+.modalBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .modalBox {
+    padding: 1.25rem;
+  }
+}
