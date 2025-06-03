@@ -7,6 +7,8 @@ from models.courseEnrollment_model import CourseEnrollment
 from models.user_model import User
 from fastapi import HTTPException
 from models.courseStep_model import CourseStep
+from models.cart_model import Cart
+from sqlalchemy.exc import IntegrityError
 
 
 
@@ -99,7 +101,23 @@ def get_top_courses_from_db(db: Session):
 
 
 
+def add_course_to_cart(db : Session, course_id : int, user_id : int ) :
+    existing_cart_item = db.query(Cart).filter(Cart.user_id == user_id, Cart.course_id == course_id).first()
 
+    if existing_cart_item:
+        raise HTTPException(status_code=400, detail="Kurs je već dodan u korpu.")
+    
+    new_cart_item = Cart(user_id = user_id, course_id= course_id)
+
+    try:
+        db.add(new_cart_item)
+        db.commit()
+        db.refresh(new_cart_item)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Problem u dodavanju u korpu")
+    
+    return new_cart_item
 
 
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, Card, CardContent, Typography, Box } from "@mui/material";
+import { Button, Card, CardContent, Typography, Box, Modal, Fade } from "@mui/material";
 import Image from "next/image";
 import { Star, Users, Clock } from "lucide-react";
 import Link from "next/link";
@@ -7,6 +7,9 @@ import styles from "./popular-courses.module.css";
 
 export function PopularCourses() {
   const [courses, setCourses] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [courseToAdd, setCourseToAdd] = useState(null);
 
   // Funkcija za normalizaciju putanje slike
   const normalizeImageUrl = (path) => {
@@ -40,6 +43,43 @@ export function PopularCourses() {
       })
       .catch((err) => console.error("Error fetching courses:", err));
   }, []);
+
+  const handleAddToCart = (courseId) => {
+  const token = localStorage.getItem("auth_token"); // Uzmi token iz localStorage
+  console.log(courseId)
+
+  // Provjera ako postoji token
+  if (!token) {
+    console.error("Token nije pronađen");
+
+    return;
+  }
+
+  fetch("http://localhost:8000/user/add-to-cart", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,  // Poslati token u Authorization header
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ course_id: courseId }), // Samo šaljemo course_id jer user_id izvučemo iz tokena
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      setModalMessage(data.message);
+      setOpenModal(true);
+    })
+    .catch((err) => {
+      console.error("Greška:", err);
+      setModalMessage("Greška pri dodavanju kursa u korpu.");
+      setOpenModal(true);
+    });
+};
+
+
+
+
+
+  const handleCloseModal = () => setOpenModal(false);
 
   return (
     <div className={styles.container}>
@@ -105,7 +145,7 @@ export function PopularCourses() {
                       ${course.price}
                     </Typography>
                   </Box>
-                  <Button size="small" className={styles.addButton}>
+                  <Button size="small" className={styles.addButton} onClick={() => handleAddToCart(course.id)}>
                     Add to Cart
                   </Button>
                 </Box>
@@ -114,6 +154,22 @@ export function PopularCourses() {
           ))
         )}
       </div>
+
+      {/* Modal za obavještenje */}
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        closeAfterTransition
+      >
+        <Fade in={openModal}>
+          <Box className={styles.modal}>
+            <Typography variant="h6">{modalMessage}</Typography>
+            <Button onClick={handleCloseModal} variant="contained">
+              Close
+            </Button>
+          </Box>
+        </Fade>
+      </Modal>
     </div>
   );
 }
