@@ -8,7 +8,8 @@ export default function CreatorHeader({ role }) {
   const dropdownRef = useRef(null);
   const router = useRouter();
 
-  const [user, setUser] = useState(null); // Dodano: user state
+  const [user, setUser] = useState(null);
+  const [cartCount, setCartCount] = useState(0); // Dodano stanje za broj u korpi
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
@@ -28,24 +29,38 @@ export default function CreatorHeader({ role }) {
   }, []);
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserDataAndCart = async () => {
       const token = localStorage.getItem("auth_token");
       if (!token) return;
 
       try {
-        const res = await fetch("http://localhost:8000/api/me", {
+        // Dohvati podatke o korisniku
+        const resUser = await fetch("http://localhost:8000/api/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const data = await res.json();
-        setUser({ name: data.username, coins: data.credits });
+        const dataUser = await resUser.json();
+        setUser({ name: dataUser.username, coins: dataUser.credits });
+
+        // Dohvati broj kurseva u korpi
+        const resCart = await fetch("http://localhost:8000/user/cart-count", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (resCart.ok) {
+          const count = await resCart.json();
+          setCartCount(count);
+        } else {
+          setCartCount(0);
+        }
       } catch (err) {
         console.error("Greška:", err);
       }
     };
 
-    fetchUserData();
+    fetchUserDataAndCart();
   }, []);
 
   const renderLinks = () => (
@@ -55,8 +70,7 @@ export default function CreatorHeader({ role }) {
       <Link href="/contact" className={styles.link}>Kontakt</Link>
       <Link href="/blog" className={styles.link}>Blog</Link>
       <Link href="/categories" className={styles.link}>Kategorije</Link>
-      <Link href="/instructors" className={styles.link}>Predavači</Link>
-     
+      <Link href="/creator" className={styles.link}>Creator Dashboard</Link>
     </>
   );
 
@@ -86,7 +100,12 @@ export default function CreatorHeader({ role }) {
           {dropdownOpen && (
             <div className={styles.dropdown}>
               <Link href="/notifications" className={styles.dropdownItem}>🔔 Notifikacije</Link>
-              <Link href="/cart" className={styles.dropdownItem}>🛒 Korpa</Link>
+              <Link href="/cart" className={styles.dropdownItem}>
+                <div className="d-flex align-items-center gap-2">
+                  <span className={styles.cartBadge}>{cartCount}</span>
+                  <span>🛒 Korpa</span>
+                </div>
+              </Link>
               <Link href="/profil" className={styles.dropdownItem}>👤Profil</Link>
               <Link href="/tokens" className={styles.dropdownItem}>💰Tokeni</Link>
               <div onClick={handleLogout} className={styles.dropdownItem} role="button">🚪 Odjava</div>
