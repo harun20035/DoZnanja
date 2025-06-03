@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button, Card, CardContent, Typography, Box, Modal, Fade } from "@mui/material";
 import Image from "next/image";
-import { Star, Users, Clock } from "lucide-react";
+import { Star, Users, Clock, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
 import styles from "./popular-courses.module.css";
 
@@ -9,19 +9,18 @@ export function PopularCourses() {
   const [courses, setCourses] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [courseToAdd, setCourseToAdd] = useState(null);
+  const [modalSuccess, setModalSuccess] = useState(true); // Novo stanje za prikaz kvake ili iksa
 
-  // Funkcija za normalizaciju putanje slike
   const normalizeImageUrl = (path) => {
-    if (!path) return "/placeholder.svg"; // Ako nema slike, koristi placeholder
-    let fixedPath = path.replace(/\\/g, "/"); // Zamijeni backslash sa forward slash
+    if (!path) return "/placeholder.svg";
+    let fixedPath = path.replace(/\\/g, "/");
     if (fixedPath.startsWith("http://") || fixedPath.startsWith("https://")) {
       return fixedPath;
     }
     if (!fixedPath.startsWith("/")) {
       fixedPath = "/" + fixedPath;
     }
-    return `http://localhost:8000${fixedPath}`; // Dodaj osnovnu URL putanju za slike s backend-a
+    return `http://localhost:8000${fixedPath}`;
   };
 
   useEffect(() => {
@@ -34,50 +33,48 @@ export function PopularCourses() {
     })
       .then((res) => res.json())
       .then((data) => {
-        // Provjeri je li odgovor niz
         if (Array.isArray(data)) {
-          setCourses(data); // Ako je odgovor niz, postavi direktno
+          setCourses(data);
         } else {
-          setCourses(data.courses || []); // Ako je objekat, koristi data.courses
+          setCourses(data.courses || []);
         }
       })
       .catch((err) => console.error("Error fetching courses:", err));
   }, []);
 
   const handleAddToCart = (courseId) => {
-  const token = localStorage.getItem("auth_token"); // Uzmi token iz localStorage
-  console.log(courseId)
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      console.error("Token nije pronađen");
+      return;
+    }
 
-  // Provjera ako postoji token
-  if (!token) {
-    console.error("Token nije pronađen");
-
-    return;
-  }
-
-  fetch("http://localhost:8000/user/add-to-cart", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,  // Poslati token u Authorization header
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ course_id: courseId }), // Samo šaljemo course_id jer user_id izvučemo iz tokena
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      setModalMessage(data.message);
-      setOpenModal(true);
+    fetch("http://localhost:8000/user/add-to-cart", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ course_id: courseId }),
     })
-    .catch((err) => {
-      console.error("Greška:", err);
-      setModalMessage("Greška pri dodavanju kursa u korpu.");
-      setOpenModal(true);
-    });
-};
-
-
-
-
+      .then(async (res) => {
+        const data = await res.json();
+        if (res.ok) {
+          setModalMessage(data.message);
+          setModalSuccess(true);
+        } else {
+          setModalMessage(data.detail || "Greška pri dodavanju kursa u korpu.");
+          setModalSuccess(false);
+        }
+        setOpenModal(true);
+      })
+      .catch((err) => {
+        console.error("Greška:", err);
+        setModalMessage("Greška pri dodavanju kursa u korpu.");
+        setModalSuccess(false);
+        setOpenModal(true);
+      });
+  };
 
   const handleCloseModal = () => setOpenModal(false);
 
@@ -102,7 +99,7 @@ export function PopularCourses() {
             <Card key={course.id} className={styles.courseCard}>
               <Box className={styles.imageContainer} position="relative">
                 <Image
-                  src={normalizeImageUrl(course.image || "/placeholder.svg")} // Koristi normaliziranu putanju
+                  src={normalizeImageUrl(course.image || "/placeholder.svg")}
                   alt={course.title}
                   fill
                   className={styles.courseImage}
@@ -133,7 +130,7 @@ export function PopularCourses() {
 
                 <Box className={styles.courseDuration} display="flex" alignItems="center" gap={0.5}>
                   <Clock className={styles.durationIcon} />
-                  <Typography variant="body2">{course.steps} steps</Typography> {/* Zamijenjeno sa koracima */}
+                  <Typography variant="body2">{course.steps} steps</Typography>
                 </Box>
 
                 <Box className={styles.courseFooter} display="flex" justifyContent="space-between" alignItems="center">
@@ -141,12 +138,12 @@ export function PopularCourses() {
                     <Typography variant="h6" component="span" className={styles.salePrice}>
                       ${course.sale_price}
                     </Typography>
-                    <Typography variant="body2" component="span" className={styles.originalPrice} sx={{ marginLeft: 1 }} >
+                    <Typography variant="body2" component="span" className={styles.originalPrice} sx={{ marginLeft: 1 }}>
                       ${course.price}
                     </Typography>
                   </Box>
                   <Button size="small" className={styles.addButton} onClick={() => handleAddToCart(course.id)}>
-                    Add to Cart
+                    DODAJ U KORPU
                   </Button>
                 </Box>
               </CardContent>
@@ -155,15 +152,18 @@ export function PopularCourses() {
         )}
       </div>
 
-      {/* Modal za obavještenje */}
-      <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        closeAfterTransition
-      >
+      {/* Modal sa ikonama */}
+      <Modal open={openModal} onClose={handleCloseModal} closeAfterTransition>
         <Fade in={openModal}>
-          <Box className={styles.modal}>
-            <Typography variant="h6">{modalMessage}</Typography>
+          <Box className={`${styles.modal} ${modalSuccess ? styles.success : styles.error}`}>
+            <Box display="flex" alignItems="center" gap={1} mb={1}>
+              {modalSuccess ? (
+                <CheckCircle color="green" size={32} />
+              ) : (
+                <XCircle color="red" size={32} />
+              )}
+              <Typography variant="h6">{modalMessage}</Typography>
+            </Box>
             <Button onClick={handleCloseModal} variant="contained">
               Close
             </Button>
