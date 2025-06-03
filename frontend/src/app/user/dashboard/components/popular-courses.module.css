@@ -213,3 +213,27 @@
   font-weight: bold;
   color: #ff9800; /* Narandžasti tekst za broj koraka */
 }
+
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  min-width: 300px;
+  max-width: 400px;
+  text-align: center;
+  z-index: 1000;
+}
+
+.success {
+  border-left: 6px solid #4caf50;
+}
+
+.error {
+  border-left: 6px solid #f44336;
+}
