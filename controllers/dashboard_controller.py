@@ -9,6 +9,7 @@ from services import course_service
 from controllers.course_controller import get_current_user
 from models.user_model import User
 from services import dashboard_service
+from schemas.dashboard_schema import AddToCartRequest
 
 router = APIRouter()
 
@@ -32,3 +33,8 @@ def get_user_coursesdb(db : SessionDep, current_user : User = Depends(get_curren
 @router.get("/popular-courses") 
 def popular_courses(db : SessionDep) :
     return dashboard_service.get_top_courses(db)
+
+
+@router.post("/add-to-cart") 
+def add_course_to_cart(db : SessionDep, request: AddToCartRequest, current_user : User = Depends(get_current_user)):
+    return dashboard_service.add_course_to_cart(db, request.course_id, current_user.id)

@@ -32,3 +32,9 @@ def user_courses(db: Session, current_user: User):
 
 def get_top_courses(db : Session) :
     return dashboard_repository.get_top_courses_from_db(db)
+
+
+def add_course_to_cart(db : Session, course_id : int, user_id : int) :
+    dashboard_repository.add_course_to_cart(db, course_id, user_id)
+
+    return {"message": "Kurs uspjesno dodan u korpu."}
