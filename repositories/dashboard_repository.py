@@ -124,6 +124,25 @@ def add_course_to_cart(db : Session, course_id : int, user_id : int ) :
 def count_cart_items(db : Session, user_id: int) -> int:
     return db.query(Cart).filter(Cart.user_id == user_id).count()
 
+def get_user_cart_courses(db: Session, user_id: int):
+    statement = (
+        select(
+            Course.id,
+            Course.title,
+            Course.image_thumbnail,
+            Course.description,
+            Course.price,
+            Course.video_demo,
+            User.name,
+            User.surname
+        )
+        .join(Cart, Cart.course_id == Course.id)
+        .join(User, User.id == Course.creator_id)
+        .where(Cart.user_id == user_id)
+    )
+    results = db.execute(statement).mappings().all()
+    return [dict(row) for row in results]
+
 
 
 
