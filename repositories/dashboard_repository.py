@@ -121,4 +121,9 @@ def add_course_to_cart(db : Session, course_id : int, user_id : int ) :
 
 
 
+def count_cart_items(db : Session, user_id: int) -> int:
+    return db.query(Cart).filter(Cart.user_id == user_id).count()
+
+
+
 

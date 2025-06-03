@@ -38,3 +38,8 @@ def add_course_to_cart(db : Session, course_id : int, user_id : int) :
     dashboard_repository.add_course_to_cart(db, course_id, user_id)
 
     return {"message": "Kurs uspjesno dodan u korpu."}
+
+
+
+def get_cart_count(db : Session, user_id: int) -> int:
+    return dashboard_repository.count_cart_items(db, user_id)
