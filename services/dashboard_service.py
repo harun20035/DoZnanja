@@ -43,3 +43,7 @@ def add_course_to_cart(db : Session, course_id : int, user_id : int) :
 
 def get_cart_count(db : Session, user_id: int) -> int:
     return dashboard_repository.count_cart_items(db, user_id)
+
+
+def get_cart_courses(db : Session, user_id : int) :
+    return dashboard_repository.get_user_cart_courses(db, user_id)

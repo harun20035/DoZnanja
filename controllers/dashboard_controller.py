@@ -43,3 +43,8 @@ def add_course_to_cart(db : SessionDep, request: AddToCartRequest, current_user 
 @router.get("/cart-count")
 def cart_count(db : SessionDep, user : User = Depends(get_current_user)):
     return dashboard_service.get_cart_count(db, user.id)
+
+
+@router.get("/cart") 
+def get_cart_courses(db : SessionDep, current_user : User = Depends(get_current_user)):
+    return dashboard_service.get_cart_courses(db, current_user.id)
