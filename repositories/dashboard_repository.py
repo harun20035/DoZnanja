@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from models.course_model import Course
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
 from typing import List
 from sqlalchemy import select, func
 from models.courseEnrollment_model import CourseEnrollment
@@ -9,6 +9,9 @@ from fastapi import HTTPException
 from models.courseStep_model import CourseStep
 from models.cart_model import Cart
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
+from sqlalchemy.exc import SQLAlchemyError
+
 
 
 
@@ -142,6 +145,60 @@ def get_user_cart_courses(db: Session, user_id: int):
     )
     results = db.execute(statement).mappings().all()
     return [dict(row) for row in results]
+
+
+def purchase_course(course_id: int, user_id: int, db: Session):
+    try:
+        # 1. Provjeri da li je kurs u korpi
+        cart_item = db.execute(
+            select(Cart).where(Cart.user_id == user_id, Cart.course_id == course_id)
+        ).scalars().first()
+
+        if not cart_item:
+            raise HTTPException(status_code=400, detail="Kurs nije u korpi.")
+
+        # 2. Dohvati kurs
+        course = db.execute(select(Course).where(Course.id == course_id)).scalars().first()
+        if not course:
+            raise HTTPException(status_code=404, detail="Kurs ne postoji.")
+
+        # 3. Dohvati korisnika
+        user = db.execute(select(User).where(User.id == user_id)).scalars().first()
+        if user.credits < course.price:
+            deficit = int(course.price - user.credits)
+            raise HTTPException(status_code=400, detail=f"Nedovoljno kredita. Nedostaje {deficit} kredita.")
+
+
+        # 4. Skini korisniku kredite
+        user.credits -= int(course.price)
+
+        # 5. Dodaj kreatoru 80%
+        creator = db.execute(select(User).where(User.id == course.creator_id)).scalars().first()
+        creator.credits += int(course.price * 0.8)
+
+        # 6. Ubaci u enrollments
+        enrollment = CourseEnrollment(
+            user_id=user_id,
+            course_id=course_id,
+            enrolled_at=datetime.utcnow()
+        )
+        db.add(enrollment)
+
+        # 7. Obriši iz korpe
+        db.execute(
+            delete(Cart).where(Cart.user_id == user_id, Cart.course_id == course_id)
+        )
+
+        db.commit()
+        return {"message": "Kupovina uspješna."}
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Greška u bazi: {str(e)}")
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Neočekivana greška: {str(e)}")
 
 
 

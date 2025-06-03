@@ -16,11 +16,11 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ErrorIcon from '@mui/icons-material/Error';
 import styles from './Cart.module.css';
 
-// Normalize lokalni path
 const normalizePath = (path) => {
-  if (!path) return null;
+  if (!path) return "/placeholder.svg";
   let fixed = path.replace(/\\/g, '/');
   if (fixed.startsWith('http://') || fixed.startsWith('https://')) return fixed;
   if (!fixed.startsWith('/')) fixed = '/' + fixed;
@@ -33,6 +33,8 @@ export default function Cart() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [lowCreditsOpen, setLowCreditsOpen] = useState(false);
+  const [missingCredits, setMissingCredits] = useState(0);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -62,12 +64,37 @@ export default function Cart() {
     setVideoOpen(true);
   };
 
-  const confirmPurchase = () => {
-    setConfirmOpen(false);
-    setSuccessOpen(true);
+  const confirmPurchase = async () => {
+  setConfirmOpen(false);
+  try {
+    const token = localStorage.getItem('auth_token');
+    await axios.post(`http://localhost:8000/user/purchase/${selectedCourse.id}`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    // TODO: API poziv za kupovinu + refresh korpe
-  };
+    setSuccessOpen(true);
+    setCourses(prev => prev.filter(c => c.id !== selectedCourse.id));
+  } catch (err) {
+    const detail = err.response?.data?.detail?.toLowerCase() || '';
+
+    if (detail.includes("nedovoljno kredita")) {
+      const match = detail.match(/nedostaje\s+(\d+)/i);
+      if (match) {
+        setMissingCredits(parseInt(match[1]));
+      } else {
+        setMissingCredits(0);
+      }
+      setLowCreditsOpen(true);
+    } else {
+      // fallback za sve ostale greške
+      console.error("Greška pri kupovini:", err);
+      alert("Greška pri kupovini: " + (detail || err.message));
+    }
+  }
+};
+
 
   return (
     <Box className={styles.dashboardContainer}>
@@ -83,7 +110,7 @@ export default function Cart() {
                 <CardMedia
                   component="img"
                   height="180"
-                  image={normalizePath(course.image_thumbnail) || '/placeholder.svg'}
+                  image={normalizePath(course.image_thumbnail)}
                   alt={course.title}
                   className={styles.courseImage}
                 />
@@ -160,7 +187,6 @@ export default function Cart() {
           <Typography variant="h6" gutterBottom>
             Pregled kursa: {selectedCourse?.title}
           </Typography>
-
           {selectedCourse?.video_demo ? (
             <Box sx={{ position: 'relative', paddingTop: '56.25%' }}>
               <iframe
@@ -182,10 +208,35 @@ export default function Cart() {
               Ovaj kurs trenutno nema video demonstraciju.
             </Typography>
           )}
-
           <Box sx={{ marginTop: 2 }}>
             <Button onClick={() => setVideoOpen(false)} variant="contained">
               Zatvori
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Modal: nedovoljno kredita */}
+      <Modal open={lowCreditsOpen} onClose={() => setLowCreditsOpen(false)}>
+        <Box className={styles.modalBox}>
+          <ErrorIcon sx={{ fontSize: 40, color: 'red', mb: 1 }} />
+          <Typography variant="h6" fontWeight="bold" color="error">
+            Nedovoljno kredita!
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            Nemate dovoljno kredita za kupovinu kursa <strong>{selectedCourse?.title}</strong>.
+          </Typography>
+          {missingCredits > 0 && (
+            <Typography sx={{ mt: 1 }}>
+              Nedostaje vam još <strong>{missingCredits} kredita</strong>.
+            </Typography>
+          )}
+          <Box sx={{ marginTop: 2 }}>
+            <Button onClick={() => setLowCreditsOpen(false)} variant="outlined" color="error">
+              Zatvori
+            </Button>
+            <Button onClick={() => setLowCreditsOpen(false)} variant="contained" color="primary" sx={{ ml: 2 }}>
+              Nadopuni kredite
             </Button>
           </Box>
         </Box>
