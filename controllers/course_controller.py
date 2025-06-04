@@ -107,3 +107,7 @@ def update_step_course(db : SessionDep, step_id : int, title: str = Form(...), d
 @router.get("/{id}", response_model=CourseSchema)
 def get_course_endpoint(course_id: int, session: Session = Depends(get_session)):
     return get_course(session, course_id)
+
+@router.get("/creator-courses/stats")
+def get_creator_courses(db : SessionDep, current_user: User = Depends(get_current_user)):
+    return course_service.get_creator_courses_with_stats(db, current_user)

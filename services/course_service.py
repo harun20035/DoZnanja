@@ -175,3 +175,9 @@ def get_course(session, course_id: int) -> Course:
             detail="Course not found"
         )
     return course
+
+
+def get_creator_courses_with_stats(db: Session, user: User):
+    if user.role != "CREATOR":
+        raise HTTPException(status_code=403, detail="Niste kreator.")
+    return course_repository.get_courses_with_stats(db, user.id)
