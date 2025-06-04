@@ -11,7 +11,7 @@ export default function MyCoursesSection() {
   const [error, setError] = useState(null);
 
   const normalizeImageUrl = (path) => {
-    if (!path) return null;
+    if (!path) return "/placeholder.svg";
     let fixedPath = path.replace(/\\/g, "/");
     if (fixedPath.startsWith("http://") || fixedPath.startsWith("https://")) {
       return fixedPath;
@@ -30,42 +30,58 @@ export default function MyCoursesSection() {
 
         const token = localStorage.getItem("auth_token");
 
-        const res = await fetch("http://localhost:8000/course/creator-courses", {
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
+        const headers = {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        };
+
+        const [basicRes, statsRes] = await Promise.all([
+          fetch("http://localhost:8000/course/creator-courses", { headers }),
+          fetch("http://localhost:8000/course/creator-courses/stats", { headers }),
+        ]);
+
+        if (!basicRes.ok || !statsRes.ok) {
+          throw new Error("Neuspješno dohvaćanje podataka.");
+        }
+
+        const basicCourses = await basicRes.json();
+        const stats = await statsRes.json();
+
+        const statsMap = new Map(stats.map((s) => [s.id, s]));
+
+        const mapped = basicCourses.map((course) => {
+          const stat = statsMap.get(course.id) || {};
+
+          return {
+            id: course.id,
+            title: course.title,
+            description: course.description,
+            image_thumbnail: course.image_thumbnail,
+            status: course.status,
+            created_at: course.created_at,
+            students: stat.students ?? 0,
+            rating: stat.average_rating ?? 0,
+            revenue: stat.revenue ?? "0.00 KM",
+            lastUpdated: course.created_at
+              ? new Date(course.created_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : "N/A",
+            published: course.status === "APPROVED",
+          };
         });
-
-        if (!res.ok)
-          throw new Error(`Failed to fetch courses: ${res.status} ${res.statusText}`);
-
-        const data = await res.json();
-
-        const mapped = data.map((course) => ({
-          id: course.id,
-          title: course.title,
-          students: course.students ?? 0,
-          rating: course.average_rating ?? 0,
-          revenue: course.revenue ?? "$0",
-          lastUpdated: new Date(course.created_at).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          }),
-          published: course.status === "APPROVED",
-          image_thumbnail: course.image_thumbnail,
-          description: course.description,
-        }));
 
         setCourses(mapped);
       } catch (error) {
-        setError(error.message || "Something went wrong");
+        setError(error.message || "Došlo je do greške.");
         setCourses([]);
       } finally {
         setLoading(false);
       }
     }
+
     fetchCourses();
   }, []);
 
@@ -80,7 +96,7 @@ export default function MyCoursesSection() {
   if (error) {
     return (
       <div className="section">
-        <p style={{ color: "red" }}>Error: {error}</p>
+        <p style={{ color: "red" }}>Greška: {error}</p>
       </div>
     );
   }
@@ -104,25 +120,14 @@ export default function MyCoursesSection() {
                 className="course-image-wrapper"
                 style={{ position: "relative", width: "192px", height: "175px" }}
               >
-                {course.image_thumbnail ? (
-                  <Image
-                    src={normalizeImageUrl(course.image_thumbnail)}
-                    alt={course.title}
-                    fill
-                    className="course-image"
-                    priority
-                    sizes="192px"
-                  />
-                ) : (
-                  <Image
-                    src="/placeholder.svg"
-                    alt="Placeholder"
-                    fill
-                    className="course-image"
-                    priority
-                    sizes="192px"
-                  />
-                )}
+                <Image
+                  src={normalizeImageUrl(course.image_thumbnail)}
+                  alt={course.title}
+                  fill
+                  className="course-image"
+                  priority
+                  sizes="192px"
+                />
                 {!course.published && <span className="draft-badge">Draft</span>}
               </div>
 

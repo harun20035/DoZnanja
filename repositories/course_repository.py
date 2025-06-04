@@ -6,7 +6,8 @@ from typing import List, Optional
 from models.user_model import User
 from fastapi import HTTPException
 from schemas.course_schema import UserUpdate
-from sqlalchemy import select
+from sqlalchemy import select, func
+from models.courseEnrollment_model import CourseEnrollment
 
 def create_course(db: Session, course: Course) -> Course:
     db.add(course)
@@ -90,3 +91,34 @@ def update_step_course(db : Session, step : CourseStep) :
 def get_course_by_id(session: Session, course_id: int) -> Optional[Course]:
     statement = select(Course).where(Course.id == course_id)
     return session.exec(statement).first()
+
+
+
+def get_courses_with_stats(db: Session, creator_id: int):
+    courses = db.execute(
+        select(Course).where(Course.creator_id == creator_id)
+    ).scalars().all()
+
+    result = []
+
+    for course in courses:
+        students_count = db.scalar(
+            select(func.count()).select_from(CourseEnrollment).where(CourseEnrollment.course_id == course.id)
+        ) or 0
+
+        revenue = round(students_count * course.price * 0.8, 2)
+
+        result.append({
+            "id": course.id,
+            "title": course.title,
+            "description": course.description,
+            "image_thumbnail": course.image_thumbnail,
+            "status": course.status,
+            "created_at": course.created_at,
+            "students": students_count,
+            "average_rating": round(course.average_rating or 0, 1),
+            "revenue": revenue  # brojčano, frontend ga formatira
+        })
+
+    return result
+
