@@ -1,0 +1,248 @@
+.courseContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%);
+}
+
+.courseHeader {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%);
+  color: white;
+  padding: 3rem 0;
+  margin-bottom: 2rem;
+}
+
+.courseTitle {
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.courseDescription {
+  opacity: 0.95;
+  margin-bottom: 1.5rem !important;
+  line-height: 1.6 !important;
+}
+
+.courseMeta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.categoryChip {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.lessonsChip {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.courseImageCard {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mainContent {
+  padding-bottom: 3rem !important;
+}
+
+.stepsSidebar {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1) !important;
+  border: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.sidebarTitle {
+  padding: 1.5rem !important;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  color: white !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+.divider {
+  margin: 0 !important;
+  background-color: rgba(139, 92, 246, 0.1) !important;
+}
+
+.stepsList {
+  padding: 0 !important;
+}
+
+.stepItem {
+  padding: 1rem 1.5rem !important;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.05);
+  transition: all 0.2s ease !important;
+}
+
+.stepItem:hover {
+  background-color: rgba(139, 92, 246, 0.05) !important;
+}
+
+.activeStep {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  border-left: 4px solid #8b5cf6 !important;
+}
+
+.stepIcon {
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.completedIcon {
+  color: #10b981 !important;
+  font-size: 1.2rem !important;
+}
+
+.uncompletedIcon {
+  color: #d1d5db !important;
+  font-size: 1.2rem !important;
+}
+
+.stepTitle {
+  font-weight: 500 !important;
+  color: #374151 !important;
+  font-size: 0.9rem !important;
+}
+
+.stepNumber {
+  font-size: 0.75rem !important;
+  color: #8b5cf6 !important;
+}
+
+.videoIcon {
+  color: #8b5cf6 !important;
+  font-size: 1.1rem !important;
+}
+
+.stepContent {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08) !important;
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  overflow: hidden;
+}
+
+.stepHeader {
+  padding: 2rem;
+  background: linear-gradient(135deg, #faf7ff 0%, #f3f0ff 100%);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.stepContentTitle {
+  color: #8b5cf6 !important;
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+}
+
+.stepContentDescription {
+  color: #6b7280 !important;
+  line-height: 1.7 !important;
+}
+
+.videoContainer {
+  padding: 2rem;
+  background: white;
+}
+
+.videoWrapper {
+  position: relative;
+  padding-top: 56.25%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.videoFrame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.imageContainer {
+  padding: 2rem;
+  background: white;
+  text-align: center;
+}
+
+.stepImage {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stepActions {
+  padding: 2rem;
+  background: white;
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.completeButton {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.completeButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.noStepSelected {
+  border-radius: 12px !important;
+  padding: 3rem !important;
+  text-align: center;
+  background: linear-gradient(135deg, #faf7ff 0%, #f3f0ff 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .courseHeader {
+    padding: 2rem 0;
+  }
+
+  .courseTitle {
+    font-size: 2rem !important;
+  }
+
+  .stepsSidebar {
+    margin-bottom: 1rem;
+  }
+
+  .stepContent {
+    margin-top: 1rem;
+  }
+
+  .stepHeader,
+  .videoContainer,
+  .imageContainer,
+  .stepActions {
+    padding: 1.5rem;
+  }
+}
