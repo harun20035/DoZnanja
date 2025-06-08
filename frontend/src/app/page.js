@@ -186,9 +186,10 @@ export default function HomePage() {
         </section>
 
         {/* Stats Section */}
+                {/* Stats Section */}
         <section className="py-5 bg-light">
           <div className="container py-3">
-            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4 text-center">
+            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 text-center">
               {stats ? (
                 <div className="col">
                   <div className="py-3">
@@ -222,6 +223,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
 
         {/* CTA Section */}
         <section className="py-5 bg-white text-purple">
