@@ -51,3 +51,11 @@ def get_cart_courses(db : Session, user_id : int) :
 
 def purchase_course(course_id : int, db : Session, user_id : int) :
     return dashboard_repository.purchase_course(course_id, db, user_id)
+
+
+def get_category_counts(db: Session):
+    return dashboard_repository.get_courses_count_by_category(db)
+
+
+def get_course_stats_service(db: Session):
+    return dashboard_repository.get_course_stats(db)

@@ -52,3 +52,13 @@ def get_cart_courses(db : SessionDep, current_user : User = Depends(get_current_
 @router.post("/purchase/{course_id}")
 def purchase_course(course_id: int, db: SessionDep, current_user: User = Depends(get_current_user)):
     return dashboard_service.purchase_course(course_id, current_user.id, db)
+
+@router.get("/courses/category-counts")
+def courses_by_category(db: SessionDep):
+    return dashboard_service.get_category_counts(db)
+
+
+@router.get("/courses/stats")
+def get_course_stats(db: SessionDep):
+    return dashboard_service.get_course_stats_service(db)
+    
