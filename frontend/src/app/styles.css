@@ -150,4 +150,48 @@ h2 {
   .bg-primary-subtle {
     background-color: rgba(13, 110, 253, 0.1);
   }
-  
+  /* Stil za CTA sekciju */
+.bg-purple {
+  background-color: #6b21a8 !important;
+}
+
+.text-purple {
+  color: #6b21a8 !important;
+}
+
+.btn-purple {
+  background-color: #6b21a8 !important;
+  color: white !important;
+  border-color: #6b21a8 !important;
+}
+
+.btn-purple:hover {
+  background-color: #5a189a !important;
+  border-color: #5a189a !important;
+}
+
+.text-white {
+  color: #fff !important;
+}
+
+/* Animacija za broj polaznika */
+.course-stats {
+  display: inline-block;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #6b21a8;
+  opacity: 0;
+  animation: countAnimation 2s forwards;
+}
+
+@keyframes countAnimation {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+

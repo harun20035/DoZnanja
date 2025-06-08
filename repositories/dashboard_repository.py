@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from models.course_model import Course
 from sqlmodel import Session, select, delete
 from typing import List
-from sqlalchemy import select, func
+from sqlalchemy import select, func, distinct
 from models.courseEnrollment_model import CourseEnrollment
 from models.user_model import User
 from fastapi import HTTPException
@@ -201,5 +201,31 @@ def purchase_course(course_id: int, user_id: int, db: Session):
         raise HTTPException(status_code=500, detail=f"Neočekivana greška: {str(e)}")
 
 
+def get_courses_count_by_category(db: Session):
+    # Upit koji grupiše kurseve po kategoriji i broji ih
+    result = db.query(
+        Course.category,
+        func.count(Course.id).label("course_count")
+    ).group_by(Course.category).all()
 
+    # Pretvaranje rezultata u dictionary format za serijalizaciju u JSON
+    return [{"category": category, "course_count": course_count} for category, course_count in result]
 
+def get_course_stats(db: Session):
+    result = db.query(
+        func.count(Course.id).label("total_courses"),
+        # Koristi subquery da brojimo jedinstvene kreatore
+        func.count(distinct(Course.creator_id)).label("total_creators"), 
+        func.count(CourseEnrollment.id).label("total_enrolled_users")
+    ).join(User, Course.creator_id == User.id) \
+     .join(CourseEnrollment, Course.id == CourseEnrollment.course_id, isouter=True) \
+     .first()
+
+    # Pretvaranje rezultata u dictionary
+    if result:
+        return {
+            "total_courses": result[0],
+            "total_creators": result[1],
+            "total_enrolled_users": result[2]
+        }
+    return {}
