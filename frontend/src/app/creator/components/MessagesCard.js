@@ -3,14 +3,14 @@ import "./dashboard.css"
 
 export default function MessagesCard() {
   const messages = [
-    { id: 1, user: "Alex Kim", message: "I have a question about Module 3...", time: "2h ago", avatar: "AK" },
-    { id: 2, user: "Sarah Johnson", message: "Thanks for the feedback on my project!", time: "5h ago", avatar: "SJ" },
+    { id: 1, user: "Alex Kim", message: "Imam pitanje u vezi Modula 3...", time: "2h prije", avatar: "AK" },
+    { id: 2, user: "Sarah Johnson", message: "Hvala na povratnim informacijama o mom projektu!", time: "5h prije", avatar: "SJ" },
   ]
 
   return (
     <div className="card chat-card">
       <div className="card-header">
-        <h3>📩 Recent Messages</h3>
+        <h3>📩 Nedavne poruke</h3>
       </div>
       <div className="card-content">
         {messages.map((message) => (
@@ -27,7 +27,7 @@ export default function MessagesCard() {
         ))}
       </div>
       <div className="card-footer">
-        <Link href="/creator/chat" className="btn full-btn">💬 View All Messages</Link>
+        <Link href="/creator/chat" className="btn full-btn">💬 Pogledaj sve poruke</Link>
       </div>
     </div>
   )

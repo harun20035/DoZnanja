@@ -49,7 +49,7 @@ export default function DashboardPage() {
     <>
       {role && getHeaderByRole(role)} {/* Dodajte provjeru da role postoji */}
       <div className="dashboard-container">
-        <h1 className="welcome-title">Welcome {username}</h1> {/* Koristite username iz stanja */}
+        <h1 className="welcome-title">Dobrodosli {username}</h1> {/* Koristite username iz stanja */}
         <div className="dashboard-grid">
           <CreateCourseCard />
           <ProfileCard />

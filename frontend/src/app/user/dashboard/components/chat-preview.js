@@ -8,18 +8,18 @@ export function UserChatPreview() {
     {
       id: 1,
       user: "David Miller",
-      role: "Instructor",
-      message: "Hi Alex! How are you finding the JavaScript module?",
-      time: "2h ago",
+      role: "Instruktor",
+      message: "Zdravo Alex! Kako ti se čini JavaScript modul?",
+      time: "Prije 2h",
       avatar: "DM",
       unread: true,
     },
     {
       id: 2,
       user: "Sarah Wilson",
-      role: "Teaching Assistant",
-      message: "Your project submission looks great! I've left some feedback.",
-      time: "Yesterday",
+      role: "Asistent za nastavu",
+      message: "Tvoj projekat izgleda odlično! Ostavio/la sam neke komentare.",
+      time: "Jučer",
       avatar: "SW",
       unread: false,
     },
@@ -31,7 +31,7 @@ export function UserChatPreview() {
         title={
           <Typography component="div" className={styles.cardTitle}>
             <MessageSquare className={styles.titleIcon} />
-            Recent Messages
+            Nedavne poruke
           </Typography>
         }
       />
@@ -62,7 +62,7 @@ export function UserChatPreview() {
         <Button variant="outlined" className={styles.viewAllButton}>
           <Link href="/user/chat" className={styles.viewAllLink}>
             <MessageSquare className={styles.buttonIcon} />
-            View All Messages
+            Pogledaj sve poruke
           </Link>
         </Button>
       </CardActions>

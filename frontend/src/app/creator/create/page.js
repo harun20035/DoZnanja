@@ -115,13 +115,13 @@ export default function CreateCourseForm() {
         <input type="number" placeholder="Cena" value={price} onChange={(e) => setPrice(e.target.value)} required />
         <input type="number" placeholder="Popust (%)" value={discount} onChange={(e) => setDiscount(e.target.value)} />
         <select value={category} onChange={(e) => setCategory(e.target.value)} required>
-          <option value="Programming">Programming</option>
-          <option value="Design">Design</option>
+          <option value="Programming">Programiranje</option>
+          <option value="Design">Dizajn</option>
           <option value="Marketing">Marketing</option>
-          <option value="Business">Business</option>
-          <option value="Photography">Photography</option>
-          <option value="Music">Music</option>
-          <option value="Other">Other</option>
+          <option value="Business">Biznis</option>
+          <option value="Photography">Fotografija</option>
+          <option value="Music">Muzika</option>
+          <option value="Other">Ostalo</option>
         </select>
 
         <div className="upload-wrapper">

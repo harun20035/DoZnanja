@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import "./dashboard.css";
@@ -44,7 +44,7 @@ export default function ProfileCard() {
       <div className="card-header purple-header">
         <h3 className="card-title">
           <span className="icon">👤</span>
-          My Profile
+          Moj Profil
         </h3>
       </div>
 
@@ -53,7 +53,7 @@ export default function ProfileCard() {
           {normalizedImagePath ? (
             <img
               src={`http://localhost:8000/${normalizedImagePath}`}
-              alt="Profile"
+              alt="Profilna slika"
               className="avatar-img"
             />
           ) : (
@@ -72,12 +72,12 @@ export default function ProfileCard() {
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: "75%" }}></div>
         </div>
-        <p className="progress-text">Profile completion: 75%</p>
+        <p className="progress-text">Kompletiranje profila: 75%</p>
       </div>
 
       <div className="card-footer">
         <Link href="/profil" className="btn-outline-purple">
-          ⚙ Edit Profile
+          ⚙ Uredi profil
         </Link>
       </div>
     </div>

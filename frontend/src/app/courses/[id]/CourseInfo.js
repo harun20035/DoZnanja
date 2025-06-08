@@ -1,28 +1,73 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import Image from "next/image"
-import CourseDescription from "./CourseDescription"
-import CourseCurriculum from "./CourseCurriculum"
-import CourseInstructor from "./CourseInstructor"
-import CourseReviews from "./CourseReviews"
+import { useState } from "react";
+import Image from "next/image";
+import CourseDescription from "./CourseDescription";
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import Fade from '@mui/material/Fade';
+import { Button, Typography } from "@mui/material";
+import { CheckCircle, XCircle } from 'lucide-react';
+import "./page.css";
+  // Ensure CSS file is correctly linked
 
 export default function CourseInfo({ course }) {
-  const [activeTab, setActiveTab] = useState("description")
+  const [activeTab, setActiveTab] = useState("description");
+  const [openModal, setOpenModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalSuccess, setModalSuccess] = useState(true); // Success or error modal
 
   // Format image URL if needed
   const imageUrl = course.image_thumbnail
     ? course.image_thumbnail.startsWith("http")
       ? course.image_thumbnail
       : `http://localhost:8000/${course.image_thumbnail.replace(/\\/g, "/")}`
-    : "/placeholder.svg?height=450&width=800"
+    : "/placeholder.svg?height=450&width=800";
 
   // Format video URL if needed
   const videoUrl = course.video_demo
     ? course.video_demo.startsWith("http")
       ? course.video_demo
       : `http://localhost:8000/${course.video_demo.replace(/\\/g, "/")}`
-    : null
+    : null;
+
+  const handleAddToCart = async () => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      setModalMessage("Niste prijavljeni!");
+      setModalSuccess(false);
+      setOpenModal(true);
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/user/add-to-cart", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ course_id: course.id }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setModalMessage(data.message || "Kurs uspješno dodan u korpu!");
+        setModalSuccess(true);
+      } else {
+        setModalMessage(data.detail || "Greška pri dodavanju kursa.");
+        setModalSuccess(false);
+      }
+      setOpenModal(true);
+    } catch (error) {
+      console.error("Greška:", error);
+      setModalMessage("Greška pri dodavanju kursa u korpu.");
+      setModalSuccess(false);
+      setOpenModal(true);
+    }
+  };
+
+  const handleCloseModal = () => setOpenModal(false);
 
   return (
     <div className="course-content-section">
@@ -59,43 +104,10 @@ export default function CourseInfo({ course }) {
                     Opis
                   </button>
                 </li>
-                <li className="nav-item" role="presentation">
-                  <button
-                    className={`nav-link ${activeTab === "curriculum" ? "active" : ""}`}
-                    onClick={() => setActiveTab("curriculum")}
-                    type="button"
-                  >
-                    <i className="bi bi-list-check me-2"></i>
-                    Sadržaj
-                  </button>
-                </li>
-                <li className="nav-item" role="presentation">
-                  <button
-                    className={`nav-link ${activeTab === "instructor" ? "active" : ""}`}
-                    onClick={() => setActiveTab("instructor")}
-                    type="button"
-                  >
-                    <i className="bi bi-person me-2"></i>
-                    Instruktor
-                  </button>
-                </li>
-                <li className="nav-item" role="presentation">
-                  <button
-                    className={`nav-link ${activeTab === "reviews" ? "active" : ""}`}
-                    onClick={() => setActiveTab("reviews")}
-                    type="button"
-                  >
-                    <i className="bi bi-star me-2"></i>
-                    Recenzije
-                  </button>
-                </li>
               </ul>
 
               <div className="tab-content">
                 {activeTab === "description" && <CourseDescription course={course} />}
-                {activeTab === "curriculum" && <CourseCurriculum course={course} />}
-                {activeTab === "instructor" && <CourseInstructor course={course} />}
-                {activeTab === "reviews" && <CourseReviews course={course} />}
               </div>
             </div>
           </div>
@@ -138,19 +150,34 @@ export default function CourseInfo({ course }) {
                     <span>Pristup na svim uređajima</span>
                   </li>
                 </ul>
-                <button className="btn-purple w-100 mb-3">
+                <button className="btn-purple w-100 mb-3" onClick={handleAddToCart}>
                   <i className="bi bi-cart-plus me-2"></i>
                   Dodaj u korpu
-                </button>
-                <button className="btn btn-outline-purple w-100">
-                  <i className="bi bi-heart me-2"></i>
-                  Dodaj u favorite
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal with success or error message */}
+      <Modal open={openModal} onClose={handleCloseModal} closeAfterTransition>
+        <Fade in={openModal}>
+          <Box className={`modal ${openModal ? 'open' : ''} ${modalSuccess ? 'success' : 'error'}`}>
+            <Box display="flex" alignItems="center" gap={1} mb={1}>
+              {modalSuccess ? (
+                <CheckCircle color="green" size={32} />
+              ) : (
+                <XCircle color="red" size={32} />
+              )}
+              <Typography variant="h6">{modalMessage}</Typography>
+            </Box>
+            <Button onClick={handleCloseModal} variant="contained">
+              Zatvori
+            </Button>
+          </Box>
+        </Fade>
+      </Modal>
     </div>
-  )
+  );
 }

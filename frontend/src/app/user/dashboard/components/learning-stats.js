@@ -9,7 +9,7 @@ export function LearningStats() {
         title={
           <Typography variant="h6" className={styles.cardTitle} component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Award className={styles.titleIcon} />
-            Learning Stats
+            Statistike učenja
           </Typography>
         }
       />
@@ -20,9 +20,9 @@ export function LearningStats() {
               <Clock className={styles.statIcon} />
             </div>
             <div className={styles.statInfo}>
-              <Typography variant="body2" className={styles.statLabel}>Learning Time</Typography>
-              <Typography variant="subtitle1" className={styles.statValue}>86 hours total</Typography>
-              <Typography variant="caption" className={styles.statChange}>+5 hours this week</Typography>
+              <Typography variant="body2" className={styles.statLabel}>Vrijeme učenja</Typography>
+              <Typography variant="subtitle1" className={styles.statValue}>86 sati ukupno</Typography>
+              <Typography variant="caption" className={styles.statChange}>+5 sati ovog tjedna</Typography>
             </div>
           </div>
 
@@ -31,9 +31,9 @@ export function LearningStats() {
               <BookOpen className={styles.statIcon} />
             </div>
             <div className={styles.statInfo}>
-              <Typography variant="body2" className={styles.statLabel}>Courses Completed</Typography>
-              <Typography variant="subtitle1" className={styles.statValue}>12 of 19</Typography>
-              <Typography variant="caption" className={styles.statChange}>2 completed this month</Typography>
+              <Typography variant="body2" className={styles.statLabel}>Završeni kursevi</Typography>
+              <Typography variant="subtitle1" className={styles.statValue}>12 od 19</Typography>
+              <Typography variant="caption" className={styles.statChange}>2 završena ovog mjeseca</Typography>
             </div>
           </div>
 
@@ -42,9 +42,9 @@ export function LearningStats() {
               <Calendar className={styles.statIcon} />
             </div>
             <div className={styles.statInfo}>
-              <Typography variant="body2" className={styles.statLabel}>Learning Streak</Typography>
-              <Typography variant="subtitle1" className={styles.statValue}>8 days</Typography>
-              <Typography variant="caption" className={styles.statStreak}>Keep it up!</Typography>
+              <Typography variant="body2" className={styles.statLabel}>Streak učenja</Typography>
+              <Typography variant="subtitle1" className={styles.statValue}>8 dana</Typography>
+              <Typography variant="caption" className={styles.statStreak}>Nastavi tako!</Typography>
             </div>
           </div>
         </div>
