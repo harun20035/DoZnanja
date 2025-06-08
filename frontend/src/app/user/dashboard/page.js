@@ -77,7 +77,7 @@ export default function DashboardPage({ userData }) {
           }}
         >
           <h1 style={{ fontSize: "2rem", fontWeight: "700", color: "#6b21a8", marginBottom: "32px" }}>
-            My Learning Dashboard
+            Početna
           </h1>
 
           <ContinueLearning />

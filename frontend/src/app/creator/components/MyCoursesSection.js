@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -88,7 +88,7 @@ export default function MyCoursesSection() {
   if (loading) {
     return (
       <div className="section">
-        <p>Loading courses...</p>
+        <p>Učitavanje kurseva...</p>
       </div>
     );
   }
@@ -104,15 +104,15 @@ export default function MyCoursesSection() {
   return (
     <div className="section">
       <div className="section-header">
-        <h2 className="section-title">My Courses</h2>
-        <Link href="/creator/courses/new" className="btn-purple">
-          Create New Course
+        <h2 className="section-title">Moji Kursevi</h2>
+        <Link href="/creator/create" className="btn-purple">
+          Kreiraj Novi Kurs
         </Link>
       </div>
 
       <div className="course-list">
         {courses.length === 0 ? (
-          <p>You have no courses yet.</p>
+          <p>Nemate još kurseva.</p>
         ) : (
           courses.map((course) => (
             <div key={course.id} className="course-card">
@@ -128,34 +128,34 @@ export default function MyCoursesSection() {
                   priority
                   sizes="192px"
                 />
-                {!course.published && <span className="draft-badge">Draft</span>}
+                {!course.published && <span className="draft-badge">Skica</span>}
               </div>
 
               <div className="course-content">
                 <div className="course-header">
                   <h3 className="course-title">{course.title}</h3>
                   <div className="course-actions">
-                    <Link href={`/creator/${course.id}`} className="btn-outline">✏ Edit</Link>
-                    <button className="btn-outline">👁 Preview</button>
-                    <button className="btn-outline">📊 Stats</button>
+                    <Link href={`/creator/${course.id}`} className="btn-outline">✏ Uredi</Link>
+                    <button className="btn-outline">👁 Pregled</button>
+                    <button className="btn-outline">📊 Statistika</button>
                   </div>
                 </div>
 
                 <div className="course-info">
                   <div>
-                    <p className="info-label">Students</p>
+                    <p className="info-label">Polaznici</p>
                     <p>{course.students > 0 ? course.students : "N/A"}</p>
                   </div>
                   <div>
-                    <p className="info-label">Rating</p>
+                    <p className="info-label">Ocjena</p>
                     <p>{course.rating > 0 ? course.rating.toFixed(1) : "N/A"}</p>
                   </div>
                   <div>
-                    <p className="info-label">Revenue</p>
+                    <p className="info-label">Prihod</p>
                     <p>{course.revenue}</p>
                   </div>
                   <div>
-                    <p className="info-label">Last Updated</p>
+                    <p className="info-label">Posljednja izmjena</p>
                     <p>{course.lastUpdated}</p>
                   </div>
                 </div>

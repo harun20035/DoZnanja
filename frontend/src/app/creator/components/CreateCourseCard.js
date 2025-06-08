@@ -7,17 +7,17 @@ export default function CreateCourseCard() {
       <div className="card-header purple-header">
         <h3 className="card-title">
           <span className="icon">➕</span>
-          Create New Course
+          Kreiraj novi kurs
         </h3>
       </div>
       <div className="card-content">
         <p className="card-text">
-          Start building your next course and share your knowledge with students around the world.
+          Započni izradu svog sljedećeg kursa i podijeli svoje znanje sa studentima širom svijeta.
         </p>
       </div>
       <div className="card-footer">
         <Link href="/creator/create" className="btn-purple">
-          Create Course
+          Kreiraj kurs
         </Link>
       </div>
     </div>

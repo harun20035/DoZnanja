@@ -170,7 +170,7 @@ const CourseStepEditor = () => {
   return (
     <div className="course-step-editor">
       <div className="editor-header">
-        <h2>Course Steps for Course ID: {courseId}</h2>
+        <h2>Koraci kursa: {courseId}</h2>
         <button className="add-step-button" onClick={() => setShowAddForm(!showAddForm)}>
           <Plus size={16} /> {showAddForm ? 'Cancel' : 'Add Step'}
         </button>
@@ -179,7 +179,7 @@ const CourseStepEditor = () => {
       {showAddForm && (
         <div className="step-form-container">
           <form onSubmit={addStep} className="step-form">
-            <h3>Add New Step</h3>
+            <h3>Dodaj</h3>
 
             <div className="form-group">
               <label htmlFor="title">Step Title</label>
@@ -212,8 +212,8 @@ const CourseStepEditor = () => {
             </div>
 
             <div className="form-actions">
-              <button type="button" className="button-secondary" onClick={() => setShowAddForm(false)}>Cancel</button>
-              <button type="submit" className="button-primary"><Plus size={16} /> Add Step</button>
+              <button type="button" className="button-secondary" onClick={() => setShowAddForm(false)}>Izlaz</button>
+              <button type="submit" className="button-primary"><Plus size={16} />Dodaj</button>
             </div>
           </form>
         </div>
@@ -222,7 +222,7 @@ const CourseStepEditor = () => {
       <div className="steps-list">
         {steps.length === 0 ? (
           <div className="no-steps">
-            <p>No steps added yet. Click "Add Step" to create your first course step.</p>
+            <p>Nema dodanih koraka, kliknite dodaj za doadavanje</p>
           </div>
         ) : (
           steps.map((step, index) => (
