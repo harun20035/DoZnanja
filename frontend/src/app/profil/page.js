@@ -293,7 +293,7 @@ const EditProfile = () => {
                   </div>
                 )}
                 <div className={styles.avatarOverlay}>
-                  <p>Change Photo</p>
+                  <p>Promijeni sliku</p>
                 </div>
               </div>
               <input
@@ -312,13 +312,13 @@ const EditProfile = () => {
                 className={`${styles.tabButton} ${activeTab === 'profile' ? styles.active : ''}`}
                 onClick={() => setActiveTab('profile')}
               >
-                Profile Information
+                Informacije
               </button>
               <button
                 className={`${styles.tabButton} ${activeTab === 'password' ? styles.active : ''}`}
                 onClick={() => setActiveTab('password')}
               >
-                Change Password
+                Promijeni lozinku
               </button>
             </div>
 
@@ -326,16 +326,16 @@ const EditProfile = () => {
               {activeTab === 'profile' && (
                 <div className={styles.card}>
                   <div className={styles.cardHeader}>
-                    <h2 className={styles.cardTitle}>Personal Information</h2>
+                    <h2 className={styles.cardTitle}>Oosbne informacije</h2>
                     <p className={styles.cardDescription}>
-                      Update your personal details here. These details will be displayed on your public profile.
+                      Azurirajte vase podatke ovdje koje ce biti prikazane javno.
                     </p>
                   </div>
                   <form onSubmit={handleProfileSubmit}>
                     <div className={styles.cardContent}>
                       <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                          <label htmlFor="firstName">First Name</label>
+                          <label htmlFor="firstName">Ime</label>
                           <div className={styles.inputWithIcon}>
                             <User className={styles.inputIcon} />
                             <input
@@ -350,7 +350,7 @@ const EditProfile = () => {
                         </div>
 
                         <div className={styles.formGroup}>
-                          <label htmlFor="lastName">Last Name</label>
+                          <label htmlFor="lastName">Prezime</label>
                           <div className={styles.inputWithIcon}>
                             <User className={styles.inputIcon} />
                             <input
@@ -366,7 +366,7 @@ const EditProfile = () => {
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="nickname">Nickname</label>
+                        <label htmlFor="nickname">Korisnicko ime</label>
                         <div className={styles.inputWithIcon}>
                           <AtSign className={styles.inputIcon} />
                           <input
@@ -377,11 +377,11 @@ const EditProfile = () => {
                             className={styles.input}
                           />
                         </div>
-                        <p className={styles.inputHelp}>This will be displayed publicly on your profile</p>
+                        <p className={styles.inputHelp}>Ovo ce biti prikazano javno</p>
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="email">Email Address</label>
+                        <label htmlFor="email">Email Addresa</label>
                         <div className={styles.inputWithIcon}>
                           <Mail className={styles.inputIcon} />
                           <input
@@ -398,10 +398,10 @@ const EditProfile = () => {
                     </div>
 
                     <div className={styles.cardFooter}>
-                      <button type="button" className={styles.buttonSecondary}>Cancel</button>
+                      <button type="button" className={styles.buttonSecondary}>Izlaz</button>
                       <button type="submit" className={styles.buttonPrimary}>
                         <Save className={styles.buttonIcon} />
-                        Save Changes
+                        Sacuvaj promjene
                       </button>
                     </div>
                   </form>
@@ -411,15 +411,15 @@ const EditProfile = () => {
               {activeTab === 'password' && (
                 <div className={styles.card}>
                   <div className={styles.cardHeader}>
-                    <h2 className={styles.cardTitle}>Change Password</h2>
+                    <h2 className={styles.cardTitle}>Promijeni lozinku</h2>
                     <p className={styles.cardDescription}>
-                      Update your password to keep your account secure.
+                      Azurirajte vasu lozinku.
                     </p>
                   </div>
                   <form onSubmit={handlePasswordSubmit}>
                     <div className={styles.cardContent}>
                       <div className={styles.formGroup}>
-                        <label htmlFor="currentPassword">Current Password</label>
+                        <label htmlFor="currentPassword">Trenutna lozinka</label>
                         <div className={styles.inputWithIcon}>
                           <Key className={styles.inputIcon} />
                           <input
@@ -443,7 +443,7 @@ const EditProfile = () => {
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="newPassword">New Password</label>
+                        <label htmlFor="newPassword">Nova lozinka</label>
                         <div className={styles.inputWithIcon}>
                           <Key className={styles.inputIcon} />
                           <input
@@ -467,7 +467,7 @@ const EditProfile = () => {
                       </div>
 
                       <div className={styles.formGroup}>
-                        <label htmlFor="confirmPassword">Confirm New Password</label>
+                        <label htmlFor="confirmPassword">Potvrdi novu lozinku</label>
                         <div className={styles.inputWithIcon}>
                           <Key className={styles.inputIcon} />
                           <input
@@ -492,10 +492,10 @@ const EditProfile = () => {
                     </div>
 
                     <div className={styles.cardFooter}>
-                      <button type="button" className={styles.buttonSecondary}>Cancel</button>
+                      <button type="button" className={styles.buttonSecondary}>Izadji</button>
                       <button type="submit" className={styles.buttonPrimary}>
                         <Save className={styles.buttonIcon} />
-                        Change Password
+                        Promijeni lozinku
                       </button>
                     </div>
                   </form>

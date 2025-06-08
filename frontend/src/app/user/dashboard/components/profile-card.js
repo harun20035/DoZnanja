@@ -57,7 +57,7 @@ export function UserProfileCard() {
     <Card className={styles.card} sx={{ maxWidth: 360, m: 2 }}>
       <CardHeader
         avatar={<UserIcon color="primary" className={styles.titleIcon} />}
-        title={<Typography variant="h6" className={styles.cardTitle}>My Profile</Typography>}
+        title={<Typography variant="h6" className={styles.cardTitle}>Moj Profil</Typography>}
         className={styles.cardHeader}
       />
 
@@ -65,7 +65,7 @@ export function UserProfileCard() {
         <Stack alignItems="center" spacing={1} mb={2}>
           <Avatar
             src={normalizedImagePath ? `http://localhost:8000/${normalizedImagePath}` : ""}
-            alt="Profile"
+            alt="Profil"
             className={styles.avatar}
           >
             {!normalizedImagePath && (
@@ -81,15 +81,15 @@ export function UserProfileCard() {
         <Box className={styles.statsGrid}>
           <Box className={styles.statItem}>
             <Typography className={styles.statValue}>7</Typography>
-            <Typography className={styles.statLabel}>Courses</Typography>
+            <Typography className={styles.statLabel}>Kursevi</Typography>
           </Box>
           <Box className={styles.statItem}>
             <Typography className={styles.statValue}>12</Typography>
-            <Typography className={styles.statLabel}>Certificates</Typography>
+            <Typography className={styles.statLabel}>Certifikati</Typography>
           </Box>
           <Box className={styles.statItem}>
             <Typography className={styles.statValue}>86h</Typography>
-            <Typography className={styles.statLabel}>Learning</Typography>
+            <Typography className={styles.statLabel}>Učenje</Typography>
           </Box>
         </Box>
       </CardContent>
@@ -103,7 +103,7 @@ export function UserProfileCard() {
           className={styles.editButton}
           sx={{ textTransform: "none" }}
         >
-          <span className={styles.editButtonLink}>Edit Profile</span>
+          <span className={styles.editButtonLink}>Izmijeni profil</span>
         </Button>
       </CardActions>
     </Card>

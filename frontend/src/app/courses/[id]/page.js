@@ -147,7 +147,6 @@ export default function CourseDetailPage() {
       <div className="course-detail-container">
         <CourseHeader course={course} />
         <CourseInfo course={course} />
-        <RelatedCourses />
       </div>
       <Footer />
     </>

@@ -52,14 +52,14 @@ export function EnrolledCourses() {
     <div className={styles.container}>
       <div className={styles.header}>
         <Typography variant="h5" component="h2" className={styles.title}>
-          My Enrolled Courses
+          Moji upisani kursevi
         </Typography>
       </div>
 
       <div className={styles.courseGrid}>
         {courses.length === 0 ? (
           <Typography variant="body1" color="textSecondary">
-            No enrolled courses found.
+            Nemate upisanih kurseva.
           </Typography>
         ) : (
           courses.map((course) => (
@@ -82,7 +82,7 @@ export function EnrolledCourses() {
                   Naslov: {course.title}
                 </Typography>
                 <Typography variant="body2" className={styles.courseInstructor}>
-                  By: {course.creator_name} {/* Prikazuje ime kreatora */}
+                  Autor: {course.creator_name} {/* Prikazuje ime kreatora */}
                 </Typography>
 
                 {/* Opis i Description u dva reda */}
@@ -90,7 +90,6 @@ export function EnrolledCourses() {
                   <Typography variant="body2" className={styles.courseDescriptionText}>
                     Opis: {course.description}
                   </Typography>
-                  
                 </div>
 
                 <div className={styles.courseFooter}>
@@ -99,7 +98,7 @@ export function EnrolledCourses() {
                     <span>{course.average_rating}</span>
                   </div>
                   <Button size="small" variant="contained" className={styles.continueButton}>
-                    Continue
+                    Nastavi
                   </Button>
                 </div>
               </CardContent>
@@ -110,7 +109,7 @@ export function EnrolledCourses() {
 
       <div className={styles.viewAllContainer}>
         <Button variant="outlined" className={styles.viewAllButton}>
-          View All My Courses
+          Pogledaj sve moje kurseve
         </Button>
       </div>
     </div>

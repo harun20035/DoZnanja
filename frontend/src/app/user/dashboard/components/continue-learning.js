@@ -8,10 +8,10 @@ export function ContinueLearning() {
   const inProgressCourses = [
     {
       id: 1,
-      title: "Advanced JavaScript Concepts",
+      title: "Napredni JavaScript koncepti",
       instructor: "David Miller",
       progress: 68,
-      lastLesson: "Closures and Scope",
+      lastLesson: "Zatvaranje i opseg",
       timeLeft: "32 min",
       image: "/placeholder.svg?height=120&width=200",
     },
@@ -20,7 +20,7 @@ export function ContinueLearning() {
       title: "React & Redux Masterclass",
       instructor: "Sarah Wilson",
       progress: 42,
-      lastLesson: "State Management with Redux",
+      lastLesson: "Upravljanje stanjem sa Redux-om",
       timeLeft: "45 min",
       image: "/placeholder.svg?height=120&width=200",
     },
@@ -30,10 +30,10 @@ export function ContinueLearning() {
     <div className={styles.container}>
       <div className={styles.header}>
         <Typography variant="h5" component="h2" className={styles.title}>
-          Continue Learning
+          Nastavite sa učenjem
         </Typography>
         <Link href="/user/courses" className={styles.viewAllLink}>
-          View all my courses
+          Pogledajte sve moje kurseve
         </Link>
       </div>
 
@@ -57,12 +57,12 @@ export function ContinueLearning() {
                     {course.title}
                   </Typography>
                   <Typography variant="body2" className={styles.courseInstructor}>
-                    by {course.instructor}
+                    od {course.instructor}
                   </Typography>
 
                   <div className={styles.progressContainer}>
                     <div className={styles.progressHeader}>
-                      <span className={styles.progressText}>{course.progress}% complete</span>
+                      <span className={styles.progressText}>{course.progress}% završeno</span>
                       <span className={styles.lessonText}>{course.lastLesson}</span>
                     </div>
                     <LinearProgress
@@ -75,10 +75,10 @@ export function ContinueLearning() {
                   <div className={styles.courseActions}>
                     <div className={styles.timeLeft}>
                       <Clock className={styles.timeIcon} />
-                      <span>{course.timeLeft} left</span>
+                      <span>{course.timeLeft} preostalo</span>
                     </div>
                     <Button size="small" variant="contained" className={styles.continueButton} startIcon={<Play className={styles.playIcon} />}>
-                      Continue
+                      Nastavite
                     </Button>
                   </div>
                 </div>

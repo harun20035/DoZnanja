@@ -39,7 +39,7 @@ export function PopularCourses() {
           setCourses(data.courses || []);
         }
       })
-      .catch((err) => console.error("Error fetching courses:", err));
+      .catch((err) => console.error("Greška pri dohvaćanju kurseva:", err));
   }, []);
 
   const handleAddToCart = (courseId) => {
@@ -82,17 +82,17 @@ export function PopularCourses() {
     <div className={styles.container}>
       <div className={styles.header}>
         <Typography variant="h5" component="h2" className={styles.title}>
-          Popular Courses
+          Popularni kursevi
         </Typography>
-        <Link href="/courses" className={styles.browseLink}>
-          Browse all courses
+        <Link href="/all-courses" className={styles.browseLink}>
+          Pregledaj sve kurseve
         </Link>
       </div>
 
       <div className={styles.courseGrid}>
         {courses.length === 0 ? (
           <Typography variant="body1" color="textSecondary">
-            No popular courses found.
+            Nema popularnih kurseva.
           </Typography>
         ) : (
           courses.map((course) => (
@@ -111,7 +111,7 @@ export function PopularCourses() {
                   {course.title}
                 </Typography>
                 <Typography variant="body2" className={styles.courseInstructor}>
-                  by {course.creator_name}
+                  od {course.creator_name}
                 </Typography>
 
                 <Box className={styles.courseStats} display="flex" alignItems="center" gap={1}>
@@ -124,13 +124,13 @@ export function PopularCourses() {
                   <div className={styles.statDivider}>|</div>
                   <Box className={styles.students} display="flex" alignItems="center" gap={0.5}>
                     <Users className={styles.studentsIcon} />
-                    <Typography variant="body2">{course.students} students</Typography>
+                    <Typography variant="body2">{course.students} polaznika</Typography>
                   </Box>
                 </Box>
 
                 <Box className={styles.courseDuration} display="flex" alignItems="center" gap={0.5}>
                   <Clock className={styles.durationIcon} />
-                  <Typography variant="body2">{course.steps} steps</Typography>
+                  <Typography variant="body2">{course.steps} koraka</Typography>
                 </Box>
 
                 <Box className={styles.courseFooter} display="flex" justifyContent="space-between" alignItems="center">
@@ -165,7 +165,7 @@ export function PopularCourses() {
               <Typography variant="h6">{modalMessage}</Typography>
             </Box>
             <Button onClick={handleCloseModal} variant="contained">
-              Close
+              Zatvori
             </Button>
           </Box>
         </Fade>
