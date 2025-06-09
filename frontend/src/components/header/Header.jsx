@@ -10,12 +10,7 @@ export default function Header({ role }) {
   const renderLinks = () => {
   return (
     <>
-      <Link href="/courses" className={styles.link}>Kursevi</Link>
-      <Link href="/about" className={styles.link}>O nama</Link>
-      <Link href="/contact" className={styles.link}>Kontakt</Link>
-      <Link href="/blog" className={styles.link}>Blog</Link>
-      <Link href="/categories" className={styles.link}>Kategorije</Link>
-      <Link href="/instructors" className={styles.link}>Predavači</Link>
+     
     </>
   );
 };
