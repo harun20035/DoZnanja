@@ -103,7 +103,7 @@ export default function UserHeader({ role }) {
             <div className={styles.dropdown}>
               <Link href="/notifications" className={styles.dropdownItem}>🔔 Notifikacije</Link>
 
-              <Link href="/cart" className={styles.dropdownItem}>
+              <Link href="/user/dashboard/cart" className={styles.dropdownItem}>
                 <div className="d-flex align-items-center gap-2">
                   <span className={styles.cartBadge}>{cartCount}</span>
                   <span>🛒 Korpa</span>
