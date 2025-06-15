@@ -1,23 +1,34 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import "./SuccessAnimation.css"
 
-export default function SuccessAnimation({ onComplete }) {
+export default function SuccessAnimation() {
   const [stage, setStage] = useState(0)
+  const router = useRouter()
 
   useEffect(() => {
     const timer1 = setTimeout(() => setStage(1), 500)
     const timer2 = setTimeout(() => setStage(2), 1500)
     const timer3 = setTimeout(() => setStage(3), 2500)
+    const timer4 = setTimeout(() => setStage(4), 3500)
 
     return () => {
       clearTimeout(timer1)
       clearTimeout(timer2)
       clearTimeout(timer3)
+      clearTimeout(timer4)
     }
   }, [])
+
+  const handleLogout = () => {
+    // Ukloni token iz localStorage
+    localStorage.removeItem("auth_token")
+
+    // Preusmjeri na login stranicu
+    router.push("/login")
+  }
 
   return (
     <div className="success-animation-overlay">
@@ -32,10 +43,8 @@ export default function SuccessAnimation({ onComplete }) {
         {/* Main content */}
         <div className={`success-content ${stage >= 1 ? "show" : ""}`}>
           <div className="success-icon">
-            <div className="checkmark">
-              <div className="checkmark-circle"></div>
-              <div className="checkmark-stem"></div>
-              <div className="checkmark-kick"></div>
+            <div className="crown-icon">
+              <div className="crown-emoji">👑</div>
             </div>
           </div>
 
@@ -60,15 +69,16 @@ export default function SuccessAnimation({ onComplete }) {
             </div>
           </div>
 
-          <div className={`success-actions ${stage >= 3 ? "show" : ""}`}>
-            <Link href="/creator" className="btn-success-primary">
-              <i className="bi bi-speedometer2 me-2"></i>
-              Idite na Creator Dashboard
-            </Link>
-            <Link href="/creator/courses" className="btn-success-secondary">
-              <i className="bi bi-collection me-2"></i>
-              Pogledajte svoje kurseve
-            </Link>
+          <div className={`logout-message ${stage >= 4 ? "show" : ""}`}>
+            <h4>🔄 Potrebna je ponovna prijava</h4>
+            <p>Da biste pristupili novim kreator funkcijama, molimo prijavite se ponovo s vašim ažuriranim nalogom.</p>
+          </div>
+
+          <div className={`success-actions ${stage >= 4 ? "show" : ""}`}>
+            <button onClick={handleLogout} className="btn-logout">
+              <i className="bi bi-box-arrow-right me-2"></i>
+              Prijavite se ponovo
+            </button>
           </div>
         </div>
       </div>
