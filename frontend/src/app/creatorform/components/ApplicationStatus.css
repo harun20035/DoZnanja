@@ -1,0 +1,31 @@
+.application-status {
+  border-radius: var(--border-radius);
+  border: none;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+}
+
+.status-details {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 1rem;
+}
+
+.alert-warning {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  color: #856404;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #d4edda 0%, #a8e6cf 100%);
+  color: #155724;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #f8d7da 0%, #ff7675 100%);
+  color: #721c24;
+}
