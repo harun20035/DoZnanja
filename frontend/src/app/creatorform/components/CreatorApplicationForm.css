@@ -1,0 +1,141 @@
+.application-form {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-purple);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  border: 2px solid var(--gray-200);
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  display: block;
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.terms-section {
+  background: var(--light-purple);
+  border-radius: var(--border-radius-sm);
+  padding: 1.5rem;
+  border-left: 4px solid var(--primary-purple);
+}
+
+.form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.form-check-input {
+  margin-top: 0.25rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid var(--primary-purple);
+  flex-shrink: 0;
+}
+
+.form-check-input:checked {
+  background-color: var(--primary-purple);
+  border-color: var(--primary-purple);
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+}
+
+.form-check-label {
+  font-size: 0.95rem;
+  color: var(--gray-700);
+  line-height: 1.4;
+}
+
+.text-purple {
+  color: var(--primary-purple);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.text-purple:hover {
+  color: var(--primary-purple-dark);
+  text-decoration: underline;
+}
+
+.btn-purple {
+  background: var(--primary-purple);
+  border-color: var(--primary-purple);
+  color: white;
+  font-weight: 600;
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem 2rem;
+  transition: all 0.3s ease;
+}
+
+.btn-purple:hover {
+  background: var(--primary-purple-dark);
+  border-color: var(--primary-purple-dark);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-purple:disabled {
+  background: var(--gray-400);
+  border-color: var(--gray-400);
+  color: white;
+  transform: none;
+  box-shadow: none;
+}
+
+.alert {
+  border-radius: var(--border-radius-sm);
+  border: none;
+  padding: 1rem 1.5rem;
+}
+
+.alert-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+@media (max-width: 767.98px) {
+  .application-form {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .application-form {
+    padding: 1rem;
+  }
+}
