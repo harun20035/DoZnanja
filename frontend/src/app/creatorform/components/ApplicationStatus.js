@@ -1,3 +1,4 @@
+import Link from "next/link"
 import "./ApplicationStatus.css"
 
 export default function ApplicationStatus({ status }) {
@@ -23,14 +24,14 @@ export default function ApplicationStatus({ status }) {
         </p>
 
         <div className="mt-3">
-          <a href="/creator/dashboard" className="btn btn-success me-2">
-            <i className="bi bi-plus-circle me-1"></i>
-            Kreiraj novi kurs
-          </a>
-          <a href="/creator/courses" className="btn btn-outline-success">
+          <Link href="/creator" className="btn btn-success me-2">
+            <i className="bi bi-speedometer2 me-1"></i>
+            Creator Dashboard
+          </Link>
+          <Link href="/creator/courses" className="btn btn-outline-success">
             <i className="bi bi-collection me-1"></i>
             Moji kursevi
-          </a>
+          </Link>
         </div>
       </div>
     </div>

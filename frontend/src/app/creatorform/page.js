@@ -8,6 +8,7 @@ import CreatorCostNotice from "./components/CreatorCostNotice"
 import CreatorApplicationForm from "./components/CreatorApplicationForm"
 import ApplicationStatus from "./components/ApplicationStatus"
 import LoadingSpinner from "./components/LoadingSpinner"
+import SuccessAnimation from "./components/SuccessAnimation"
 import { useCreatorApplication } from "./hooks/useCreatorApplication"
 import "./styles/variables.css"
 import "./page.css"
@@ -17,6 +18,7 @@ export default function CreatorFormPage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
 
   const { applicationStatus, submitApplication } = useCreatorApplication()
 
@@ -31,15 +33,37 @@ export default function CreatorFormPage() {
       }
 
       try {
-        const response = await fetch("http://localhost:8000/me", {
+        console.log("🔄 CreatorForm - Dohvaćam podatke korisnika...")
+        const response = await fetch("http://localhost:8000/api/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data")
+        }
+
         const userData = await response.json()
-        setUser({ name: userData.username, coins: userData.credits })
+        console.log("📊 CreatorForm - Podaci korisnika:", userData)
+
+        setUser({
+          name: userData.username,
+          coins: userData.credits,
+          role: userData.role,
+        })
+
+        // Ako je korisnik već kreator, preusmjeri ga na creator dashboard
+        if (userData.role === "CREATOR") {
+          console.log("✅ CreatorForm - Korisnik je već CREATOR, preusmjeravam na /creator")
+          router.push("/creator")
+          return
+        }
       } catch (err) {
         console.error("Greška pri dohvaćanju korisničkih podataka:", err)
+        if (err.message.includes("401") || err.message.includes("Unauthorized")) {
+          router.push("/login")
+        }
       } finally {
         setLoading(false)
       }
@@ -52,35 +76,62 @@ export default function CreatorFormPage() {
     setSubmitting(true)
 
     try {
+      console.log("📤 Šaljem prijavu za kreator...")
       const result = await submitApplication({
         reason: formData.reason,
         experience: formData.experience,
         expertise: formData.expertise,
       })
 
-      alert(`🎉 ${result.message}`)
+      console.log("✅ Prijava uspješna:", result)
 
-      // Refresh user data to show updated credits and role
+      // Ažuriraj user podatke odmah nakon uspješne prijave
       const token = localStorage.getItem("auth_token")
-      const response = await fetch("http://localhost:8000/me", {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await fetch("http://localhost:8000/api/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
-      const userData = await response.json()
-      setUser({ name: userData.username, coins: userData.credits })
 
-      // Redirect to creator dashboard after 2 seconds
-      setTimeout(() => {
-        router.push("/creator/dashboard")
-      }, 2000)
+      if (response.ok) {
+        const updatedUserData = await response.json()
+        console.log("🔄 Ažurirani podaci korisnika:", updatedUserData)
+
+        setUser({
+          name: updatedUserData.username,
+          coins: updatedUserData.credits,
+          role: updatedUserData.role,
+        })
+
+        // Pošalji event za ažuriranje drugih komponenti
+        window.dispatchEvent(
+          new CustomEvent("userUpdated", {
+            detail: updatedUserData,
+          }),
+        )
+
+        // Prikaži success animaciju
+        setShowSuccessAnimation(true)
+      }
     } catch (err) {
+      console.error("❌ Greška pri slanju prijave:", err)
       alert(`Greška: ${err.message}`)
-    } finally {
       setSubmitting(false)
     }
   }
 
+  const handleAnimationComplete = () => {
+    console.log("🎬 Animacija završena, preusmjeravam na /creator")
+    // Preusmjeri na creator dashboard
+    router.push("/creator")
+  }
+
   if (loading) {
     return <LoadingSpinner />
+  }
+
+  if (showSuccessAnimation) {
+    return <SuccessAnimation onComplete={handleAnimationComplete} />
   }
 
   return (

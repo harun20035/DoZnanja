@@ -19,7 +19,19 @@ export const creatorService = {
       throw new Error(errorData.detail || "Greška pri slanju prijave")
     }
 
-    return response.json()
+    const result = await response.json()
+
+    // Ako backend vrati ažurirane user podatke, možemo ih koristiti
+    if (result.user) {
+      // Možemo emitovati event ili vratiti user podatke
+      window.dispatchEvent(
+        new CustomEvent("userUpdated", {
+          detail: result.user,
+        }),
+      )
+    }
+
+    return result
   },
 
   // Dobij status svoje prijave
