@@ -9,6 +9,10 @@ export default function SuccessAnimation() {
   const router = useRouter()
 
   useEffect(() => {
+    // Odmah ukloni token i postavi flag za ponovnu prijavu
+    localStorage.removeItem("auth_token")
+    localStorage.setItem("requires_relogin", "true")
+
     const timer1 = setTimeout(() => setStage(1), 500)
     const timer2 = setTimeout(() => setStage(2), 1500)
     const timer3 = setTimeout(() => setStage(3), 2500)
@@ -23,8 +27,9 @@ export default function SuccessAnimation() {
   }, [])
 
   const handleLogout = () => {
-    // Ukloni token iz localStorage
+    // Ukloni sve auth podatke
     localStorage.removeItem("auth_token")
+    localStorage.removeItem("requires_relogin")
 
     // Preusmjeri na login stranicu
     router.push("/login")
