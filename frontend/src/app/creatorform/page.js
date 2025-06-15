@@ -6,6 +6,7 @@ import CreatorBenefits from "./components/CreatorBenefits"
 import CreatorCostNotice from "./components/CreatorCostNotice"
 import CreatorApplicationForm from "./components/CreatorApplicationForm"
 import LoadingSpinner from "./components/LoadingSpinner"
+import CreatorHeader from "./components/CreatorHeader"
 import "./styles/variables.css"
 import "./page.css"
 
@@ -85,6 +86,7 @@ export default function CreatorFormPage() {
       <div className="container py-5">
         <div className="row justify-content-center">
           <div className="col-lg-8">
+            <CreatorHeader />
             <CreatorBenefits />
             <CreatorCostNotice user={user} creatorCost={CREATOR_COST} />
             <CreatorApplicationForm
