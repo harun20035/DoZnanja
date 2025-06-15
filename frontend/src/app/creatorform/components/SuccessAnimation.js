@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import "./SuccessAnimation.css"
 
 export default function SuccessAnimation({ onComplete }) {
@@ -10,15 +11,13 @@ export default function SuccessAnimation({ onComplete }) {
     const timer1 = setTimeout(() => setStage(1), 500)
     const timer2 = setTimeout(() => setStage(2), 1500)
     const timer3 = setTimeout(() => setStage(3), 2500)
-    const timer4 = setTimeout(() => onComplete(), 4000)
 
     return () => {
       clearTimeout(timer1)
       clearTimeout(timer2)
       clearTimeout(timer3)
-      clearTimeout(timer4)
     }
-  }, [onComplete])
+  }, [])
 
   return (
     <div className="success-animation-overlay">
@@ -61,15 +60,15 @@ export default function SuccessAnimation({ onComplete }) {
             </div>
           </div>
 
-          <div className={`redirect-message ${stage >= 3 ? "show" : ""}`}>
-            <div className="loading-dots">
-              <span>Preusmjeravamo vas na creator dashboard</span>
-              <div className="dots">
-                <span>.</span>
-                <span>.</span>
-                <span>.</span>
-              </div>
-            </div>
+          <div className={`success-actions ${stage >= 3 ? "show" : ""}`}>
+            <Link href="/creator" className="btn-success-primary">
+              <i className="bi bi-speedometer2 me-2"></i>
+              Idite na Creator Dashboard
+            </Link>
+            <Link href="/creator/courses" className="btn-success-secondary">
+              <i className="bi bi-collection me-2"></i>
+              Pogledajte svoje kurseve
+            </Link>
           </div>
         </div>
       </div>

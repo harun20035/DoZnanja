@@ -104,9 +104,18 @@ export default function CreatorFormPage() {
         })
 
         // Pošalji event za ažuriranje drugih komponenti
+        console.log("📡 Šaljem userUpdated event:", updatedUserData)
         window.dispatchEvent(
           new CustomEvent("userUpdated", {
             detail: updatedUserData,
+          }),
+        )
+
+        // Pošalji poseban event za promjenu uloge
+        console.log("📡 Šaljem roleChanged event:", { role: updatedUserData.role })
+        window.dispatchEvent(
+          new CustomEvent("roleChanged", {
+            detail: { role: updatedUserData.role },
           }),
         )
 
@@ -120,18 +129,14 @@ export default function CreatorFormPage() {
     }
   }
 
-  const handleAnimationComplete = () => {
-    console.log("🎬 Animacija završena, preusmjeravam na /creator")
-    // Preusmjeri na creator dashboard
-    router.push("/creator")
-  }
+  // Uklonili smo handleAnimationComplete jer više ne preusmjeravamo automatski
 
   if (loading) {
     return <LoadingSpinner />
   }
 
   if (showSuccessAnimation) {
-    return <SuccessAnimation onComplete={handleAnimationComplete} />
+    return <SuccessAnimation />
   }
 
   return (
