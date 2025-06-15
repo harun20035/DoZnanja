@@ -72,7 +72,7 @@ export default function UserHeader({ role }) {
       <Link href="/blog" className={styles.link}>Blog</Link>
       <Link href="/categories" className={styles.link}>Kategorije</Link>
       <Link href="/instructors" className={styles.link}>Predavači</Link>
-      <Link href="/formakreatora" className={styles.ctaLink}>Postani Kreator</Link>
+      <Link href="/creatorform" className={styles.ctaLink}>Postani Kreator</Link>
     </>
   );
 
