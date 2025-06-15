@@ -715,7 +715,7 @@ body {
 
 /* Modal sadržaj */
 .modal-content {
-  background-color: white;
+  background-color: white !important;
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
@@ -739,6 +739,26 @@ body.modal-open {
   overflow: hidden;
 }
 
+/* modal centriran + vidljiv */
+.modal-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+  min-width: 300px;
+  max-width: 400px;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
+/* Success i Error stil */
+.modal-content.success {
+  border-left: 6px solid #4caf50;
+}
 
-
+.modal-content.error {
+  border-left: 6px solid #f44336;
+}

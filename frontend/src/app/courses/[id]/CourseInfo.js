@@ -161,9 +161,9 @@ export default function CourseInfo({ course }) {
       </div>
 
       {/* Modal with success or error message */}
-      <Modal open={openModal} onClose={handleCloseModal} closeAfterTransition>
+      <Modal open={openModal} onClose={handleCloseModal} closeAfterTransition >
         <Fade in={openModal}>
-          <Box className={`modal ${openModal ? 'open' : ''} ${modalSuccess ? 'success' : 'error'}`}>
+          <Box className={`modal-content ${openModal ? 'open' : ''} ${modalSuccess ? 'success' : 'error'}`}>
             <Box display="flex" alignItems="center" gap={1} mb={1}>
               {modalSuccess ? (
                 <CheckCircle color="green" size={32} />
