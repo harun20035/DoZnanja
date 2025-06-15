@@ -697,12 +697,24 @@ body {
   }
 }
 
-/* Modal Styles */
+/* Modal Overlay (pozadina) */
 .modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0; /* isto kao top:0; right:0; bottom:0; left:0 */
+  background-color: rgba(80, 69, 69, 0.5); /* tamna pozadina */
+  display: none; /* skriveno dok se ne otvori */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Kad je modal otvoren */
+.modal.open {
+  display: flex;
+}
+
+/* Modal sadržaj */
+.modal-content {
   background-color: white;
   border-radius: 12px;
   padding: 24px;
@@ -710,27 +722,23 @@ body {
   min-width: 300px;
   max-width: 400px;
   text-align: center;
-  z-index: 1000;
-  display: none; /* Hidden by default */
+  position: relative; /* da se eventualni zatvori button bolje pozicionira */
 }
 
-/* Success and Error modals */
-.success {
+/* Success i Error modali */
+.modal-content.success {
   border-left: 6px solid #4caf50;
 }
 
-.error {
+.modal-content.error {
   border-left: 6px solid #f44336;
 }
 
-/* When the modal is open */
-.modal.open {
-  display: block;
+/* Onemogućiti scroll kad je modal otvoren (po želji) */
+body.modal-open {
+  overflow: hidden;
 }
 
-/* Modal background */
-.MuiBackdrop-root {
-  background-color: rgba(0, 0, 0, 0.5); /* Darken the background */
-  z-index: 500;
-}
+
+
 
