@@ -90,7 +90,17 @@ def handle_google_callback(code: str, session: Session) -> User:
 
 
 def get_user_summary(user: User):
+    """Vraća sažetak korisničkih podataka uključujući role"""
+    print(f"🔍 get_user_summary pozvan s user: {user}")
+    print(f"🔍 user.role: {user.role}")
+    print(f"🔍 user.role.value: {user.role.value if user.role else 'None'}")
+    
     return {
+        "id": user.id,
         "username": user.username,
-        "credits": user.credits
+        "email": user.email,
+        "role": user.role.value if user.role else None,  # DODANO!
+        "credits": user.credits,
+        "name": user.name,
+        "surname": user.surname
     }

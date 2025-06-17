@@ -1,0 +1,452 @@
+:root {
+  --primary-purple: #6f42c1;
+  --primary-purple-dark: #5a32a3;
+  --primary-purple-light: #9a7ad1;
+  --light-purple: #f3f0f9;
+  --white: #ffffff;
+  --gray-50: #fafafa;
+  --gray-100: #f8f9fa;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-400: #ced4da;
+  --gray-500: #adb5bd;
+  --gray-600: #6c757d;
+  --gray-700: #495057;
+  --gray-800: #343a40;
+  --gray-900: #212529;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --border-radius: 16px;
+  --border-radius-sm: 8px;
+}
+
+.success-animation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-purple-dark) 100%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.5s ease-out;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.success-animation-container {
+  position: relative;
+  text-align: center;
+  color: white;
+  max-width: 450px;
+  width: 100%;
+  padding: 1.5rem;
+  margin: auto;
+  min-height: fit-content;
+}
+
+/* Confetti Animation */
+.confetti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffd700;
+  animation: confetti-fall 3s linear infinite;
+}
+
+.confetti-0 {
+  background: #ff6b6b;
+  animation-delay: 0s;
+  left: 10%;
+}
+.confetti-1 {
+  background: #4ecdc4;
+  animation-delay: 0.2s;
+  left: 20%;
+}
+.confetti-2 {
+  background: #45b7d1;
+  animation-delay: 0.4s;
+  left: 30%;
+}
+.confetti-3 {
+  background: #96ceb4;
+  animation-delay: 0.6s;
+  left: 40%;
+}
+.confetti-4 {
+  background: #ffeaa7;
+  animation-delay: 0.8s;
+  left: 50%;
+}
+.confetti-5 {
+  background: #dda0dd;
+  animation-delay: 1s;
+  left: 60%;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Success Content */
+.success-content {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s ease-out;
+}
+
+.success-content.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Success Icon - Kompaktnija korona */
+.success-icon {
+  margin-bottom: 1.5rem;
+}
+
+.crown-icon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  position: relative;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 3px solid white;
+  animation: crown-appear 0.8s ease-out;
+}
+
+.crown-emoji {
+  font-size: 3rem;
+  animation: crown-bounce 1s ease-out 0.5s both;
+}
+
+@keyframes crown-appear {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(-90deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes crown-bounce {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Text Animations - Kompaktniji */
+.success-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.6s ease-out;
+  line-height: 1.2;
+}
+
+.success-title.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.success-message {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.6s ease-out 0.2s;
+  line-height: 1.4;
+}
+
+.success-message.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Features - Kompaktniji layout */
+.success-features {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.6s ease-out;
+}
+
+.success-features.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.8rem 0.6rem;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  flex: 1;
+  max-width: 100px;
+}
+
+.feature-icon {
+  font-size: 1.5rem;
+}
+
+.feature-item span:last-child {
+  font-size: 0.8rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Logout Message - Kompaktniji */
+.logout-message {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.6s ease-out;
+}
+
+.logout-message.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.logout-message h4 {
+  margin-bottom: 0.4rem;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.logout-message p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+/* Action Button */
+.success-actions {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.6s ease-out;
+}
+
+.success-actions.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.btn-logout {
+  background: white;
+  color: var(--primary-purple);
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-logout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  color: var(--primary-purple);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.btn-logout:active {
+  transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive - Još kompaktniji na malim ekranima */
+@media (max-width: 768px) {
+  .success-animation-container {
+    padding: 1rem;
+    max-width: 350px;
+  }
+
+  .success-features {
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .feature-item {
+    padding: 0.6rem 0.4rem;
+    max-width: 80px;
+  }
+
+  .feature-item span:last-child {
+    font-size: 0.7rem;
+  }
+
+  .success-title {
+    font-size: 1.8rem;
+  }
+
+  .success-message {
+    font-size: 1rem;
+  }
+
+  .crown-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .crown-emoji {
+    font-size: 2.5rem;
+  }
+
+  .logout-message {
+    padding: 0.8rem;
+  }
+
+  .logout-message h4 {
+    font-size: 0.9rem;
+  }
+
+  .logout-message p {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .success-animation-container {
+    padding: 0.8rem;
+    max-width: 300px;
+  }
+
+  .success-title {
+    font-size: 1.6rem;
+  }
+
+  .success-message {
+    font-size: 0.95rem;
+  }
+
+  .crown-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .crown-emoji {
+    font-size: 2rem;
+  }
+
+  .feature-item {
+    padding: 0.5rem 0.3rem;
+    max-width: 70px;
+  }
+
+  .feature-icon {
+    font-size: 1.2rem;
+  }
+
+  .feature-item span:last-child {
+    font-size: 0.65rem;
+  }
+}
+
+/* Za vrlo kratke ekrane */
+@media (max-height: 600px) {
+  .success-animation-overlay {
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+
+  .success-animation-container {
+    margin-top: 0;
+  }
+
+  .success-icon {
+    margin-bottom: 1rem;
+  }
+
+  .crown-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .crown-emoji {
+    font-size: 2rem;
+  }
+
+  .success-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .success-message {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .success-features {
+    margin-bottom: 1rem;
+  }
+
+  .logout-message {
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+  }
+}

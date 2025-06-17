@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import CreatorHeader from "./components/CreatorHeader"
 import CreatorBenefits from "./components/CreatorBenefits"
 import CreatorCostNotice from "./components/CreatorCostNotice"
 import CreatorApplicationForm from "./components/CreatorApplicationForm"
+import ApplicationStatus from "./components/ApplicationStatus"
 import LoadingSpinner from "./components/LoadingSpinner"
-import CreatorHeader from "./components/CreatorHeader"
+import SuccessAnimation from "./components/SuccessAnimation"
+import { useCreatorApplication } from "./hooks/useCreatorApplication"
 import "./styles/variables.css"
 import "./page.css"
 
@@ -15,6 +18,9 @@ export default function CreatorFormPage() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+
+  const { applicationStatus, submitApplication } = useCreatorApplication()
 
   const CREATOR_COST = 100
 
@@ -27,15 +33,37 @@ export default function CreatorFormPage() {
       }
 
       try {
+        console.log("🔄 CreatorForm - Dohvaćam podatke korisnika...")
         const response = await fetch("http://localhost:8000/api/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data")
+        }
+
         const userData = await response.json()
-        setUser({ name: userData.username, coins: userData.credits })
+        console.log("📊 CreatorForm - Podaci korisnika:", userData)
+
+        setUser({
+          name: userData.username,
+          coins: userData.credits,
+          role: userData.role,
+        })
+
+        // Ako je korisnik već kreator, preusmjeri ga na creator dashboard
+        if (userData.role === "CREATOR") {
+          console.log("✅ CreatorForm - Korisnik je već CREATOR, preusmjeravam na /creator")
+          router.push("/creator")
+          return
+        }
       } catch (err) {
         console.error("Greška pri dohvaćanju korisničkih podataka:", err)
+        if (err.message.includes("401") || err.message.includes("Unauthorized")) {
+          router.push("/login")
+        }
       } finally {
         setLoading(false)
       }
@@ -48,37 +76,67 @@ export default function CreatorFormPage() {
     setSubmitting(true)
 
     try {
+      console.log("📤 Šaljem prijavu za kreator...")
+      const result = await submitApplication({
+        reason: formData.reason,
+        experience: formData.experience,
+        expertise: formData.expertise,
+      })
+
+      console.log("✅ Prijava uspješna:", result)
+
+      // Ažuriraj user podatke odmah nakon uspješne prijave
       const token = localStorage.getItem("auth_token")
-      const response = await fetch("http://localhost:8000/api/become-creator", {
-        method: "POST",
+      const response = await fetch("http://localhost:8000/api/me", {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          reason: formData.reason,
-          experience: formData.experience,
-          expertise: formData.expertise,
-        }),
       })
 
       if (response.ok) {
-        alert("Vaša prijava je uspješno poslana! Uskoro ćete biti kontaktirani.")
-        router.push("/")
-      } else {
-        const errorData = await response.json()
-        alert(`Greška: ${errorData.message || "Nešto je pošlo po zlu"}`)
+        const updatedUserData = await response.json()
+        console.log("🔄 Ažurirani podaci korisnika:", updatedUserData)
+
+        setUser({
+          name: updatedUserData.username,
+          coins: updatedUserData.credits,
+          role: updatedUserData.role,
+        })
+
+        // Pošalji event za ažuriranje drugih komponenti
+        console.log("📡 Šaljem userUpdated event:", updatedUserData)
+        window.dispatchEvent(
+          new CustomEvent("userUpdated", {
+            detail: updatedUserData,
+          }),
+        )
+
+        // Pošalji poseban event za promjenu uloge
+        console.log("📡 Šaljem roleChanged event:", { role: updatedUserData.role })
+        window.dispatchEvent(
+          new CustomEvent("roleChanged", {
+            detail: { role: updatedUserData.role },
+          }),
+        )
+
+        // Prikaži success animaciju
+        setShowSuccessAnimation(true)
       }
     } catch (err) {
-      console.error("Greška pri slanju prijave:", err)
-      alert("Greška pri slanju prijave. Molimo pokušajte ponovo.")
-    } finally {
+      console.error("❌ Greška pri slanju prijave:", err)
+      alert(`Greška: ${err.message}`)
       setSubmitting(false)
     }
   }
 
+  // Uklonili smo handleAnimationComplete jer više ne preusmjeravamo automatski
+
   if (loading) {
     return <LoadingSpinner />
+  }
+
+  if (showSuccessAnimation) {
+    return <SuccessAnimation />
   }
 
   return (
@@ -87,14 +145,24 @@ export default function CreatorFormPage() {
         <div className="row justify-content-center">
           <div className="col-lg-8">
             <CreatorHeader />
-            <CreatorBenefits />
-            <CreatorCostNotice user={user} creatorCost={CREATOR_COST} />
-            <CreatorApplicationForm
-              user={user}
-              creatorCost={CREATOR_COST}
-              onSubmit={handleFormSubmit}
-              submitting={submitting}
-            />
+
+            {/* Prikaži status ako je već kreator */}
+            <ApplicationStatus status={applicationStatus} />
+
+            {/* Prikaži formu samo ako nije kreator */}
+            {!applicationStatus?.has_application && (
+              <>
+                <CreatorBenefits />
+                <CreatorCostNotice user={user} creatorCost={CREATOR_COST} />
+                <CreatorApplicationForm
+                  user={user}
+                  creatorCost={CREATOR_COST}
+                  onSubmit={handleFormSubmit}
+                  submitting={submitting}
+                />
+              </>
+            )}
+
           </div>
         </div>
       </div>
