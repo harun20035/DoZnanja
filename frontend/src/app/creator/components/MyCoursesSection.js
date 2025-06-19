@@ -136,7 +136,8 @@ export default function MyCoursesSection() {
                   <h3 className="course-title">{course.title}</h3>
                   <div className="course-actions">
                     <Link href={`/creator/${course.id}`} className="btn-outline">✏ Uredi</Link>
-                    <button className="btn-outline">👁 Pregled</button>
+                    <Link href={`/creator/${course.id}/quiz`} className="btn-outline">✏ Kreiraj kviz </Link>
+                    
                     <button className="btn-outline">📊 Statistika</button>
                   </div>
                 </div>
