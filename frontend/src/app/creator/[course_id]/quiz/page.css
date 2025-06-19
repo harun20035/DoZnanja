@@ -1,0 +1,70 @@
+/* app/creator/[course_id]/quiz/page.css */
+
+.quiz-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: #333;
+  font-family: sans-serif;
+}
+
+.quiz-container h2 {
+  text-align: center;
+  color: #6f42c1;
+  margin-bottom: 1.5rem;
+}
+
+.question-block {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e0d7f3;
+  padding-bottom: 1rem;
+}
+
+.question-block label {
+  font-weight: bold;
+  color: #6f42c1;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.question-block input[type="text"] {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.options {
+  margin-left: 1rem;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.option input[type="radio"] {
+  accent-color: #6f42c1;
+}
+
+button[type="submit"] {
+  background-color: #6f42c1;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+  font-weight: bold;
+}
+
+button[type="submit"]:hover {
+  background-color: #59309d;
+}
