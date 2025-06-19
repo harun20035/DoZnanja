@@ -6,6 +6,7 @@ from models.courseStep_model import CourseStep
 from models.courseEnrollment_model import CourseEnrollment
 from models.reviewCourses_model import Review
 from models.cart_model import Cart
+from models.chatMessage_model import ChatMessage
 
 
 def create_db_and_tables():
