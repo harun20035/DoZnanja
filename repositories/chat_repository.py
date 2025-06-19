@@ -13,14 +13,15 @@ def get_chat_partners_for_user(db: Session, user_id: int):
             User.name,
             User.surname,
             User.profile_image,
-            Course.title.label("course_title"),
-            Course.id.label("course_id")
+            Course.title,
+            Course.id.label("course_id")  # Dodaj .label() da se jasno označi course_id
         )
         .join(Course, Course.creator_id == User.id)
         .join(CourseEnrollment, CourseEnrollment.course_id == Course.id)
         .filter(CourseEnrollment.user_id == user_id)
         .all()
     )
+
 
 def get_chat_partners_for_creator_students(db: Session, creator_id: int):
     return (
@@ -29,8 +30,8 @@ def get_chat_partners_for_creator_students(db: Session, creator_id: int):
             User.name,
             User.surname,
             User.profile_image,
-            Course.title.label("course_title"),
-            Course.id.label("course_id")
+            Course.title,
+            Course.id
         )
         .join(CourseEnrollment, CourseEnrollment.user_id == User.id)
         .join(Course, Course.id == CourseEnrollment.course_id)
@@ -45,8 +46,8 @@ def get_chat_partners_for_creator_purchased(db: Session, creator_id: int):
             User.name,
             User.surname,
             User.profile_image,
-            Course.title.label("course_title"),
-            Course.id.label("course_id")
+            Course.title,
+            Course.id
         )
         .join(Course, Course.creator_id == User.id)
         .join(CourseEnrollment, CourseEnrollment.course_id == Course.id)
@@ -54,8 +55,6 @@ def get_chat_partners_for_creator_purchased(db: Session, creator_id: int):
         .filter(User.id != creator_id)
         .all()
     )
-
-
 
 def save_message(db: Session, sender_id: int, receiver_id: int, course_id: int, content: str):
     message = ChatMessage(
@@ -68,7 +67,6 @@ def save_message(db: Session, sender_id: int, receiver_id: int, course_id: int, 
     db.add(message)
     db.commit()
 
-# Dohvat poruka između dva usera za jedan kurs
 def get_messages_between_users(db: Session, user1_id: int, user2_id: int, course_id: int):
     return db.query(ChatMessage).filter(
         ChatMessage.course_id == course_id,

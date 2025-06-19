@@ -45,8 +45,8 @@ export default function ChatPage() {
           name: partner.name,
           surname: partner.surname,
           role: "CHAT_PARTNER",
-          course: partner.course_title,
-          courseId: partner.course_id,
+          course: partner.course_title || partner.courseTitle,
+          courseId: partner.course_id ?? partner.courseId ?? null,
           avatar: partner.profile_image
             ? `http://localhost:8000/${partner.profile_image.replace(/\\/g, "/")}`
             : null,
@@ -55,8 +55,6 @@ export default function ChatPage() {
           unreadCount: 0,
           isOnline: true,
         }))
-        console.log("TRANSFORMED PARTNERS:", transformed)
-
         setUsers(transformed)
       } catch (error) {
         console.error("Greška:", error)
@@ -72,11 +70,11 @@ export default function ChatPage() {
     if (selectedUser) {
       const token = localStorage.getItem("auth_token")
       const ws = new WebSocket(
-        `ws://localhost:8000/chat/ws/chat/${selectedUser.id}/${selectedUser.courseId}`
-        
+        `ws://localhost:8000/chat/ws/chat/${selectedUser.id}/${selectedUser.courseId}?token=${token}`
       )
 
       ws.onopen = () => console.log("🔌 WebSocket konektovan")
+
       ws.onmessage = (event) => {
         const now = new Date()
         const msg = {
@@ -88,16 +86,45 @@ export default function ChatPage() {
         }
         setMessages((prev) => [...prev, msg])
       }
-      ws.onclose = () => console.log("🔌 WebSocket zatvoren")
 
+      ws.onclose = () => console.log("🔌 WebSocket zatvoren")
       socketRef.current = ws
+
       return () => ws.close()
     }
   }, [selectedUser])
 
+  // 🔥 DODANO OVDJE: Fetch starih poruka iz API-ja
+  const fetchMessages = async (userId, courseId) => {
+    try {
+      const token = localStorage.getItem("auth_token")
+      const res = await fetch(`http://localhost:8000/chat/messages/${userId}/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error("Greška pri dohvatanju poruka.")
+
+      const data = await res.json()
+
+      const formatted = data.map((msg) => ({
+        id: msg.id,
+        senderId: msg.sender_id,
+        message: msg.content,
+        timestamp: new Date(msg.timestamp).toLocaleTimeString("sr-Latn-BA", {
+          hour: "2-digit", minute: "2-digit"
+        }),
+        isOwn: msg.sender_id !== userId,
+      }))
+
+      setMessages(formatted)
+    } catch (err) {
+      console.error("❌ Greška kod učitavanja poruka:", err)
+    }
+  }
+
   const handleUserSelect = (user) => {
     setSelectedUser(user)
-    setMessages([]) // ili fetch poruke ako želiš
+    setMessages([])
+    fetchMessages(user.id, user.courseId) // ✅ OVO JE JEDINO DODANO U POSTOJEĆI KOD
   }
 
   const handleSendMessage = () => {
