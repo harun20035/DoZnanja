@@ -4,6 +4,8 @@ from repositories.chat_repository import (
     get_chat_partners_for_user,
     get_chat_partners_for_creator_students,
     get_chat_partners_for_creator_purchased,
+    save_message,
+    get_messages_between_users
 )
 
 def get_available_chat_partners(db: Session, current_user: User):
@@ -16,6 +18,10 @@ def get_available_chat_partners(db: Session, current_user: User):
         results = list(combined.values())
     else:
         return []
+    
+    for row in results:
+        print("ROW DEBUG:", row)
+
 
     # Pretvaranje Row objekata u dictove da FastAPI može serializirati
     return [
@@ -25,6 +31,15 @@ def get_available_chat_partners(db: Session, current_user: User):
             "surname": row.surname,
             "profile_image": row.profile_image,
             "course_title": row.course_title,
+            "course_id": row.course_id
         }
         for row in results
     ]
+
+# Spremanje poruke
+def save_message(db: Session, sender_id: int, receiver_id: int, course_id: int, content: str):
+    save_message(db, sender_id, receiver_id, course_id, content)
+
+# Dohvat svih poruka između dva usera za određeni kurs
+def get_chat_messages(db: Session, user1_id: int, user2_id: int, course_id: int):
+    return get_messages_between_users(db, user1_id, user2_id, course_id)
