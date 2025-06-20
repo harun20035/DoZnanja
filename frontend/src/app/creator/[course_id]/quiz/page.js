@@ -1,4 +1,3 @@
-// app/creator/[course_id]/quiz/page.js
 "use client"
 
 import { useState } from "react"
@@ -34,11 +33,45 @@ export default function QuizCreationPage() {
     setQuestions(updated)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Kviz za kurs:", course_id)
-    console.log("Pitanja:", questions)
-    // TODO: Pošalji podatke backendu
+
+    const token = localStorage.getItem("auth_token")
+    if (!token) {
+      alert("Niste prijavljeni.")
+      return
+    }
+
+    try {
+      for (const q of questions) {
+        const payload = {
+          quiz_id: parseInt(course_id),
+          question_text: q.question,
+          options: q.options.map((text, index) => ({
+            text,
+            is_correct: q.correctIndex === index
+          })),
+        }
+
+        const res = await fetch("http://localhost:8000/quiz/create-question", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        })
+
+        const data = await res.json()
+        if (!res.ok) {
+          throw new Error(data.detail || "Greška prilikom slanja pitanja.")
+        }
+      }
+
+      alert("Kviz je uspješno spremljen!")
+    } catch (err) {
+      alert("Greška: " + err.message)
+    }
   }
 
   return (
