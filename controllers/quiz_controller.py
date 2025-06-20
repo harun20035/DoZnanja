@@ -54,3 +54,10 @@ def create_question_controller(
         return {"message": "Pitanje spremljeno", "question_id": question.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/exists/{course_id}")
+def check_quiz_exists(course_id: int, db: SessionDep, current_user: User = Depends(get_current_user)):
+    from models.quiz_model import Quiz
+    existing_quiz = db.query(Quiz).filter(Quiz.course_id == course_id).first()
+    return {"exists": existing_quiz is not None}

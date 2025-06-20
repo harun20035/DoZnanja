@@ -12,6 +12,7 @@ export default function MyCoursesSection() {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [showToast, setShowToast] = useState(false);
 
   const router = useRouter();
 
@@ -27,9 +28,29 @@ export default function MyCoursesSection() {
     return `http://localhost:8000${fixedPath}`;
   };
 
-  const handleCreateQuizClick = (courseId) => {
-    setSelectedCourseId(courseId);
-    setShowModal(true);
+  const handleCreateQuizClick = async (courseId) => {
+    const token = localStorage.getItem("auth_token");
+    try {
+      const res = await fetch(`http://localhost:8000/quiz/exists/${courseId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (data.exists) {
+        setError(`❌ Kviz za ovaj kurs već postoji.`);
+        setShowToast(true);
+      } else {
+        setSelectedCourseId(courseId);
+        setShowModal(true);
+        setError(null);
+      }
+    } catch (err) {
+      setError("❌ Greška pri provjeri kviza.");
+      setShowToast(true);
+    }
   };
 
   const handleConfirmCreate = async () => {
@@ -113,7 +134,7 @@ export default function MyCoursesSection() {
         setCourses(mapped);
       } catch (error) {
         setError(error.message || "Došlo je do greške.");
-        setCourses([]);
+        setShowToast(true);
       } finally {
         setLoading(false);
       }
@@ -121,6 +142,16 @@ export default function MyCoursesSection() {
 
     fetchCourses();
   }, []);
+
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
 
   return (
     <>
@@ -135,8 +166,6 @@ export default function MyCoursesSection() {
         <div className="course-list">
           {loading ? (
             <p>Učitavanje kurseva...</p>
-          ) : error ? (
-            <p style={{ color: "red" }}>Greška: {error}</p>
           ) : courses.length === 0 ? (
             <p>Nemate još kurseva.</p>
           ) : (
@@ -196,7 +225,6 @@ export default function MyCoursesSection() {
         </div>
       </div>
 
-      {/* NOVI MODAL */}
       {showModal && (
         <div style={{
           position: "fixed",
@@ -251,6 +279,25 @@ export default function MyCoursesSection() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {showToast && error && (
+        <div style={{
+          position: "fixed",
+          bottom: "30px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          backgroundColor: "#ffe6e6",
+          color: "#cc0000",
+          padding: "1rem 1.5rem",
+          borderRadius: "8px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          fontWeight: "bold",
+          zIndex: 9999,
+          animation: "fadeInOut 3s ease-in-out"
+        }}>
+          {error}
         </div>
       )}
     </>
