@@ -61,3 +61,22 @@ def check_quiz_exists(course_id: int, db: SessionDep, current_user: User = Depen
     from models.quiz_model import Quiz
     existing_quiz = db.query(Quiz).filter(Quiz.course_id == course_id).first()
     return {"exists": existing_quiz is not None}
+
+
+@router.delete("/delete/{course_id}")
+def delete_quiz_and_questions(course_id: int, db: SessionDep, current_user: User = Depends(get_current_user)):
+    from models.quiz_model import Quiz
+    from models.quizQuestion_model import QuizQuestion
+
+    quiz = db.query(Quiz).filter(Quiz.course_id == course_id).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Kviz ne postoji")
+
+    # Prvo obriši pitanja
+    db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz.id).delete()
+
+    # Zatim obriši kviz
+    db.delete(quiz)
+    db.commit()
+
+    return {"message": "Kviz i pitanja su uspješno obrisani"}

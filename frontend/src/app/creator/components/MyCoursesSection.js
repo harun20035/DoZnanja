@@ -10,7 +10,8 @@ export default function MyCoursesSection() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [showToast, setShowToast] = useState(false);
 
@@ -39,13 +40,11 @@ export default function MyCoursesSection() {
 
       const data = await res.json();
 
+      setSelectedCourseId(courseId);
       if (data.exists) {
-        setError(`❌ Kviz za ovaj kurs već postoji.`);
-        setShowToast(true);
+        setShowDeleteModal(true); // kviz već postoji, pitamo korisnika želi li ga izbrisati
       } else {
-        setSelectedCourseId(courseId);
-        setShowModal(true);
-        setError(null);
+        setShowCreateModal(true); // kviz ne postoji, možemo ga kreirati
       }
     } catch (err) {
       setError("❌ Greška pri provjeri kviza.");
@@ -76,9 +75,31 @@ export default function MyCoursesSection() {
     } catch (err) {
       alert("Greška: " + err.message);
     } finally {
-      setShowModal(false);
+      setShowCreateModal(false);
     }
   };
+
+  const handleConfirmDelete = async () => {
+  try {
+    const token = localStorage.getItem("auth_token");
+
+    const res = await fetch(`http://localhost:8000/quiz/delete/${selectedCourseId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) throw new Error("Brisanje nije uspjelo.");
+
+    setShowDeleteModal(false);
+    alert("🗑️ Kviz obrisan.");
+    window.location.reload(); // ili refetchCourses() ako to izdvojiš kao funkciju
+  } catch (err) {
+    alert("Greška pri brisanju kviza: " + err.message);
+    setShowDeleteModal(false);
+  }
+};
 
   useEffect(() => {
     async function fetchCourses() {
@@ -225,58 +246,31 @@ export default function MyCoursesSection() {
         </div>
       </div>
 
-      {showModal && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          backgroundColor: "rgba(0,0,0,0.4)",
-          zIndex: 9999,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }}>
-          <div style={{
-            backgroundColor: "white",
-            padding: "2rem",
-            borderRadius: "12px",
-            width: "90%",
-            maxWidth: "400px",
-            boxShadow: "0 0 20px rgba(0,0,0,0.25)",
-            textAlign: "center"
-          }}>
+      {showCreateModal && (
+        <div style={modalBackdropStyle}>
+          <div style={modalStyle}>
             <h3 style={{ marginBottom: "1rem", color: "#6a0dad" }}>
               Želite li kreirati kviz za ovaj kurs?
             </h3>
-            <div style={{ display: "flex", justifyContent: "space-around", marginTop: "1.5rem" }}>
-              <button
-                style={{
-                  backgroundColor: "#6a0dad",
-                  color: "white",
-                  padding: "0.6rem 1.2rem",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer"
-                }}
-                onClick={handleConfirmCreate}
-              >
-                Da
+            <div style={modalActionsStyle}>
+              <button style={confirmButtonStyle} onClick={handleConfirmCreate}>Da</button>
+              <button style={cancelButtonStyle} onClick={() => setShowCreateModal(false)}>Ne</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div style={modalBackdropStyle}>
+          <div style={modalStyle}>
+            <h3 style={{ marginBottom: "1rem", color: "#cc0000" }}>
+              Kviz za ovaj kurs već postoji. Želite li ga izbrisati?
+            </h3>
+            <div style={modalActionsStyle}>
+              <button style={confirmButtonStyle} onClick={handleConfirmDelete}>
+                  Izbriši
               </button>
-              <button
-                style={{
-                  border: "2px solid #6a0dad",
-                  backgroundColor: "white",
-                  color: "#6a0dad",
-                  padding: "0.6rem 1.2rem",
-                  borderRadius: "8px",
-                  cursor: "pointer"
-                }}
-                onClick={() => setShowModal(false)}
-              >
-                Ne
-              </button>
+              <button style={cancelButtonStyle} onClick={() => setShowDeleteModal(false)}>Odustani</button>
             </div>
           </div>
         </div>
@@ -303,3 +297,50 @@ export default function MyCoursesSection() {
     </>
   );
 }
+
+const modalBackdropStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  backgroundColor: "rgba(0,0,0,0.4)",
+  zIndex: 9999,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center"
+};
+
+const modalStyle = {
+  backgroundColor: "white",
+  padding: "2rem",
+  borderRadius: "12px",
+  width: "90%",
+  maxWidth: "400px",
+  boxShadow: "0 0 20px rgba(0,0,0,0.25)",
+  textAlign: "center"
+};
+
+const modalActionsStyle = {
+  display: "flex",
+  justifyContent: "space-around",
+  marginTop: "1.5rem"
+};
+
+const confirmButtonStyle = {
+  backgroundColor: "#6a0dad",
+  color: "white",
+  padding: "0.6rem 1.2rem",
+  border: "none",
+  borderRadius: "8px",
+  cursor: "pointer"
+};
+
+const cancelButtonStyle = {
+  border: "2px solid #6a0dad",
+  backgroundColor: "white",
+  color: "#6a0dad",
+  padding: "0.6rem 1.2rem",
+  borderRadius: "8px",
+  cursor: "pointer"
+};
