@@ -39,72 +39,42 @@ export default function CourseViewerPage() {
 
   // Učitavanje podataka o kursu
   useEffect(() => {
-    const fetchCourseData = async () => {
-      try {
-        setLoading(true)
-        setError(null)
+  const fetchCourseData = async () => {
+    const token = localStorage.getItem("auth_token")
+    console.log("📦 Token:", token)
 
-        console.log("🔍 Fetching course data...")
-        console.log("📍 API_BASE_URL:", API_BASE_URL)
-        console.log("🆔 Course ID:", courseId)
+    if (!token) {
+      setError("Niste prijavljeni.")
+      setLoading(false)
+      return
+    }
 
-        const url = `http://localhost:8000/course/view/${id}`; // umjesto /courses/
-
-        console.log("🌐 Full URL:", url)
-
-        const token = localStorage.getItem("access_token")
-        console.log("🔑 Token exists:", !!token)
-
-        const headers = {
+    try {
+      const response = await fetch(`${API_BASE_URL}/course/view/${courseId}`, {
+        method: "GET",
+        headers: {
           "Content-Type": "application/json",
-        }
+          Authorization: `Bearer ${token}`,
+        },
+      })
 
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`
-        }
-
-        console.log("📤 Request headers:", headers)
-
-        const response = await fetch(url, {
-          method: "GET",
-          headers,
-        })
-
-        console.log("📥 Response status:", response.status)
-        console.log("📥 Response ok:", response.ok)
-
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error("❌ Error response:", errorText)
-          throw new Error(`HTTP error! status: ${response.status} - ${errorText}`)
-        }
-
-        const data = await response.json()
-        console.log("✅ Course data received:", data)
-
-        setCourseData(data)
-
-        // Postavi prvi step kao selektovan
-        if (data.steps && data.steps.length > 0) {
-          setSelectedStep(data.steps[0])
-          console.log("📝 First step selected:", data.steps[0].title)
-        }
-      } catch (err) {
-        console.error("💥 Error fetching course data:", err)
-        setError(`Greška pri učitavanju kursa: ${err.message}`)
-      } finally {
-        setLoading(false)
+      if (!response.ok) {
+        const text = await response.text()
+        throw new Error(`HTTP error! status: ${response.status} - ${text}`)
       }
-    }
 
-    if (courseId) {
-      fetchCourseData()
+      const data = await response.json()
+      setCourseData(data)
+      if (data.steps.length > 0) setSelectedStep(data.steps[0])
+    } catch (err) {
+      setError(`Greška: ${err.message}`)
+    } finally {
+      setLoading(false)
     }
-  }, [courseId])
-
-  const handleStepClick = (step) => {
-    setSelectedStep(step)
   }
+
+  if (courseId) fetchCourseData()
+}, [courseId])
 
   const markStepCompleted = (stepId) => {
     setCompletedSteps((prev) => new Set([...prev, stepId]))
