@@ -20,7 +20,6 @@ def get_all_courses(db: Session) -> List[Course]:
     results = db.execute(statement).scalars()
     return results.all()
 
-
 def get_user_by_id(db: Session, user_id: int):
     return db.query(User).filter(User.id == user_id).first()
 
@@ -35,21 +34,16 @@ def update_user(db: Session, user: User):
     db.refresh(user)
     return user
 
-
-
 def change_password(db : Session, user : User):
     db.add(user)
     db.commit()
     db.refresh(user)
-
     return {"message": "Lozinka uspješno promijenjena"}
-
 
 def change_photo(db : Session, user : User) :
     db.add(user)
     db.commit()
     db.refresh(user)
-
     return {"message": "Slika uspješno promijenjena"}
 
 def get_creator_courses(db: Session, creator_id: int):
@@ -57,7 +51,6 @@ def get_creator_courses(db: Session, creator_id: int):
     result = db.execute(statement)
     courses = result.scalars().all() 
     return courses
-
 
 def create_step(db: Session, step: CourseStep):
     db.add(step)
@@ -74,25 +67,46 @@ def get_step(db:Session,course_id:int):
 def get_step_delete(db: Session, step_id: int):
     return db.query(CourseStep).filter(CourseStep.id == step_id).first()
 
-
 def delete_step(db:Session,step:CourseStep):
     db.delete(step)
     db.commit()
-
 
 def update_step_course(db : Session, step : CourseStep) :
     db.add(step)
     db.commit()
     db.refresh(step)
-
     return {"message" : "Step uspjesno azuriran"}
-
 
 def get_course_by_id(session: Session, course_id: int) -> Optional[Course]:
     statement = select(Course).where(Course.id == course_id)
     return session.exec(statement).first()
 
+# NOVA FUNKCIJA - Dohvatanje kursa sa kreatorom i step-ovima
+def get_course_with_details(db: Session, course_id: int):
+    # Dohvati kurs
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        return None
+    
+    # Dohvati kreatora
+    creator = db.query(User).filter(User.id == course.creator_id).first()
+    
+    # Dohvati step-ove
+    steps = db.query(CourseStep).filter(CourseStep.course_id == course_id).order_by(CourseStep.id).all()
+    
+    return {
+        "course": course,
+        "creator": creator,
+        "steps": steps
+    }
 
+# NOVA FUNKCIJA - Provjeri da li je korisnik enrollovan
+def is_user_enrolled(db: Session, user_id: int, course_id: int) -> bool:
+    enrollment = db.query(CourseEnrollment).filter(
+        CourseEnrollment.user_id == user_id,
+        CourseEnrollment.course_id == course_id
+    ).first()
+    return enrollment is not None
 
 def get_courses_with_stats(db: Session, creator_id: int):
     courses = db.execute(
@@ -117,8 +131,7 @@ def get_courses_with_stats(db: Session, creator_id: int):
             "created_at": course.created_at,
             "students": students_count,
             "average_rating": round(course.average_rating or 0, 1),
-            "revenue": revenue  # brojčano, frontend ga formatira
+            "revenue": revenue
         })
 
     return result
-
