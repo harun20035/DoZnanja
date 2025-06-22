@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import {
   Box, Typography, List, ListItem, ListItemButton, ListItemText,
-  ListItemAvatar, Avatar, Paper, Container, Grid, IconButton,
+  ListItemAvatar, Avatar, Paper, Container, IconButton,
   Badge, Divider, TextField,
 } from "@mui/material"
 import {
@@ -19,6 +19,7 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("")
   const [isMounted, setIsMounted] = useState(false)
   const socketRef = useRef(null)
+  const messagesEndRef = useRef(null)
 
   useEffect(() => {
     setIsMounted(true)
@@ -36,9 +37,7 @@ export default function ChatPage() {
         const response = await fetch("http://localhost:8000/chat/partners", {
           headers: { Authorization: `Bearer ${token}` },
         })
-
         if (!response.ok) throw new Error("Greška pri dohvatanju partnera.")
-
         const data = await response.json()
         const transformed = data.map((partner) => ({
           id: partner.id,
@@ -72,9 +71,7 @@ export default function ChatPage() {
       const ws = new WebSocket(
         `ws://localhost:8000/chat/ws/chat/${selectedUser.id}/${selectedUser.courseId}?token=${token}`
       )
-
       ws.onopen = () => console.log("🔌 WebSocket konektovan")
-
       ws.onmessage = (event) => {
         const now = new Date()
         const msg = {
@@ -86,15 +83,16 @@ export default function ChatPage() {
         }
         setMessages((prev) => [...prev, msg])
       }
-
       ws.onclose = () => console.log("🔌 WebSocket zatvoren")
       socketRef.current = ws
-
       return () => ws.close()
     }
   }, [selectedUser])
 
-  // 🔥 DODANO OVDJE: Fetch starih poruka iz API-ja
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
   const fetchMessages = async (userId, courseId) => {
     try {
       const token = localStorage.getItem("auth_token")
@@ -102,9 +100,7 @@ export default function ChatPage() {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error("Greška pri dohvatanju poruka.")
-
       const data = await res.json()
-
       const formatted = data.map((msg) => ({
         id: msg.id,
         senderId: msg.sender_id,
@@ -114,7 +110,6 @@ export default function ChatPage() {
         }),
         isOwn: msg.sender_id !== userId,
       }))
-
       setMessages(formatted)
     } catch (err) {
       console.error("❌ Greška kod učitavanja poruka:", err)
@@ -124,7 +119,7 @@ export default function ChatPage() {
   const handleUserSelect = (user) => {
     setSelectedUser(user)
     setMessages([])
-    fetchMessages(user.id, user.courseId) // ✅ OVO JE JEDINO DODANO U POSTOJEĆI KOD
+    fetchMessages(user.id, user.courseId)
   }
 
   const handleSendMessage = () => {
@@ -151,11 +146,7 @@ export default function ChatPage() {
   }
 
   if (!isMounted || isLoading) {
-    return (
-      <Box p={4}>
-        <Typography>Učitavanje konverzacija...</Typography>
-      </Box>
-    )
+    return <Box p={4}><Typography>Učitavanje konverzacija...</Typography></Box>
   }
 
   return (
@@ -170,101 +161,72 @@ export default function ChatPage() {
       </Box>
 
       <Container maxWidth="xl" className={styles.mainContent}>
-        <Grid container spacing={0} className={styles.chatGrid}>
-          <Grid item xs={12} md={4} lg={3}>
-            <Paper className={styles.usersSidebar}>
-              <Box className={styles.sidebarHeader}>
-                <Typography variant="h6" className={styles.sidebarTitle}>Konverzacije</Typography>
-              </Box>
-              <Divider className={styles.divider} />
-              <List className={styles.usersList}>
-                {users.map((user) => (
-                  <ListItem key={`${user.id}-${user.courseId}`} disablePadding>
+        <Box display="flex" gap={2} width="100%">
+          <Paper className={styles.usersSidebar} style={{ flex: 1 }}>
+            <Box className={styles.sidebarHeader}>
+              <Typography variant="h6" className={styles.sidebarTitle}>Konverzacije</Typography>
+            </Box>
+            <Divider className={styles.divider} />
+            <List className={styles.usersList} style={{ height: '100%' }}>
+              {users.map((user) => (
+                <ListItem key={`${user.id}-${user.courseId}`} disablePadding>
+                  <ListItemButton
+                    onClick={() => handleUserSelect(user)}
+                    className={`${styles.userItem} ${selectedUser?.id === user.id ? styles.activeUser : ""}`}
+                  >
+                    <ListItemAvatar>
+                      <Badge
+                        overlap="circular"
+                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                        badgeContent={user.isOnline ? <Circle className={styles.onlineIndicator} /> : null}
+                      >
+                        <Avatar src={user.avatar} alt={user.name}>
+                          {!user.avatar && getInitials(`${user.name} ${user.surname}`)}
+                        </Avatar>
+                      </Badge>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={<Box className={styles.userInfo}><Typography className={styles.userName}>{user.name} {user.surname}</Typography></Box>}
+                      secondary={<Typography className={styles.userRole}>Kurs: <strong>{user.course}</strong></Typography>}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Paper>
 
-                    <ListItemButton
-                      onClick={() => handleUserSelect(user)}
-                      className={`${styles.userItem} ${selectedUser?.id === user.id ? styles.activeUser : ""}`}
-                    >
-                      <ListItemAvatar>
-                        <Badge
-                          overlap="circular"
-                          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                          badgeContent={user.isOnline ? <Circle className={styles.onlineIndicator} /> : null}
-                        >
-                          <Avatar src={user.avatar} alt={user.name}>
-                            {!user.avatar && getInitials(`${user.name} ${user.surname}`)}
-                          </Avatar>
-                        </Badge>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Box className={styles.userInfo}>
-                            <Typography className={styles.userName}>
-                              {user.name} {user.surname}
-                            </Typography>
-                            {user.unreadCount > 0 && (
-                              <Badge badgeContent={user.unreadCount} className={styles.unreadBadge} />
-                            )}
-                          </Box>
-                        }
-                        secondary={
-                          <Box>
-                            <Typography className={styles.userRole}>
-                              Kurs: <strong>{user.course}</strong>
-                            </Typography>
-                            <Typography className={styles.lastMessage}>{user.lastMessage}</Typography>
-                          </Box>
-                        }
-                      />
-                      <Typography className={styles.messageTime}>{user.lastMessageTime}</Typography>
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12} md={8} lg={9}>
+          <Paper className={styles.chatArea} style={{ flex: 2 }}>
             {selectedUser ? (
-              <Paper className={styles.chatArea}>
+              <>
                 <Box className={styles.chatAreaHeader}>
                   <Box className={styles.chatUserInfo}>
                     <Avatar src={selectedUser.avatar} alt={selectedUser.name}>
                       {!selectedUser.avatar && getInitials(`${selectedUser.name} ${selectedUser.surname}`)}
                     </Avatar>
                     <Box>
-                      <Typography variant="h6" className={styles.chatUserName}>
-                        {selectedUser.name} {selectedUser.surname}
-                      </Typography>
-                      <Typography className={styles.chatUserRole}>
-                        Kurs: {selectedUser.course} • {selectedUser.isOnline ? "Online" : "Offline"}
-                      </Typography>
+                      <Typography variant="h6" className={styles.chatUserName}>{selectedUser.name} {selectedUser.surname}</Typography>
+                      <Typography className={styles.chatUserRole}>Kurs: {selectedUser.course} • {selectedUser.isOnline ? "Online" : "Offline"}</Typography>
                     </Box>
                   </Box>
                   <Box className={styles.chatActions}>
-                    <IconButton className={styles.actionButton}><Phone /></IconButton>
-                    <IconButton className={styles.actionButton}><VideoCall /></IconButton>
-                    <IconButton className={styles.actionButton}><MoreVert /></IconButton>
+                    
                   </Box>
                 </Box>
 
                 <Box className={styles.messagesArea}>
                   {messages.map((msg) => (
-                    <Box
-  key={`${msg.id}-${msg.timestamp}`}
-  className={`${styles.messageContainer} ${msg.isOwn ? styles.ownMessage : styles.otherMessage}`}
->
-
+                    <Box key={`${msg.id}-${msg.timestamp}`} className={`${styles.messageContainer} ${msg.isOwn ? styles.ownMessage : styles.otherMessage}`}>
                       <Box className={styles.messageBubble}>
                         <Typography className={styles.messageText}>{msg.message}</Typography>
                         <Typography className={styles.messageTimestamp}>{msg.timestamp}</Typography>
                       </Box>
                     </Box>
                   ))}
+                  <Box ref={messagesEndRef} />
                 </Box>
 
                 <Box className={styles.messageInput}>
-                  <IconButton className={styles.attachButton}><AttachFile /></IconButton>
+                  
                   <TextField
                     fullWidth
                     multiline
@@ -276,22 +238,18 @@ export default function ChatPage() {
                     variant="outlined"
                     className={styles.inputField}
                   />
-                  <IconButton className={styles.emojiButton}><EmojiEmotions /></IconButton>
+                  
                   <IconButton onClick={handleSendMessage} className={styles.sendButton}><Send /></IconButton>
                 </Box>
-              </Paper>
+              </>
             ) : (
-              <Paper className={styles.noChatSelected}>
-                <Typography variant="h6" className={styles.noChatText}>
-                  Odaberite konverzaciju da počnete chat
-                </Typography>
-                <Typography variant="body2" className={styles.noChatSubtext}>
-                  Kliknite na korisnika s lijeve strane
-                </Typography>
-              </Paper>
+              <Box className={styles.noChatSelected}>
+                <Typography variant="h6" className={styles.noChatText}>Odaberite konverzaciju da počnete chat</Typography>
+                <Typography variant="body2" className={styles.noChatSubtext}>Kliknite na korisnika s lijeve strane</Typography>
+              </Box>
             )}
-          </Grid>
-        </Grid>
+          </Paper>
+        </Box>
       </Container>
     </Box>
   )
