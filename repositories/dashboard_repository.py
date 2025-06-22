@@ -15,10 +15,6 @@ from sqlalchemy.exc import SQLAlchemyError
 
 
 
-
-
-
-
 def get_all_courses(db: Session) -> List[Course]:
     statement = select(Course)
     results = db.execute(statement).scalars()
@@ -104,23 +100,46 @@ def get_top_courses_from_db(db: Session):
 
 
 
-def add_course_to_cart(db : Session, course_id : int, user_id : int ) :
-    existing_cart_item = db.query(Cart).filter(Cart.user_id == user_id, Cart.course_id == course_id).first()
+
+def add_course_to_cart(db: Session, course_id: int, user_id: int):
+    # 1. Provjera da li je kurs već u korpi
+    existing_cart_item = db.query(Cart).filter(
+        Cart.user_id == user_id,
+        Cart.course_id == course_id
+    ).first()
 
     if existing_cart_item:
         raise HTTPException(status_code=400, detail="Kurs je već dodan u korpu.")
-    
-    new_cart_item = Cart(user_id = user_id, course_id= course_id)
 
+    # 2. Provjera da li je kurs već kupljen
+    already_enrolled = db.query(CourseEnrollment).filter(
+        CourseEnrollment.user_id == user_id,
+        CourseEnrollment.course_id == course_id
+    ).first()
+
+    if already_enrolled:
+        raise HTTPException(status_code=400, detail="Već ste kupili ovaj kurs.")
+
+    # 3. Provjera da li korisnik pokušava dodati svoj vlastiti kurs
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Kurs ne postoji.")
+
+    if course.creator_id == user_id:
+        raise HTTPException(status_code=400, detail="Ne možete dodati vlastiti kurs u korpu.")
+
+    # 4. Dodavanje u korpu
+    new_cart_item = Cart(user_id=user_id, course_id=course_id)
     try:
         db.add(new_cart_item)
         db.commit()
         db.refresh(new_cart_item)
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=500, detail="Problem u dodavanju u korpu")
-    
+        raise HTTPException(status_code=500, detail="Problem u dodavanju u korpu.")
+
     return new_cart_item
+
 
 
 
