@@ -454,6 +454,88 @@
 }
 
 
+.chat-snippet {
+  word-wrap: break-word;
+  white-space: normal;
+  overflow: hidden;
+  max-height: 3.6em; /* 2 linije otprilike */
+  line-height: 1.8em;
+  text-overflow: ellipsis;
+}
+
+.chat-card {
+  padding: 16px;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.chat-message {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px !important;
+  margin-top: 16px;
+}
+
+.chat-avatar {
+  width: 45px;
+  height: 45px;
+  min-width: 45px;
+  border-radius: 50%;
+  background-color: #b388eb; /* ljubičasta */
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}
+
+.chat-avatar-img {
+  width: 45px;
+  height: 45px;
+  min-width: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+   /* pozadina kad slika postoji */
+}
+
+.chat-text {
+  flex: 1;
+  overflow: hidden;
+}
+
+.chat-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.chat-user {
+  color: #333;
+}
+
+.chat-time {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.chat-snippet {
+  font-size: 0.9rem;
+  color: #444;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* max 2 linije */
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  max-width: 100%;
+}
 
 
 

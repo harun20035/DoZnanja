@@ -7,6 +7,7 @@ from database import engine
 from fastapi.security import OAuth2PasswordBearer
 from schemas.chat_schema import ChatPartnerResponse, ChatMessageResponse
 import os, jwt
+from schemas.chat_schema import LastChatPreviewResponse
 
 router = APIRouter()
 
@@ -114,3 +115,11 @@ def get_chat_messages(
     current_user: User = Depends(get_current_user)
 ):
     return chat_service.get_chat_messages(db, current_user.id, user_id, course_id)
+
+
+@router.get("/messages/last", response_model=List[LastChatPreviewResponse])
+def get_last_messages_preview(
+    db: Session = Depends(get_sync_session),
+    current_user: User = Depends(get_current_user)
+):
+    return chat_service.get_last_chat_previews(db, current_user.id)
