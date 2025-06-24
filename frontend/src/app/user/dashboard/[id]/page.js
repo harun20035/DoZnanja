@@ -388,6 +388,36 @@ export default function CourseViewerPage() {
             )}
           </Grid>
         </Grid>
+        
+              <Button
+        variant="contained"
+        sx={{
+          marginTop: "2rem",
+          backgroundColor: "#8b5cf6",
+          "&:hover": { backgroundColor: "#7c3aed" },
+        }}
+        disabled={completedSteps.has(selectedStep.id)}
+        onClick={() => {
+          markStepCompleted(selectedStep.id)
+
+          // Otključavanje sljedećeg koraka
+          const currentIndex = steps.findIndex(s => s.id === selectedStep.id)
+          const nextStep = steps[currentIndex + 1]
+          if (nextStep) setSelectedStep(nextStep)
+        }}
+      >
+        {completedSteps.has(selectedStep.id) ? "Završeno" : "Označi kao završeno"}
+      </Button>
+
+      {completedSteps.size === steps.length && (
+  <Box sx={{ textAlign: "center", marginTop: "2rem" }}>
+    <Button variant="contained" sx={{ backgroundColor: "#10b981" }}>
+      Radi kviz
+    </Button>
+  </Box>
+)}
+
+
       </Container>
     </Box>
   )
