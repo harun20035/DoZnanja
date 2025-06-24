@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import {
   Box,
   Typography,
@@ -18,82 +19,151 @@ import {
   AppBar,
   Toolbar,
   Button,
+  CircularProgress,
+  Alert,
 } from "@mui/material"
 import { CheckCircle, RadioButtonUnchecked, School, AccessTime, PlayCircleOutline, Image } from "@mui/icons-material"
 
+// Konfiguracija API URL-a
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+
 export default function CourseViewerPage() {
-  // Hardcoded course data
-  const course = {
-    id: 1,
-    title: "Kompletni React.js Kurs za Početnike",
-    description:
-      "Naučite React.js od osnova do naprednih koncepata. Ovaj kurs pokriva sve što trebate znati da postanete React developer.",
-    price: 199.99,
-    category: "Programming",
-    image_thumbnail: "/placeholder.svg?height=300&width=400",
-    video_demo: "https://www.youtube.com/embed/dGcsHMXbSOA",
-    average_rating: 4.8,
-    creator_name: "Marko",
-    creator_surname: "Petrović",
-  }
+  const params = useParams()
+  const courseId = params.id
 
-  // Hardcoded steps data - različiti scenariji
-  const steps = [
-    {
-      id: 1,
-      course_id: 1,
-      title: "Uvod u React.js",
-      description:
-        "U ovoj lekciji ćemo se upoznati sa React.js bibliotekom, njenim osnovnim konceptima i zašto je toliko popularna u web developmentu. Vidjet ćemo i dijagram arhitekture React aplikacije.",
-      video_url: "https://www.youtube.com/embed/dGcsHMXbSOA",
-      image_url: "/placeholder.svg?height=400&width=600",
-    },
-    {
-      id: 2,
-      course_id: 1,
-      title: "Instalacija i Setup",
-      description: "Korak po korak vodič za instalaciju Node.js-a, npm-a i kreiranje prvog React projekta.",
-      video_url: "https://www.youtube.com/embed/SqcY0GlETPk",
-      image_url: null, // Samo video
-    },
-    {
-      id: 3,
-      course_id: 1,
-      title: "JSX Sintaksa - Dijagram",
-      description:
-        "Duboko zavirite u JSX sintaksu - React-ov način pisanja HTML-a u JavaScript-u. Ova lekcija sadrži samo dijagram sa objašnjenjem.",
-      video_url: null, // Samo slika
-      image_url: "/placeholder.svg?height=500&width=800",
-    },
-    {
-      id: 4,
-      course_id: 1,
-      title: "Komponente i Props - Kompletna lekcija",
-      description:
-        "Naučite kako da kreirate i koristite React komponente. Ova lekcija sadrži i video objašnjenje i dijagram komponenti.",
-      video_url: "https://www.youtube.com/embed/9D1x7-2FmTA",
-      image_url: "/placeholder.svg?height=450&width=700",
-    },
-    {
-      id: 5,
-      course_id: 1,
-      title: "State i Event Handling",
-      description: "Ovladajte React State-om i event handling-om. Samo tekstualno objašnjenje bez dodatnih materijala.",
-      video_url: null, // Samo tekst
-      image_url: null,
-    },
-  ]
-
-  const [selectedStep, setSelectedStep] = useState(steps[0])
+  const [courseData, setCourseData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [selectedStep, setSelectedStep] = useState(null)
   const [completedSteps, setCompletedSteps] = useState(new Set())
 
-  const handleStepClick = (step) => {
-    setSelectedStep(step)
+  // Učitavanje podataka o kursu
+  useEffect(() => {
+  const fetchCourseData = async () => {
+    const token = localStorage.getItem("auth_token")
+    console.log("📦 Token:", token)
+
+    if (!token) {
+      setError("Niste prijavljeni.")
+      setLoading(false)
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/course/view/${courseId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        const text = await response.text()
+        throw new Error(`HTTP error! status: ${response.status} - ${text}`)
+      }
+
+      const data = await response.json()
+      setCourseData(data)
+      if (data.steps.length > 0) setSelectedStep(data.steps[0])
+    } catch (err) {
+      setError(`Greška: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
+
+  if (courseId) fetchCourseData()
+}, [courseId])
 
   const markStepCompleted = (stepId) => {
     setCompletedSteps((prev) => new Set([...prev, stepId]))
   }
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)",
+        }}
+      >
+        <Box sx={{ textAlign: "center" }}>
+          <CircularProgress size={60} sx={{ color: "#8b5cf6", marginBottom: "1rem" }} />
+          <Typography variant="h6" sx={{ color: "#8b5cf6" }}>
+            Učitavanje kursa...
+          </Typography>
+          <Typography variant="body2" sx={{ color: "#666", marginTop: "0.5rem" }}>
+            API: {API_BASE_URL}/courses/view/{courseId}
+          </Typography>
+        </Box>
+      </Box>
+    )
+  }
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)",
+        }}
+      >
+        <Container maxWidth="md">
+          <Alert severity="error" sx={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+            {error}
+          </Alert>
+          <Paper sx={{ padding: "1rem", backgroundColor: "#f5f5f5" }}>
+            <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
+              Debug informacije:
+            </Typography>
+            <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+              API URL: {API_BASE_URL}/courses/view/{courseId}
+            </Typography>
+            <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+              Course ID: {courseId}
+            </Typography>
+            <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+              Environment: {process.env.NODE_ENV}
+            </Typography>
+          </Paper>
+          <Box sx={{ textAlign: "center", marginTop: "1rem" }}>
+            <Button variant="contained" onClick={() => window.location.reload()} sx={{ background: "#8b5cf6" }}>
+              Pokušaj ponovo
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+    )
+  }
+
+  if (!courseData) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)",
+        }}
+      >
+        <Container maxWidth="md">
+          <Alert severity="warning" sx={{ fontSize: "1.1rem" }}>
+            Kurs nije pronađen.
+          </Alert>
+        </Container>
+      </Box>
+    )
+  }
+
+  const { course, creator, steps, is_enrolled, total_steps } = courseData
 
   return (
     <Box sx={{ minHeight: "100vh", background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)" }}>
@@ -109,7 +179,7 @@ export default function CourseViewerPage() {
           <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <School sx={{ fontSize: "2rem", color: "white" }} />
             <Typography variant="h6" sx={{ fontWeight: 700, color: "white", fontSize: "1.5rem" }}>
-              EduPlatform
+              DoZnanja
             </Typography>
           </Box>
 
@@ -121,7 +191,7 @@ export default function CourseViewerPage() {
               Moji Kursevi
             </Button>
             <Button color="inherit" sx={{ fontWeight: 500 }}>
-              Korpa
+              Profil
             </Button>
           </Box>
         </Toolbar>
@@ -142,9 +212,16 @@ export default function CourseViewerPage() {
               <Typography variant="h3" sx={{ fontWeight: 700, marginBottom: "1rem" }}>
                 {course.title}
               </Typography>
-              <Typography variant="h6" sx={{ opacity: 0.95, marginBottom: "1.5rem", lineHeight: 1.6 }}>
+              <Typography variant="h6" sx={{ opacity: 0.95, marginBottom: "1rem", lineHeight: 1.6 }}>
                 {course.description}
               </Typography>
+
+              {creator && (
+                <Typography variant="body1" sx={{ opacity: 0.9, marginBottom: "1.5rem" }}>
+                  Kreator: {creator.name} {creator.surname} (@{creator.username})
+                </Typography>
+              )}
+
               <Box sx={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
                 <Chip
                   icon={<School />}
@@ -157,13 +234,24 @@ export default function CourseViewerPage() {
                 />
                 <Chip
                   icon={<AccessTime />}
-                  label={`${steps.length} lekcija`}
+                  label={`${total_steps} lekcija`}
                   sx={{
                     backgroundColor: "rgba(255, 255, 255, 0.15)",
                     color: "white",
                     border: "1px solid rgba(255, 255, 255, 0.3)",
                   }}
                 />
+                {is_enrolled && (
+                  <Chip
+                    icon={<CheckCircle />}
+                    label="Enrollovan"
+                    sx={{
+                      backgroundColor: "rgba(16, 185, 129, 0.2)",
+                      color: "white",
+                      border: "1px solid rgba(16, 185, 129, 0.3)",
+                    }}
+                  />
+                )}
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -171,7 +259,11 @@ export default function CourseViewerPage() {
                 <CardMedia
                   component="img"
                   height="200"
-                  image="/placeholder.svg?height=300&width=400"
+                  image={
+                    course.image_thumbnail
+                      ? `${API_BASE_URL}/${course.image_thumbnail}`
+                      : "/placeholder.svg?height=300&width=400"
+                  }
                   alt={course.title}
                 />
               </Card>
@@ -180,7 +272,7 @@ export default function CourseViewerPage() {
         </Container>
       </Box>
 
-      {/* Main Content */}
+      {/* Main Content - ostatak koda ostaje isti */}
       <Container maxWidth="xl" sx={{ paddingBottom: "3rem" }}>
         <Grid container spacing={3}>
           {/* Steps Sidebar */}
@@ -252,7 +344,7 @@ export default function CourseViewerPage() {
             </Paper>
           </Grid>
 
-          {/* Step Content */}
+          {/* Step Content - ostatak komponente */}
           <Grid item xs={12} md={8} lg={9}>
             {selectedStep ? (
               <Paper
@@ -264,7 +356,6 @@ export default function CourseViewerPage() {
                   overflow: "hidden",
                 }}
               >
-                {/* Step Header */}
                 <Box
                   sx={{
                     padding: "2rem",
@@ -278,154 +369,6 @@ export default function CourseViewerPage() {
                   <Typography variant="body1" sx={{ color: "#6b7280", lineHeight: 1.7 }}>
                     {selectedStep.description}
                   </Typography>
-
-                  {/* Content Type Indicators */}
-                  <Box sx={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-                    {selectedStep.video_url && (
-                      <Chip
-                        icon={<PlayCircleOutline />}
-                        label="Video"
-                        size="small"
-                        sx={{ backgroundColor: "rgba(139, 92, 246, 0.1)", color: "#8b5cf6" }}
-                      />
-                    )}
-                    {selectedStep.image_url && (
-                      <Chip
-                        icon={<Image />}
-                        label="Dijagram"
-                        size="small"
-                        sx={{ backgroundColor: "rgba(168, 85, 247, 0.1)", color: "#a855f7" }}
-                      />
-                    )}
-                    {!selectedStep.video_url && !selectedStep.image_url && (
-                      <Chip
-                        label="Tekstualna lekcija"
-                        size="small"
-                        sx={{ backgroundColor: "rgba(107, 114, 128, 0.1)", color: "#6b7280" }}
-                      />
-                    )}
-                  </Box>
-                </Box>
-
-                {/* Video Content */}
-                {selectedStep.video_url && (
-                  <Box sx={{ padding: "2rem", background: "white" }}>
-                    <Typography variant="h6" sx={{ color: "#8b5cf6", marginBottom: "1rem", fontWeight: 600 }}>
-                      📹 Video lekcija
-                    </Typography>
-                    <Box
-                      sx={{
-                        position: "relative",
-                        paddingTop: "56.25%",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                      }}
-                    >
-                      <iframe
-                        src={selectedStep.video_url}
-                        title={selectedStep.title}
-                        frameBorder="0"
-                        allowFullScreen
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%",
-                          border: "none",
-                        }}
-                      />
-                    </Box>
-                  </Box>
-                )}
-
-                {/* Image Content */}
-                {selectedStep.image_url && (
-                  <Box sx={{ padding: "2rem", background: selectedStep.video_url ? "#fafafa" : "white" }}>
-                    <Typography variant="h6" sx={{ color: "#a855f7", marginBottom: "1rem", fontWeight: 600 }}>
-                      📊 Dijagram i objašnjenje
-                    </Typography>
-                    <Box
-                      sx={{
-                        textAlign: "center",
-                        padding: "1rem",
-                        backgroundColor: "white",
-                        borderRadius: "8px",
-                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-                      }}
-                    >
-                      <img
-                        src={selectedStep.image_url || "/placeholder.svg"}
-                        alt={selectedStep.title}
-                        style={{
-                          maxWidth: "100%",
-                          height: "auto",
-                          borderRadius: "8px",
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                        }}
-                      />
-                    </Box>
-                  </Box>
-                )}
-
-                {/* No Media Content */}
-                {!selectedStep.video_url && !selectedStep.image_url && (
-                  <Box sx={{ padding: "2rem", background: "white" }}>
-                    <Typography variant="h6" sx={{ color: "#6b7280", marginBottom: "1rem", fontWeight: 600 }}>
-                      📝 Tekstualna lekcija
-                    </Typography>
-                    <Box
-                      sx={{
-                        padding: "1.5rem",
-                        backgroundColor: "#f9fafb",
-                        borderRadius: "8px",
-                        border: "1px solid #e5e7eb",
-                      }}
-                    >
-                      <Typography variant="body1" sx={{ color: "#374151", lineHeight: 1.8 }}>
-                        Ova lekcija sadrži detaljno tekstualno objašnjenje koncepata. Pročitajte pažljivo i pratite
-                        primjere koda koji će biti prikazani u narednim lekcijama.
-                      </Typography>
-                    </Box>
-                  </Box>
-                )}
-
-                {/* Step Actions */}
-                <Box
-                  sx={{
-                    padding: "2rem",
-                    background: "white",
-                    borderTop: "1px solid rgba(139, 92, 246, 0.1)",
-                  }}
-                >
-                  {!completedSteps.has(selectedStep.id) ? (
-                    <Button
-                      onClick={() => markStepCompleted(selectedStep.id)}
-                      sx={{
-                        background: "linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)",
-                        color: "white",
-                        border: "none",
-                        padding: "0.75rem 2rem",
-                        borderRadius: "8px",
-                        fontWeight: 500,
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        boxShadow: "0 2px 8px rgba(139, 92, 246, 0.3)",
-                        "&:hover": {
-                          transform: "translateY(-1px)",
-                          boxShadow: "0 4px 12px rgba(139, 92, 246, 0.4)",
-                        },
-                      }}
-                    >
-                      ✓ Označi kao završeno
-                    </Button>
-                  ) : (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <CheckCircle sx={{ color: "#10b981", fontSize: "1.5rem" }} />
-                      <Typography sx={{ color: "#10b981", fontWeight: 600 }}>Lekcija je završena!</Typography>
-                    </Box>
-                  )}
                 </Box>
               </Paper>
             ) : (
@@ -446,57 +389,6 @@ export default function CourseViewerPage() {
           </Grid>
         </Grid>
       </Container>
-
-      {/* Footer */}
-      <Box
-        component="footer"
-        sx={{
-          background: "linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%)",
-          color: "white",
-          padding: "3rem 0 1rem",
-          marginTop: "4rem",
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                <School sx={{ fontSize: "2rem", color: "white" }} />
-                <Typography variant="h6" sx={{ fontWeight: 700, color: "white" }}>
-                  EduPlatform
-                </Typography>
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{ color: "rgba(255, 255, 255, 0.8)", lineHeight: 1.6, marginBottom: "1rem" }}
-              >
-                Vaša destinacija za online učenje. Pristupite kvalitetnim kursevima i razvijajte svoje vještine uz
-                najbolje instruktore.
-              </Typography>
-            </Grid>
-
-            <Grid item xs={12} md={8}>
-              <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: "1rem", color: "white" }}>
-                © 2024 EduPlatform. Sva prava zadržana.
-              </Typography>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
     </Box>
   )
 }
-/* import CourseViewer from "../components/CourseViewer"
-import Navbar from "../components/Navbar"
-import Footer from "../components/Footer"
-
-export default function HomePage() {
-  return (
-    <>
-      <Navbar />
-      <CourseViewer />
-      <Footer />
-    </>
-  )
-}
- */
