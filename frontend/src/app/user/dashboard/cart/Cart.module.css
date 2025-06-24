@@ -1,3 +1,5 @@
+/* cart-redesign.module.css */
+
 .dashboardContainer {
   padding: 2rem;
   background-color: #f9f6ff;
@@ -111,4 +113,12 @@
   .modalBox {
     padding: 1.25rem;
   }
+}
+
+.success {
+  border-left: 6px solid #4caf50;
+}
+
+.error {
+  border-left: 6px solid #f44336;
 }

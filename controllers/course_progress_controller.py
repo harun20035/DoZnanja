@@ -1,10 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
-from database import get_session
+from database import engine
 from schemas.course_progress_schema import StepProgressUpdate
 from services.course_progress_service import complete_step_service, get_completed_steps_service
 
 router = APIRouter(prefix="/progress", tags=["progress"])
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+
 
 @router.post("/complete")
 def complete_step(data: StepProgressUpdate, session: Session = Depends(get_session)):
