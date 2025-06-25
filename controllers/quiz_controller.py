@@ -114,7 +114,12 @@ def submit_quiz_answers(
 ):
     from models.quizAnswer_model import QuizAnswer
     from models.quiz_option_model import QuizOption
+    from models.quizResult_model import QuizResult
+    from models.quiz_model import Quiz
+
     correct_count = 0
+    quiz_id = None
+    course_id = None
     for ans in answers:
         # Proveri da li je izabrana opcija tačna
         option = db.query(QuizOption).filter(QuizOption.id == int(ans["answer_given"])).first()
@@ -130,6 +135,48 @@ def submit_quiz_answers(
         db.add(quiz_answer)
         if is_correct:
             correct_count += 1
+        # Zapamti quiz_id i course_id iz prvog odgovora
+        if quiz_id is None:
+            # Pronađi quiz_id na osnovu question_id
+            from models.quizQuestion_model import QuizQuestion
+            question = db.query(QuizQuestion).filter(QuizQuestion.id == ans["question_id"]).first()
+            if question:
+                quiz_id = question.quiz_id
+        if course_id is None:
+            course_id = ans["course_id"]
     db.commit()
     passed = correct_count == len(answers)
+
+    # Upisi rezultat u quiz_results
+    if quiz_id and course_id:
+        quiz_result = QuizResult(
+            user_id=current_user.id,
+            quiz_id=quiz_id,
+            course_id=course_id,
+            score=correct_count,
+            passed=passed
+        )
+        db.add(quiz_result)
+        db.commit()
+
     return {"passed": passed, "score": correct_count}
+
+@router.get("/result/by-course/{course_id}")
+def get_quiz_result_by_course(
+    course_id: int,
+    db: SessionDep,
+    current_user: User = Depends(get_current_user)
+):
+    from models.quizResult_model import QuizResult
+    result = db.query(QuizResult).filter(
+        QuizResult.course_id == course_id,
+        QuizResult.user_id == current_user.id
+    ).order_by(QuizResult.timestamp.desc()).first()
+    if not result:
+        return {"exists": False}
+    return {
+        "exists": True,
+        "passed": result.passed,
+        "score": result.score,
+        "timestamp": result.timestamp
+    }

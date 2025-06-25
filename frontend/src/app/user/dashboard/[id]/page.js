@@ -213,6 +213,28 @@ export default function CourseViewerPage() {
     if (courseId) fetchCourseData()
   }, [courseId])
 
+  // Provera da li je korisnik već položio kviz
+  useEffect(() => {
+    const checkQuizResult = async () => {
+      try {
+        const token = localStorage.getItem('auth_token')
+        const res = await fetch(`${API_BASE_URL}/quiz/result/by-course/${courseId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        if (data.exists && data.passed) {
+          setShowReview(true)
+        } else {
+          setShowReview(false)
+        }
+      } catch (err) {
+        setShowReview(false)
+      }
+    }
+    if (courseId) checkQuizResult()
+  }, [courseId])
+
   const markStepCompleted = async (stepId) => {
     const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
     const userId = userData.id || 'guest'
