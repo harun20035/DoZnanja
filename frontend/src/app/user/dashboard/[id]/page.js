@@ -103,9 +103,9 @@ export default function CourseViewerPage() {
   }
 
   // Funkcija za čuvanje u localStorage kao fallback
-  const saveToLocalStorage = (stepId) => {
+  const saveToLocalStorage = (stepId, userId) => {
     try {
-      const key = `course_progress_${courseId}`
+      const key = `course_progress_${userId}_${courseId}`
       const existingProgress = JSON.parse(localStorage.getItem(key) || "[]")
       if (!existingProgress.includes(stepId)) {
         existingProgress.push(stepId)
@@ -117,9 +117,9 @@ export default function CourseViewerPage() {
   }
 
   // Funkcija za učitavanje iz localStorage kao fallback
-  const loadFromLocalStorage = () => {
+  const loadFromLocalStorage = (userId) => {
     try {
-      const key = `course_progress_${courseId}`
+      const key = `course_progress_${userId}_${courseId}`
       const progress = JSON.parse(localStorage.getItem(key) || "[]")
       return new Set(progress)
     } catch (err) {
@@ -132,6 +132,8 @@ export default function CourseViewerPage() {
   useEffect(() => {
     const fetchCourseData = async () => {
       const token = localStorage.getItem("auth_token")
+      const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+      const userId = userData.id
       console.log("📦 Token:", token)
 
       if (!token) {
@@ -165,9 +167,6 @@ export default function CourseViewerPage() {
         if (data.steps.length > 0) setSelectedStep(data.steps[0])
 
         // Učitavanje napretka
-        const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
-        const userId = userData.id
-
         if (userId) {
           // Prvo pokušaj da učitamo sa backend-a
           const backendProgress = await fetchCompletedSteps(userId)
@@ -175,19 +174,21 @@ export default function CourseViewerPage() {
             setCompletedSteps(backendProgress)
           } else {
             // Ako nema podataka na backend-u, učitaj iz localStorage
-            const localProgress = loadFromLocalStorage()
+            const localProgress = loadFromLocalStorage(userId)
             setCompletedSteps(localProgress)
           }
         } else {
           // Ako nema user ID, koristi samo localStorage
-          const localProgress = loadFromLocalStorage()
+          const localProgress = loadFromLocalStorage('guest')
           setCompletedSteps(localProgress)
         }
 
       } catch (err) {
         setError(`Greška: ${err.message}`)
         // U slučaju greške, učitaj iz localStorage
-        const localProgress = loadFromLocalStorage()
+        const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+        const userId = userData.id || 'guest'
+        const localProgress = loadFromLocalStorage(userId)
         setCompletedSteps(localProgress)
       } finally {
         setLoading(false)
@@ -198,11 +199,13 @@ export default function CourseViewerPage() {
   }, [courseId])
 
   const markStepCompleted = async (stepId) => {
+    const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+    const userId = userData.id || 'guest'
     // Dodaj u lokalno stanje odmah
     setCompletedSteps((prev) => new Set([...prev, stepId]))
     
     // Sačuvaj u localStorage kao fallback
-    saveToLocalStorage(stepId)
+    saveToLocalStorage(stepId, userId)
     
     // Pokušaj da sačuvaš na backend
     const backendSuccess = await saveStepProgress(stepId)
@@ -214,6 +217,24 @@ export default function CourseViewerPage() {
 
   const handleStepClick = (step) => {
     setSelectedStep(step)
+  }
+
+  // Ako korisnik nije upisan na kurs, prikaži poruku i zabrani pristup
+  if (courseData && courseData.is_enrolled === false) {
+    return (
+      <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)" }}>
+        <Container maxWidth="sm">
+          <Alert severity="error" sx={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+            Nemate pristup ovom kursu. Kupite kurs da biste mogli da učite.
+          </Alert>
+          <Box sx={{ textAlign: "center", marginTop: "1rem" }}>
+            <Button variant="contained" onClick={() => router.push("/user/dashboard")} sx={{ background: "#8b5cf6" }}>
+              Nazad na dashboard
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+    )
   }
 
   if (loading) {
