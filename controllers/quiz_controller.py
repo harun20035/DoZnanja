@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer
 from schemas.quiz_schema import QuizCreate, QuizQuestionCreate
@@ -105,3 +105,31 @@ def get_quiz_questions(quiz_id: int, db: SessionDep, current_user: User = Depend
             "options": [{"id": o.id, "text": o.text} for o in options]
         })
     return result
+
+@router.post("/answer/bulk")
+def submit_quiz_answers(
+    db: SessionDep,
+    answers: list[dict] = Body(...),
+    current_user: User = Depends(get_current_user)
+):
+    from models.quizAnswer_model import QuizAnswer
+    from models.quiz_option_model import QuizOption
+    correct_count = 0
+    for ans in answers:
+        # Proveri da li je izabrana opcija tačna
+        option = db.query(QuizOption).filter(QuizOption.id == int(ans["answer_given"])).first()
+        is_correct = option.is_correct if option else False
+
+        quiz_answer = QuizAnswer(
+            course_id=ans["course_id"],
+            user_id=ans["user_id"],
+            question_id=ans["question_id"],
+            answer_given=str(ans["answer_given"]),
+            is_correct=is_correct
+        )
+        db.add(quiz_answer)
+        if is_correct:
+            correct_count += 1
+    db.commit()
+    passed = correct_count == len(answers)
+    return {"passed": passed, "score": correct_count}
