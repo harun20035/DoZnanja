@@ -63,6 +63,7 @@ export default function CourseViewerPage() {
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const REVIEWS_PER_PAGE = 5;
+  const [quizResultStatus, setQuizResultStatus] = useState(null); // null | 'passed' | 'failed'
 
   // Funkcija za učitavanje završenih koraka sa backend-a
   const fetchCompletedSteps = async (userId) => {
@@ -235,11 +236,17 @@ export default function CourseViewerPage() {
         const data = await res.json()
         if (data.exists && data.passed) {
           setShowReview(true)
+          setQuizResultStatus('passed')
+        } else if (data.exists && !data.passed) {
+          setShowReview(true)
+          setQuizResultStatus('failed')
         } else {
           setShowReview(false)
+          setQuizResultStatus(null)
         }
       } catch (err) {
         setShowReview(false)
+        setQuizResultStatus(null)
       }
     }
     if (courseId) checkQuizResult()
@@ -814,6 +821,17 @@ export default function CourseViewerPage() {
             <Button variant="contained" sx={{ backgroundColor: "#10b981" }} onClick={handleOpenQuizModal}>
               Radi kviz
             </Button>
+          </Box>
+        )}
+        {/* Prikaz statusa kviza */}
+        {quizResultStatus === 'passed' && (
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <span style={{ color: '#10b981', fontWeight: 600, fontSize: 18 }}>Položili ste kviz!</span>
+          </Box>
+        )}
+        {quizResultStatus === 'failed' && (
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <span style={{ color: '#ef4444', fontWeight: 600, fontSize: 18 }}>Niste položili kviz.</span>
           </Box>
         )}
         {showReview && (
