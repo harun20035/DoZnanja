@@ -1,13 +1,15 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import "./page.css"
 
 export default function QuizCreationPage() {
   const { course_id } = useParams()
+  const router = useRouter()
   const [quizId, setQuizId] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
 
   const [questions, setQuestions] = useState(
     Array.from({ length: 5 }, () => ({
@@ -67,15 +69,18 @@ export default function QuizCreationPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitting(true)
 
     const token = localStorage.getItem("auth_token")
     if (!token) {
       alert("Niste prijavljeni.")
+      setSubmitting(false)
       return
     }
 
     if (!quizId) {
       alert("Nije pronađen validan ID kviza.")
+      setSubmitting(false)
       return
     }
 
@@ -106,8 +111,11 @@ export default function QuizCreationPage() {
       }
 
       alert("Kviz je uspješno spremljen!")
+      router.push("/creator")
     } catch (err) {
       alert("Greška: " + err.message)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -147,7 +155,7 @@ export default function QuizCreationPage() {
             </div>
           </div>
         ))}
-        <button type="submit">Spremi kviz</button>
+        <button type="submit" disabled={submitting}>{submitting ? "Spremanje..." : "Spremi kviz"}</button>
       </form>
     </div>
   )

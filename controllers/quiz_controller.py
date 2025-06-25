@@ -67,16 +67,41 @@ def check_quiz_exists(course_id: int, db: SessionDep, current_user: User = Depen
 def delete_quiz_and_questions(course_id: int, db: SessionDep, current_user: User = Depends(get_current_user)):
     from models.quiz_model import Quiz
     from models.quizQuestion_model import QuizQuestion
+    from models.quiz_option_model import QuizOption
 
-    quiz = db.query(Quiz).filter(Quiz.course_id == course_id).first()
-    if not quiz:
+    quizzes = db.query(Quiz).filter(Quiz.course_id == course_id).all()
+    if not quizzes:
         raise HTTPException(status_code=404, detail="Kviz ne postoji")
 
-    # Prvo obriši pitanja
-    db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz.id).delete()
-
-    # Zatim obriši kviz
-    db.delete(quiz)
+    for quiz in quizzes:
+        questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz.id).all()
+        for question in questions:
+            db.query(QuizOption).filter(QuizOption.question_id == question.id).delete()
+            db.delete(question)
+        db.delete(quiz)
     db.commit()
 
     return {"message": "Kviz i pitanja su uspješno obrisani"}
+
+@router.get("/by-course/{course_id}")
+def get_quiz_by_course(course_id: int, db: SessionDep, current_user: User = Depends(get_current_user)):
+    from models.quiz_model import Quiz
+    quiz = db.query(Quiz).filter(Quiz.course_id == course_id).order_by(Quiz.id.desc()).first()
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Kviz ne postoji za ovaj kurs")
+    return quiz
+
+@router.get("/questions/{quiz_id}")
+def get_quiz_questions(quiz_id: int, db: SessionDep, current_user: User = Depends(get_current_user)):
+    from models.quizQuestion_model import QuizQuestion
+    from models.quiz_option_model import QuizOption
+    questions = db.query(QuizQuestion).filter(QuizQuestion.quiz_id == quiz_id).all()
+    result = []
+    for q in questions:
+        options = db.query(QuizOption).filter(QuizOption.question_id == q.id).all()
+        result.append({
+            "id": q.id,
+            "question_text": q.question_text,
+            "options": [{"id": o.id, "text": o.text} for o in options]
+        })
+    return result

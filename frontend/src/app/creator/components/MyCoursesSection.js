@@ -38,17 +38,22 @@ export default function MyCoursesSection() {
         },
       });
 
-      const data = await res.json();
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = { exists: false };
+      }
 
       setSelectedCourseId(courseId);
-      if (data.exists) {
-        setShowDeleteModal(true); // kviz već postoji, pitamo korisnika želi li ga izbrisati
+      if (res.ok && data.exists) {
+        setShowDeleteModal(true);
       } else {
-        setShowCreateModal(true); // kviz ne postoji, možemo ga kreirati
+        setShowCreateModal(true);
       }
     } catch (err) {
-      setError("❌ Greška pri provjeri kviza.");
-      setShowToast(true);
+      setSelectedCourseId(courseId);
+      setShowCreateModal(true);
     }
   };
 
@@ -79,88 +84,66 @@ export default function MyCoursesSection() {
     }
   };
 
-  const handleConfirmDelete = async () => {
-  try {
-    const token = localStorage.getItem("auth_token");
+  async function fetchCourses() {
+    try {
+      setLoading(true);
+      setError(null);
 
-    const res = await fetch(`http://localhost:8000/quiz/delete/${selectedCourseId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const token = localStorage.getItem("auth_token");
 
-    if (!res.ok) throw new Error("Brisanje nije uspjelo.");
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      };
 
-    setShowDeleteModal(false);
-    alert("🗑️ Kviz obrisan.");
-    window.location.reload(); // ili refetchCourses() ako to izdvojiš kao funkciju
-  } catch (err) {
-    alert("Greška pri brisanju kviza: " + err.message);
-    setShowDeleteModal(false);
+      const [basicRes, statsRes] = await Promise.all([
+        fetch("http://localhost:8000/course/creator-courses", { headers }),
+        fetch("http://localhost:8000/course/creator-courses/stats", { headers }),
+      ]);
+
+      if (!basicRes.ok || !statsRes.ok) {
+        throw new Error("Neuspješno dohvaćanje podataka.");
+      }
+
+      const basicCourses = await basicRes.json();
+      const stats = await statsRes.json();
+
+      const statsMap = new Map(stats.map((s) => [s.id, s]));
+
+      const mapped = basicCourses.map((course) => {
+        const stat = statsMap.get(course.id) || {};
+
+        return {
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          image_thumbnail: course.image_thumbnail,
+          status: course.status,
+          created_at: course.created_at,
+          students: stat.students ?? 0,
+          rating: stat.average_rating ?? 0,
+          revenue: stat.revenue ?? "0.00 KM",
+          lastUpdated: course.created_at
+            ? new Date(course.created_at).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : "N/A",
+          published: course.status === "APPROVED",
+        };
+      });
+
+      setCourses(mapped);
+    } catch (error) {
+      setError(error.message || "Došlo je do greške.");
+      setShowToast(true);
+    } finally {
+      setLoading(false);
+    }
   }
-};
 
   useEffect(() => {
-    async function fetchCourses() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const token = localStorage.getItem("auth_token");
-
-        const headers = {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        };
-
-        const [basicRes, statsRes] = await Promise.all([
-          fetch("http://localhost:8000/course/creator-courses", { headers }),
-          fetch("http://localhost:8000/course/creator-courses/stats", { headers }),
-        ]);
-
-        if (!basicRes.ok || !statsRes.ok) {
-          throw new Error("Neuspješno dohvaćanje podataka.");
-        }
-
-        const basicCourses = await basicRes.json();
-        const stats = await statsRes.json();
-
-        const statsMap = new Map(stats.map((s) => [s.id, s]));
-
-        const mapped = basicCourses.map((course) => {
-          const stat = statsMap.get(course.id) || {};
-
-          return {
-            id: course.id,
-            title: course.title,
-            description: course.description,
-            image_thumbnail: course.image_thumbnail,
-            status: course.status,
-            created_at: course.created_at,
-            students: stat.students ?? 0,
-            rating: stat.average_rating ?? 0,
-            revenue: stat.revenue ?? "0.00 KM",
-            lastUpdated: course.created_at
-              ? new Date(course.created_at).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })
-              : "N/A",
-            published: course.status === "APPROVED",
-          };
-        });
-
-        setCourses(mapped);
-      } catch (error) {
-        setError(error.message || "Došlo je do greške.");
-        setShowToast(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchCourses();
   }, []);
 
@@ -173,6 +156,30 @@ export default function MyCoursesSection() {
       return () => clearTimeout(timer);
     }
   }, [showToast]);
+
+  const handleConfirmDelete = async () => {
+    try {
+      const token = localStorage.getItem("auth_token");
+
+      const res = await fetch(`http://localhost:8000/quiz/delete/${selectedCourseId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Brisanje nije uspjelo.");
+
+      setShowDeleteModal(false);
+      setSelectedCourseId(null);
+      alert("🗑️ Kviz obrisan.");
+      await fetchCourses();
+    } catch (err) {
+      alert("Greška pri brisanju kviza: " + err.message);
+      setShowDeleteModal(false);
+      setSelectedCourseId(null);
+    }
+  };
 
   return (
     <>

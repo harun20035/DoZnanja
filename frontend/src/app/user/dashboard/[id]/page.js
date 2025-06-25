@@ -21,6 +21,13 @@ import {
   Button,
   CircularProgress,
   Alert,
+  Modal,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  Snackbar,
 } from "@mui/material"
 import { CheckCircle, RadioButtonUnchecked, School, AccessTime, PlayCircleOutline, Image } from "@mui/icons-material"
 
@@ -38,6 +45,14 @@ export default function CourseViewerPage() {
   const [selectedStep, setSelectedStep] = useState(null)
   const [completedSteps, setCompletedSteps] = useState(new Set())
   const [savingProgress, setSavingProgress] = useState(false)
+  const [quizModalOpen, setQuizModalOpen] = useState(false)
+  const [quiz, setQuiz] = useState(null)
+  const [quizQuestions, setQuizQuestions] = useState([])
+  const [quizAnswers, setQuizAnswers] = useState({})
+  const [quizResult, setQuizResult] = useState(null)
+  const [quizLoading, setQuizLoading] = useState(false)
+  const [showReview, setShowReview] = useState(false)
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', success: false })
 
   // Funkcija za učitavanje završenih koraka sa backend-a
   const fetchCompletedSteps = async (userId) => {
@@ -217,6 +232,86 @@ export default function CourseViewerPage() {
 
   const handleStepClick = (step) => {
     setSelectedStep(step)
+  }
+
+  // Fetch quiz and questions
+  const fetchQuizAndQuestions = async () => {
+    setQuizLoading(true)
+    try {
+      const token = localStorage.getItem('auth_token')
+      // 1. Fetch quiz for this course
+      const quizRes = await fetch(`${API_BASE_URL}/quiz/by-course/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!quizRes.ok) throw new Error('Kviz nije pronađen za ovaj kurs.')
+      const quizData = await quizRes.json()
+      setQuiz(quizData)
+      // 2. Fetch questions for this quiz
+      const questionsRes = await fetch(`${API_BASE_URL}/quiz/questions/${quizData.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!questionsRes.ok) throw new Error('Pitanja nisu pronađena.')
+      const questionsData = await questionsRes.json()
+      setQuizQuestions(questionsData)
+      setQuizAnswers({})
+      setQuizResult(null)
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, success: false })
+    } finally {
+      setQuizLoading(false)
+    }
+  }
+
+  // Otvori modal i fetchuj kviz
+  const handleOpenQuizModal = () => {
+    setQuizModalOpen(true)
+    fetchQuizAndQuestions()
+  }
+  const handleCloseQuizModal = () => {
+    setQuizModalOpen(false)
+    setQuizResult(null)
+    setQuizAnswers({})
+  }
+
+  // Selektovanje odgovora
+  const handleAnswerChange = (questionId, optionId) => {
+    setQuizAnswers(prev => ({ ...prev, [questionId]: optionId }))
+  }
+
+  // Submit kviza
+  const handleQuizSubmit = async () => {
+    // Provera da li su sva pitanja odgovorena
+    if (quizQuestions.some(q => !quizAnswers[q.id])) {
+      setSnackbar({ open: true, message: 'Odgovorite na sva pitanja!', success: false })
+      return
+    }
+    try {
+      const token = localStorage.getItem('auth_token')
+      const userData = JSON.parse(localStorage.getItem('user_data') || '{}')
+      // Pripremi payload
+      const payload = quizQuestions.map(q => ({
+        course_id: courseId,
+        user_id: userData.id,
+        question_id: q.id,
+        answer_given: quizAnswers[q.id]
+      }))
+      // Pretpostavljam da postoji endpoint /quiz/answer/bulk za slanje svih odgovora odjednom
+      const res = await fetch(`${API_BASE_URL}/quiz/answer/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      })
+      if (!res.ok) throw new Error('Greška pri slanju odgovora.')
+      const result = await res.json()
+      setQuizResult(result)
+      setSnackbar({ open: true, message: result.passed ? 'Čestitamo, položili ste kviz!' : 'Nažalost, niste položili kviz.', success: result.passed })
+      setShowReview(true)
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, success: false })
+    }
   }
 
   // Ako korisnik nije upisan na kurs, prikaži poruku i zabrani pristup
@@ -628,15 +723,88 @@ export default function CourseViewerPage() {
           </Grid>
         </Grid>
         
-        {completedSteps.size === steps.length && (
+        {/* Dugme za kviz ili recenziju */}
+        {completedSteps.size === steps.length && !showReview && (
           <Box sx={{ textAlign: "center", marginTop: "2rem" }}>
-            <Button variant="contained" sx={{ backgroundColor: "#10b981" }}>
+            <Button variant="contained" sx={{ backgroundColor: "#10b981" }} onClick={handleOpenQuizModal}>
               Radi kviz
+            </Button>
+          </Box>
+        )}
+        {showReview && (
+          <Box sx={{ textAlign: "center", marginTop: "2rem" }}>
+            <Button variant="contained" sx={{ backgroundColor: "#8b5cf6" }}>
+              Ostavi recenziju
             </Button>
           </Box>
         )}
 
       </Container>
+
+      {/* Kviz modal */}
+      <Modal open={quizModalOpen} onClose={handleCloseQuizModal}>
+        <Box sx={{
+          maxWidth: 600,
+          maxHeight: '80vh',
+          margin: '5% auto',
+          background: 'white',
+          borderRadius: 4,
+          p: 4,
+          boxShadow: 24,
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <Typography variant="h5" sx={{ mb: 2 }}>Kviz za kurs</Typography>
+          {quizLoading ? (
+            <Typography>Učitavanje kviza...</Typography>
+          ) : quizQuestions.length > 0 ? (
+            <form onSubmit={e => { e.preventDefault(); handleQuizSubmit(); }}>
+              {quizQuestions.map((q, idx) => (
+                <FormControl key={q.id} component="fieldset" sx={{ mb: 3, width: '100%' }}>
+                  <FormLabel component="legend">{idx + 1}. {q.question_text}</FormLabel>
+                  <RadioGroup
+                    value={quizAnswers[q.id] || ''}
+                    onChange={e => handleAnswerChange(q.id, e.target.value)}
+                  >
+                    {q.options.map(opt => (
+                      <FormControlLabel
+                        key={opt.id}
+                        value={opt.id}
+                        control={<Radio />}
+                        label={opt.text}
+                      />
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+              ))}
+              <Button type="submit" variant="contained" sx={{ mt: 2, backgroundColor: '#10b981' }}>
+                Pošalji odgovore
+              </Button>
+            </form>
+          ) : (
+            <Typography>Nema dostupnih pitanja za ovaj kviz.</Typography>
+          )}
+          {quizResult && (
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
+              <Typography variant="h6" color={quizResult.passed ? 'success.main' : 'error.main'}>
+                {quizResult.passed ? 'Čestitamo, položili ste kviz!' : 'Nažalost, niste položili kviz.'}
+              </Typography>
+              {quizResult.score !== undefined && (
+                <Typography sx={{ mt: 1 }}>Rezultat: {quizResult.score} / {quizQuestions.length}</Typography>
+              )}
+              <Button sx={{ mt: 2 }} onClick={handleCloseQuizModal}>Zatvori</Button>
+            </Box>
+          )}
+        </Box>
+      </Modal>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        message={snackbar.message}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      />
     </Box>
   )
 }
