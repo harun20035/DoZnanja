@@ -3,6 +3,8 @@ from models.reviewCourses_model import Review
 from repositories import review_repository
 from schemas.review_schema import ReviewCreate
 from models.user_model import User
+from models.course_model import Course
+from sqlalchemy import func
 
 def add_review_service(db: Session, review_data: ReviewCreate, user_id: int):
     review = Review(
@@ -11,7 +13,27 @@ def add_review_service(db: Session, review_data: ReviewCreate, user_id: int):
         rating=review_data.rating,
         comment=review_data.comment
     )
-    return review_repository.add_review(db, review)
+    added_review = review_repository.add_review(db, review)
+    
+    # Ažuriraj prosečnu ocenu kursa
+    update_course_average_rating(db, review_data.course_id)
+    
+    return added_review
+
+def update_course_average_rating(db: Session, course_id: int):
+    """Izračunaj i ažuriraj prosečnu ocenu kursa na osnovu svih recenzija"""
+    # Izračunaj prosečnu ocenu svih recenzija za kurs
+    avg_rating = db.query(func.avg(Review.rating)).filter(Review.course_id == course_id).scalar()
+    
+    # Ako nema recenzija, postavi na 0
+    if avg_rating is None:
+        avg_rating = 0.0
+    
+    # Ažuriraj kurs
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if course:
+        course.average_rating = round(float(avg_rating), 1)
+        db.commit()
 
 def get_reviews_by_course_service(db: Session, course_id: int, skip: int = 0, limit: int = 5):
     reviews = review_repository.get_reviews_by_course(db, course_id, skip=skip, limit=limit)

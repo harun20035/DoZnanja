@@ -53,6 +53,7 @@ export default function CourseViewerPage() {
   const [quizAnswers, setQuizAnswers] = useState({})
   const [quizResult, setQuizResult] = useState(null)
   const [quizLoading, setQuizLoading] = useState(false)
+  const [quizSubmitted, setQuizSubmitted] = useState(false)
   const [showReview, setShowReview] = useState(false)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', success: false })
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -310,6 +311,7 @@ export default function CourseViewerPage() {
     setQuizModalOpen(false)
     setQuizResult(null)
     setQuizAnswers({})
+    setQuizSubmitted(false)
   }
 
   // Selektovanje odgovora
@@ -324,6 +326,10 @@ export default function CourseViewerPage() {
       setSnackbar({ open: true, message: 'Odgovorite na sva pitanja!', success: false })
       return
     }
+    
+    // Zaključaj dugme nakon prvog klika
+    setQuizSubmitted(true)
+    
     try {
       const token = localStorage.getItem('auth_token')
       const userData = JSON.parse(localStorage.getItem('user_data') || '{}')
@@ -350,6 +356,8 @@ export default function CourseViewerPage() {
       setShowReview(true)
     } catch (err) {
       setSnackbar({ open: true, message: err.message, success: false })
+      // Ako je greška, otključaj dugme da korisnik može ponovo pokušati
+      setQuizSubmitted(false)
     }
   }
 
@@ -906,8 +914,8 @@ export default function CourseViewerPage() {
                   </RadioGroup>
                 </FormControl>
               ))}
-              <Button type="submit" variant="contained" sx={{ mt: 2, backgroundColor: '#10b981' }}>
-                Pošalji odgovore
+              <Button type="submit" variant="contained" sx={{ mt: 2, backgroundColor: '#10b981' }} disabled={quizSubmitted}>
+                {quizSubmitted ? 'Odgovori poslani...' : 'Pošalji odgovore'}
               </Button>
             </form>
           ) : (
