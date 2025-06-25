@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import {
   Box,
   Typography,
@@ -29,6 +29,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 export default function CourseViewerPage() {
   const params = useParams()
+  const router = useRouter()
   const courseId = params.id
 
   const [courseData, setCourseData] = useState(null)
@@ -36,21 +37,13 @@ export default function CourseViewerPage() {
   const [error, setError] = useState(null)
   const [selectedStep, setSelectedStep] = useState(null)
   const [completedSteps, setCompletedSteps] = useState(new Set())
+  const [savingProgress, setSavingProgress] = useState(false)
 
-  // Učitavanje podataka o kursu
-  useEffect(() => {
-  const fetchCourseData = async () => {
-    const token = localStorage.getItem("auth_token")
-    console.log("📦 Token:", token)
-
-    if (!token) {
-      setError("Niste prijavljeni.")
-      setLoading(false)
-      return
-    }
-
+  // Funkcija za učitavanje završenih koraka sa backend-a
+  const fetchCompletedSteps = async (userId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/course/view/${courseId}`, {
+      const token = localStorage.getItem("auth_token")
+      const response = await fetch(`${API_BASE_URL}/progress/completed/${userId}/${courseId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -58,26 +51,169 @@ export default function CourseViewerPage() {
         },
       })
 
-      if (!response.ok) {
-        const text = await response.text()
-        throw new Error(`HTTP error! status: ${response.status} - ${text}`)
+      if (response.ok) {
+        const completedStepIds = await response.json()
+        return new Set(completedStepIds)
+      }
+    } catch (err) {
+      console.error("Greška pri učitavanju napretka:", err)
+    }
+    return new Set()
+  }
+
+  // Funkcija za čuvanje završenog koraka na backend
+  const saveStepProgress = async (stepId) => {
+    try {
+      setSavingProgress(true)
+      const token = localStorage.getItem("auth_token")
+      const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+      const userId = userData.id
+
+      if (!userId) {
+        console.error("User ID nije pronađen")
+        return false
       }
 
-      const data = await response.json()
-      setCourseData(data)
-      if (data.steps.length > 0) setSelectedStep(data.steps[0])
+      const response = await fetch(`${API_BASE_URL}/progress/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          course_id: parseInt(courseId),
+          step_id: stepId,
+          completed: true
+        }),
+      })
+
+      if (response.ok) {
+        return true
+      } else {
+        console.error("Greška pri čuvanju napretka:", response.statusText)
+        return false
+      }
     } catch (err) {
-      setError(`Greška: ${err.message}`)
+      console.error("Greška pri čuvanju napretka:", err)
+      return false
     } finally {
-      setLoading(false)
+      setSavingProgress(false)
     }
   }
 
-  if (courseId) fetchCourseData()
-}, [courseId])
+  // Funkcija za čuvanje u localStorage kao fallback
+  const saveToLocalStorage = (stepId) => {
+    try {
+      const key = `course_progress_${courseId}`
+      const existingProgress = JSON.parse(localStorage.getItem(key) || "[]")
+      if (!existingProgress.includes(stepId)) {
+        existingProgress.push(stepId)
+        localStorage.setItem(key, JSON.stringify(existingProgress))
+      }
+    } catch (err) {
+      console.error("Greška pri čuvanju u localStorage:", err)
+    }
+  }
 
-  const markStepCompleted = (stepId) => {
+  // Funkcija za učitavanje iz localStorage kao fallback
+  const loadFromLocalStorage = () => {
+    try {
+      const key = `course_progress_${courseId}`
+      const progress = JSON.parse(localStorage.getItem(key) || "[]")
+      return new Set(progress)
+    } catch (err) {
+      console.error("Greška pri učitavanju iz localStorage:", err)
+      return new Set()
+    }
+  }
+
+  // Učitavanje podataka o kursu i napretku
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      const token = localStorage.getItem("auth_token")
+      console.log("📦 Token:", token)
+
+      if (!token) {
+        setError("Niste prijavljeni.")
+        setLoading(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/course/view/${courseId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (!response.ok) {
+          const text = await response.text()
+          throw new Error(`HTTP error! status: ${response.status} - ${text}`)
+        }
+
+        if (response.status === 403) {
+          alert("Nemate pristup ovom kursu.");
+          router.push("/user/dashboard");
+          return;
+        }
+
+        const data = await response.json()
+        setCourseData(data)
+        if (data.steps.length > 0) setSelectedStep(data.steps[0])
+
+        // Učitavanje napretka
+        const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+        const userId = userData.id
+
+        if (userId) {
+          // Prvo pokušaj da učitamo sa backend-a
+          const backendProgress = await fetchCompletedSteps(userId)
+          if (backendProgress.size > 0) {
+            setCompletedSteps(backendProgress)
+          } else {
+            // Ako nema podataka na backend-u, učitaj iz localStorage
+            const localProgress = loadFromLocalStorage()
+            setCompletedSteps(localProgress)
+          }
+        } else {
+          // Ako nema user ID, koristi samo localStorage
+          const localProgress = loadFromLocalStorage()
+          setCompletedSteps(localProgress)
+        }
+
+      } catch (err) {
+        setError(`Greška: ${err.message}`)
+        // U slučaju greške, učitaj iz localStorage
+        const localProgress = loadFromLocalStorage()
+        setCompletedSteps(localProgress)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (courseId) fetchCourseData()
+  }, [courseId])
+
+  const markStepCompleted = async (stepId) => {
+    // Dodaj u lokalno stanje odmah
     setCompletedSteps((prev) => new Set([...prev, stepId]))
+    
+    // Sačuvaj u localStorage kao fallback
+    saveToLocalStorage(stepId)
+    
+    // Pokušaj da sačuvaš na backend
+    const backendSuccess = await saveStepProgress(stepId)
+    
+    if (!backendSuccess) {
+      console.warn("Napretak nije sačuvan na backend-u, ali je sačuvan lokalno")
+    }
+  }
+
+  const handleStepClick = (step) => {
+    setSelectedStep(step)
   }
 
   if (loading) {
@@ -370,6 +506,88 @@ export default function CourseViewerPage() {
                     {selectedStep.description}
                   </Typography>
                 </Box>
+
+                {/* Video Content */}
+                {selectedStep.video_url && (
+                  <Box sx={{ padding: "2rem", background: "white" }}>
+                    <Box sx={{ position: "relative", paddingTop: "56.25%", borderRadius: "8px", overflow: "hidden", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }}>
+                      {selectedStep.video_url.includes('youtube.com') || selectedStep.video_url.includes('youtu.be') ? (
+                        // YouTube video
+                        <iframe
+                          src={selectedStep.video_url}
+                          title={selectedStep.title}
+                          frameBorder="0"
+                          allowFullScreen
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                          }}
+                        />
+                      ) : (
+                        // Local video file
+                        <video
+                          controls
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                          }}
+                        >
+                          <source 
+                            src={`${API_BASE_URL}/${selectedStep.video_url.replace(/\\/g, '/')}`} 
+                            type="video/mp4" 
+                          />
+                          Vaš browser ne podržava video tag.
+                        </video>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+
+                {/* Image Content */}
+                {selectedStep.image_url && (
+                  <Box sx={{ padding: "2rem", background: "white", textAlign: "center" }}>
+                    <img
+                      src={`${API_BASE_URL}/${selectedStep.image_url.replace(/\\/g, '/')}`}
+                      alt={selectedStep.title}
+                      style={{
+                        maxWidth: "100%",
+                        height: "auto",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                      }}
+                    />
+                  </Box>
+                )}
+
+                {/* Step Actions */}
+                <Box sx={{ padding: "2rem", background: "white", borderTop: "1px solid rgba(139, 92, 246, 0.1)" }}>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "#8b5cf6",
+                      "&:hover": { backgroundColor: "#7c3aed" },
+                    }}
+                    disabled={completedSteps.has(selectedStep?.id) || savingProgress || !selectedStep}
+                    onClick={async () => {
+                      if (!selectedStep) return
+                      
+                      await markStepCompleted(selectedStep.id)
+
+                      // Otključavanje sljedećeg koraka
+                      const currentIndex = steps.findIndex(s => s.id === selectedStep.id)
+                      const nextStep = steps[currentIndex + 1]
+                      if (nextStep) setSelectedStep(nextStep)
+                    }}
+                  >
+                    {savingProgress ? "Čuvanje..." : completedSteps.has(selectedStep?.id) ? "Završeno" : "Označi kao završeno"}
+                  </Button>
+                </Box>
               </Paper>
             ) : (
               <Paper
@@ -389,34 +607,13 @@ export default function CourseViewerPage() {
           </Grid>
         </Grid>
         
-              <Button
-        variant="contained"
-        sx={{
-          marginTop: "2rem",
-          backgroundColor: "#8b5cf6",
-          "&:hover": { backgroundColor: "#7c3aed" },
-        }}
-        disabled={completedSteps.has(selectedStep.id)}
-        onClick={() => {
-          markStepCompleted(selectedStep.id)
-
-          // Otključavanje sljedećeg koraka
-          const currentIndex = steps.findIndex(s => s.id === selectedStep.id)
-          const nextStep = steps[currentIndex + 1]
-          if (nextStep) setSelectedStep(nextStep)
-        }}
-      >
-        {completedSteps.has(selectedStep.id) ? "Završeno" : "Označi kao završeno"}
-      </Button>
-
-      {completedSteps.size === steps.length && (
-  <Box sx={{ textAlign: "center", marginTop: "2rem" }}>
-    <Button variant="contained" sx={{ backgroundColor: "#10b981" }}>
-      Radi kviz
-    </Button>
-  </Box>
-)}
-
+        {completedSteps.size === steps.length && (
+          <Box sx={{ textAlign: "center", marginTop: "2rem" }}>
+            <Button variant="contained" sx={{ backgroundColor: "#10b981" }}>
+              Radi kviz
+            </Button>
+          </Box>
+        )}
 
       </Container>
     </Box>
