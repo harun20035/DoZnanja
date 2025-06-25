@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 from database import engine
 from schemas.course_schema import CourseCreate, Category, UserUpdate, ChangePassword, ChangePhoto, StepDate, CourseSchema, CourseWithDetailsResponse
 from services.course_service import create_course, update_user_data, change_password_data, change_photo_data,get_creator_courses_list,create_step_course_service,get_step_course_service,delete_step_course_service
@@ -17,6 +17,9 @@ from fastapi import APIRouter, Depends
 from services import course_service
 from typing import Optional
 from services.course_service import get_course
+from services import review_service
+from schemas.review_schema import ReviewCreate
+from schemas.review_schema import ReviewResponse
 
 router = APIRouter()
 
@@ -130,3 +133,23 @@ def get_course_endpoint(course_id: int, session: Session = Depends(get_session))
 @router.get("/creator-courses/stats")
 def get_creator_courses(db : SessionDep, current_user: User = Depends(get_current_user)):
     return course_service.get_creator_courses_with_stats(db, current_user)
+
+@router.post("/reviews/", response_model=ReviewResponse)
+def add_review(
+    review: ReviewCreate,
+    db: SessionDep,
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        return review_service.add_review_service(db, review, current_user.id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/reviews/by-course/{course_id}", response_model=List[ReviewResponse])
+def get_reviews_by_course(
+    course_id: int,
+    db: SessionDep,
+    skip: int = 0,
+    limit: int = 5
+):
+    return review_service.get_reviews_by_course_service(db, course_id, skip=skip, limit=limit)
