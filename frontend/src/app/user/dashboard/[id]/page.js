@@ -57,9 +57,12 @@ export default function CourseViewerPage() {
   const [showReview, setShowReview] = useState(false)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', success: false })
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
+  const [commentText, setCommentText] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -396,14 +399,12 @@ export default function CourseViewerPage() {
         },
         body: JSON.stringify({
           rating: reviewRating,
-          comment: reviewComment,
           course_id: parseInt(courseId),
         }),
       });
-      if (!res.ok) throw new Error("Greška pri slanju recenzije.");
-      setSnackbar({ open: true, message: "Recenzija uspješno sačuvana!", success: true });
+      if (!res.ok) throw new Error("Greška pri slanju ocene.");
+      setSnackbar({ open: true, message: "Ocena uspješno sačuvana!", success: true });
       setReviewModalOpen(false);
-      setReviewComment("");
       setReviewRating(5);
       fetchReviews(1); // Refresuj na prvu stranicu
       setReviewPage(1);
@@ -411,6 +412,36 @@ export default function CourseViewerPage() {
       setSnackbar({ open: true, message: err.message, success: false });
     } finally {
       setReviewSubmitting(false);
+    }
+  };
+
+  // Funkcija za slanje komentara
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    setCommentSubmitting(true);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`${API_BASE_URL}/course/comments/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          course_id: parseInt(courseId),
+          comment: commentText,
+        }),
+      });
+      if (!res.ok) throw new Error("Greška pri slanju komentara.");
+      setSnackbar({ open: true, message: "Komentar uspješno sačuvan!", success: true });
+      setCommentModalOpen(false);
+      setCommentText("");
+      fetchReviews(1); // Refresuj na prvu stranicu
+      setReviewPage(1);
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, success: false });
+    } finally {
+      setCommentSubmitting(false);
     }
   };
 
@@ -844,28 +875,35 @@ export default function CourseViewerPage() {
         )}
         {showReview && (
           <Box sx={{ textAlign: "center", marginTop: "2rem" }}>
-            <Button variant="contained" sx={{ backgroundColor: "#8b5cf6" }} onClick={() => setReviewModalOpen(true)}>
-              Ostavi recenziju
+            <Button variant="contained" sx={{ backgroundColor: "#8b5cf6", mr: 2 }} onClick={() => setReviewModalOpen(true)}>
+              Ostavi ocenu
+            </Button>
+            <Button variant="outlined" sx={{ borderColor: "#8b5cf6", color: "#8b5cf6" }} onClick={() => setCommentModalOpen(true)}>
+              Ostavi komentar
             </Button>
           </Box>
         )}
         {/* Prikaz recenzija */}
         <Box sx={{ maxWidth: 600, margin: '2rem auto 0 auto', textAlign: 'center' }}>
-          <Typography variant="h5" sx={{ mb: 2 }}>Recenzije</Typography>
+          <Typography variant="h5" sx={{ mb: 2 }}>Ocene i komentari</Typography>
           {reviewsLoading ? (
-            <Typography>Učitavanje recenzija...</Typography>
+            <Typography>Učitavanje...</Typography>
           ) : reviews.length === 0 ? (
-            <Typography>Nema recenzija za ovaj kurs.</Typography>
+            <Typography>Nema ocena i komentara za ovaj kurs.</Typography>
           ) : (
             <>
               {reviews.map((r) => (
                 <Box key={r.id} sx={{ border: '1px solid #eee', borderRadius: 2, p: 2, mb: 2, textAlign: 'left' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <Typography sx={{ fontWeight: 600 }}>{r.username || 'Korisnik'}</Typography>
-                    <Rating value={r.rating} readOnly size="small" max={5} precision={0.5} />
+                    {r.rating > 0 && (
+                      <Rating value={r.rating} readOnly size="small" max={5} precision={0.5} />
+                    )}
                     <Typography sx={{ color: '#888', fontSize: 13 }}>{format(new Date(r.created_at), 'dd.MM.yyyy.')}</Typography>
                   </Box>
-                  <Typography sx={{ fontSize: 15 }}>{r.comment}</Typography>
+                  {r.comment && (
+                    <Typography sx={{ fontSize: 15 }}>{r.comment}</Typography>
+                  )}
                 </Box>
               ))}
               <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
@@ -947,7 +985,7 @@ export default function CourseViewerPage() {
           flexDirection: 'column',
           alignItems: 'center',
         }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Ostavi recenziju</Typography>
+          <Typography variant="h6" sx={{ mb: 2 }}>Ostavi ocenu</Typography>
           <form onSubmit={handleReviewSubmit} style={{ width: '100%' }}>
             <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Rating
@@ -959,17 +997,39 @@ export default function CourseViewerPage() {
                 max={5}
               />
             </Box>
+            <Button type="submit" variant="contained" sx={{ backgroundColor: '#8b5cf6', width: '100%' }} disabled={reviewSubmitting}>
+              {reviewSubmitting ? 'Spremanje...' : 'Spasi ocenu'}
+            </Button>
+          </form>
+        </Box>
+      </Modal>
+      {/* Comment modal */}
+      <Modal open={commentModalOpen} onClose={() => setCommentModalOpen(false)}>
+        <Box sx={{
+          maxWidth: 400,
+          margin: '10% auto',
+          background: 'white',
+          borderRadius: 4,
+          p: 4,
+          boxShadow: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>Ostavi komentar</Typography>
+          <form onSubmit={handleCommentSubmit} style={{ width: '100%' }}>
             <Box sx={{ mb: 2 }}>
               <textarea
-                value={reviewComment}
-                onChange={e => setReviewComment(e.target.value)}
-                placeholder="Vaš komentar (opcionalno)"
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                placeholder="Vaš komentar"
                 rows={4}
                 style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc', resize: 'vertical' }}
+                required
               />
             </Box>
-            <Button type="submit" variant="contained" sx={{ backgroundColor: '#8b5cf6', width: '100%' }} disabled={reviewSubmitting}>
-              {reviewSubmitting ? 'Spremanje...' : 'Spasi recenziju'}
+            <Button type="submit" variant="contained" sx={{ backgroundColor: '#8b5cf6', width: '100%' }} disabled={commentSubmitting}>
+              {commentSubmitting ? 'Spremanje...' : 'Spasi komentar'}
             </Button>
           </form>
         </Box>

@@ -7,25 +7,47 @@ from models.course_model import Course
 from sqlalchemy import func
 
 def add_review_service(db: Session, review_data: ReviewCreate, user_id: int):
+    # Proveri da li korisnik već ima ocenu za ovaj kurs
+    existing_review = review_repository.get_user_review_for_course(db, user_id, review_data.course_id)
+    
+    if existing_review:
+        # Ako postoji, ažuriraj ocenu
+        updated_review = review_repository.update_review_rating(db, existing_review.id, review_data.rating)
+        # Ažuriraj prosečnu ocenu kursa
+        update_course_average_rating(db, review_data.course_id)
+        return updated_review
+    else:
+        # Ako ne postoji, kreiraj novu
+        review = Review(
+            user_id=user_id,
+            course_id=review_data.course_id,
+            rating=review_data.rating,
+            comment=review_data.comment
+        )
+        added_review = review_repository.add_review(db, review)
+        # Ažuriraj prosečnu ocenu kursa
+        update_course_average_rating(db, review_data.course_id)
+        return added_review
+
+def add_comment_service(db: Session, course_id: int, comment: str, user_id: int):
+    """Dodaj samo komentar (bez ocene)"""
     review = Review(
         user_id=user_id,
-        course_id=review_data.course_id,
-        rating=review_data.rating,
-        comment=review_data.comment
+        course_id=course_id,
+        rating=0,  # Ocena 0 označava da je samo komentar
+        comment=comment
     )
-    added_review = review_repository.add_review(db, review)
-    
-    # Ažuriraj prosečnu ocenu kursa
-    update_course_average_rating(db, review_data.course_id)
-    
-    return added_review
+    return review_repository.add_review(db, review)
 
 def update_course_average_rating(db: Session, course_id: int):
     """Izračunaj i ažuriraj prosečnu ocenu kursa na osnovu svih recenzija"""
-    # Izračunaj prosečnu ocenu svih recenzija za kurs
-    avg_rating = db.query(func.avg(Review.rating)).filter(Review.course_id == course_id).scalar()
+    # Izračunaj prosečnu ocenu svih recenzija za kurs (samo one sa ocenom > 0)
+    avg_rating = db.query(func.avg(Review.rating)).filter(
+        Review.course_id == course_id,
+        Review.rating > 0
+    ).scalar()
     
-    # Ako nema recenzija, postavi na 0
+    # Ako nema recenzija sa ocenom, postavi na 0
     if avg_rating is None:
         avg_rating = 0.0
     

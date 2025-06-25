@@ -20,6 +20,7 @@ from services.course_service import get_course
 from services import review_service
 from schemas.review_schema import ReviewCreate
 from schemas.review_schema import ReviewResponse
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -142,6 +143,21 @@ def add_review(
 ):
     try:
         return review_service.add_review_service(db, review, current_user.id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+class CommentCreate(BaseModel):
+    course_id: int
+    comment: str
+
+@router.post("/comments/", response_model=ReviewResponse)
+def add_comment(
+    comment_data: CommentCreate,
+    db: SessionDep,
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        return review_service.add_comment_service(db, comment_data.course_id, comment_data.comment, current_user.id)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
