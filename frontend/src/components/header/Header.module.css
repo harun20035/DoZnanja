@@ -175,3 +175,7 @@
     font-size: 0.9rem;
   }
 }
+
+.headerSpacer {
+  padding-bottom: 2rem; /* ili koliko ti paše */
+}

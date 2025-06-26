@@ -10,6 +10,11 @@ import {
   Phone, VideoCall, MoreVert, AttachFile, EmojiEmotions, Send, Circle,
 } from "@mui/icons-material"
 import styles from "./Chat.module.css"
+import getHeaderByRole from "../../components/layoutComponents"
+import { useParams, useRouter } from "next/navigation"
+import { getRoleFromToken, getUserDataFromToken } from "@/utils/auth";
+import Footer from "../../components/footer/Footer"
+
 
 export default function ChatPage() {
   const [users, setUsers] = useState([])
@@ -19,6 +24,35 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("")
   const [isMounted, setIsMounted] = useState(false)
   const socketRef = useRef(null)
+  const [role, setRole] = useState(null);
+  const [username, setUsername] = useState('');
+  const router = useRouter()
+ 
+ 
+ 
+  useEffect(() => {
+        const checkAuthorization = () => {
+          try {
+            const role = getRoleFromToken();
+            setRole(role);
+            const user = getUserDataFromToken();
+            setUsername(user?.username || '');
+            
+            // Ako korisnik ima bilo koju rolu, smatramo ga autoriziranim
+            if (role) {
+              // Dodatna logika ako je potrebno
+            } else {
+              router.push("/login"); // Preusmjeri na login ako nema role
+            }
+          } catch (error) {
+            console.error("Authorization error:", error);
+            router.push("/login");
+          }
+        };
+    
+        checkAuthorization();
+      }, [router]);
+  
 
   useEffect(() => {
     setIsMounted(true)
@@ -159,15 +193,11 @@ export default function ChatPage() {
   }
 
   return (
-    <Box className={styles.chatContainer}>
-      <Box className={styles.chatHeader}>
-        <Container maxWidth="xl">
-          <Typography variant="h3" className={styles.chatTitle}>Poruke i Chat</Typography>
-          <Typography variant="h6" className={styles.chatDescription}>
-            Komunicirajte sa instruktorima i studentima uz kupljene kurseve
-          </Typography>
-        </Container>
-      </Box>
+     <Box className={styles.chatContainer}>
+      
+                {getHeaderByRole(role)}
+      
+      
 
       <Container maxWidth="xl" className={styles.mainContent}>
         <Grid container spacing={0} className={styles.chatGrid}>
@@ -293,6 +323,8 @@ export default function ChatPage() {
           </Grid>
         </Grid>
       </Container>
+      <Footer/>
     </Box>
+    
   )
 }
