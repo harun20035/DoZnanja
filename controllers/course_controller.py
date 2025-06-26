@@ -75,7 +75,10 @@ def create_course_controller(db: SessionDep,title: str = Form(...),description: 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# NOVI ENDPOINT - Dohvatanje kursa sa detaljima
+@router.get("/statistika")
+def get_creator_statistics(db: SessionDep, current_user: User = Depends(get_current_user)):
+    return course_service.get_creator_stats(db, current_user.id)
+
 @router.get("/view/{course_id}", response_model=CourseWithDetailsResponse)
 def get_course_details(
     course_id: int, 
@@ -169,3 +172,5 @@ def get_reviews_by_course(
     limit: int = 5
 ):
     return review_service.get_reviews_by_course_service(db, course_id, skip=skip, limit=limit)
+
+

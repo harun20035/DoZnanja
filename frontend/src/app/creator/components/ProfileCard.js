@@ -70,9 +70,9 @@ export default function ProfileCard() {
         <p className="profile-role">{userData.username}</p>
 
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width: "75%" }}></div>
+          <div className="progress-fill" style={{ width: "100%" }}></div>
         </div>
-        <p className="progress-text">Kompletiranje profila: 75%</p>
+        <p className="progress-text">Vaš korisnički profil</p>
       </div>
 
       <div className="card-footer">

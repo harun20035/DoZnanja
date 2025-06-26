@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from schemas.course_schema import UserUpdate
 from sqlalchemy import select, func
 from models.courseEnrollment_model import CourseEnrollment
+from models.quizResult_model import QuizResult
 
 def create_course(db: Session, course: Course) -> Course:
     db.add(course)
@@ -135,3 +136,32 @@ def get_courses_with_stats(db: Session, creator_id: int):
         })
 
     return result
+
+
+
+
+def get_total_courses(db: Session, creator_id: int) -> int:
+    return db.query(func.count()).select_from(Course).filter(Course.creator_id == creator_id).scalar()
+
+def get_total_revenue(db: Session, creator_id: int) -> float:
+    subquery = db.query(
+        CourseEnrollment.course_id,
+        func.count().label("enrolled_count")
+    ).join(Course, CourseEnrollment.course_id == Course.id).filter(
+        Course.creator_id == creator_id
+    ).group_by(CourseEnrollment.course_id).subquery()
+
+    revenue = db.query(
+        func.coalesce(func.sum((Course.price * subquery.c.enrolled_count) * 0.8), 0)
+    ).join(subquery, Course.id == subquery.c.course_id).scalar()
+
+    return revenue or 0.0
+
+def get_average_rating(db: Session, creator_id: int) -> float:
+    return db.query(func.avg(Course.average_rating)).filter(Course.creator_id == creator_id).scalar()
+
+def get_completed_courses_count(db: Session, creator_id: int) -> int:
+    return db.query(func.count()).select_from(QuizResult).join(Course).filter(
+        Course.creator_id == creator_id,
+        QuizResult.passed == True
+    ).scalar()
