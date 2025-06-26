@@ -12,6 +12,10 @@ export default function QuizCreationPage() {
   const [submitting, setSubmitting] = useState(false)
   const [quizCreated, setQuizCreated] = useState(false)
 
+  // Role check logic
+  const [isAuthorized, setIsAuthorized] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
   const [questions, setQuestions] = useState(
     Array.from({ length: 5 }, () => ({
       question: "",
@@ -19,6 +23,36 @@ export default function QuizCreationPage() {
       correctIndex: null,
     }))
   )
+
+  useEffect(() => {
+    const checkRole = async () => {
+      const token = localStorage.getItem('auth_token')
+      if (!token) {
+        router.push('/login')
+        return
+      }
+      try {
+        const res = await fetch('http://localhost:8000/api/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!res.ok) {
+          router.push('/login')
+          return
+        }
+        const data = await res.json()
+        if (data.role === 'CREATOR' || data.role === 'ADMIN') {
+          setIsAuthorized(true)
+        } else {
+          router.push('/unauthorized')
+        }
+      } catch {
+        router.push('/unauthorized')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    checkRole()
+  }, [router])
 
   useEffect(() => {
     const checkAndCreateQuiz = async () => {
@@ -138,6 +172,11 @@ export default function QuizCreationPage() {
       setSubmitting(false)
     }
   }
+
+  if (isLoading) {
+    return <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></div>
+  }
+  if (!isAuthorized) return null
 
   if (loading) return <p>Učitavanje kviza...</p>
 

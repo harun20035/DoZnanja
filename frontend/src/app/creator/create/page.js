@@ -8,6 +8,11 @@ import './createCourse.css';
 export default function CreateCourseForm() {
   const router = useRouter();
 
+  // Role check logic
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // All other state hooks
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -19,82 +24,45 @@ export default function CreateCourseForm() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  const errors = [];
-  if (!thumbnail) errors.push('Niste unijeli sliku.');
-  if (!video) errors.push('Niste unijeli video.');
-
-  if (errors.length > 0) {
-    setErrorMessage(errors.join(' '));
-    setShowErrorModal(true);
-    return;
-  }
-
-  const token = localStorage.getItem('auth_token');
-  if (!token) {
-    setErrorMessage('⚠️ Nisi ulogovan ili nema tokena u localStorage-u.');
-    setShowErrorModal(true);
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('title', title);
-  formData.append('description', description);
-  formData.append('price', price);
-  formData.append('discount_percent', discount);
-  formData.append('category', category);
-  formData.append('image_thumbnail', thumbnail);
-  formData.append('video_demo', video);
-
-  try {
-    const res = await fetch('http://localhost:8000/course/create', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      if (Array.isArray(data.detail)) {
-        const poruke = data.detail.map((err) => err.msg).join(', ');
-        setErrorMessage(poruke);
-      } else if (typeof data.detail === 'string') {
-        setErrorMessage(data.detail);
-      } else {
-        setErrorMessage('Greška prilikom kreiranja kursa.');
+  // All useEffect hooks
+  useEffect(() => {
+    const checkRole = async () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        router.push('/login');
+        return;
       }
-      setShowErrorModal(true);
-    } else {
-      setShowSuccessModal(true);
-      // Reset polja
-      setTitle('');
-      setDescription('');
-      setPrice('');
-      setDiscount('');
-      setCategory('Programming');
-      setThumbnail(null);
-      setVideo(null);
-    }
-  } catch (err) {
-    console.error(err);
-    setErrorMessage('Greška prilikom slanja zahteva.');
-    setShowErrorModal(true);
-  }
-};
-
+      try {
+        const res = await fetch('http://localhost:8000/api/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+          router.push('/login');
+          return;
+        }
+        const data = await res.json();
+        if (data.role === 'CREATOR' || data.role === 'ADMIN') {
+          setIsAuthorized(true);
+        } else {
+          router.push('/unauthorized');
+        }
+      } catch {
+        router.push('/unauthorized');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkRole();
+  }, [router]);
 
   useEffect(() => {
-  if (showSuccessModal) {
-    const timer = setTimeout(() => {
-      setShowSuccessModal(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }
-}, [showSuccessModal]);
-
+    if (showSuccessModal) {
+      const timer = setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessModal]);
 
   useEffect(() => {
     if (showErrorModal) {
@@ -105,6 +73,78 @@ export default function CreateCourseForm() {
       return () => clearTimeout(timer);
     }
   }, [showErrorModal]);
+
+  // Only after all hooks, do conditional return
+  if (isLoading) {
+    return <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></div>;
+  }
+  if (!isAuthorized) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const errors = [];
+    if (!thumbnail) errors.push('Niste unijeli sliku.');
+    if (!video) errors.push('Niste unijeli video.');
+
+    if (errors.length > 0) {
+      setErrorMessage(errors.join(' '));
+      setShowErrorModal(true);
+      return;
+    }
+
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      setErrorMessage('⚠️ Nisi ulogovan ili nema tokena u localStorage-u.');
+      setShowErrorModal(true);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('price', price);
+    formData.append('discount_percent', discount);
+    formData.append('category', category);
+    formData.append('image_thumbnail', thumbnail);
+    formData.append('video_demo', video);
+
+    try {
+      const res = await fetch('http://localhost:8000/course/create', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (Array.isArray(data.detail)) {
+          const poruke = data.detail.map((err) => err.msg).join(', ');
+          setErrorMessage(poruke);
+        } else if (typeof data.detail === 'string') {
+          setErrorMessage(data.detail);
+        } else {
+          setErrorMessage('Greška prilikom kreiranja kursa.');
+        }
+        setShowErrorModal(true);
+      } else {
+        setShowSuccessModal(true);
+        // Reset polja
+        setTitle('');
+        setDescription('');
+        setPrice('');
+        setDiscount('');
+        setCategory('Programming');
+        setThumbnail(null);
+        setVideo(null);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('Greška prilikom slanja zahteva.');
+      setShowErrorModal(true);
+    }
+  };
 
   return (
     <div className="form-container">

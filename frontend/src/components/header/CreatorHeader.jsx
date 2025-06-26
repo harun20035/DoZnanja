@@ -59,6 +59,7 @@ export default function CreatorHeader() {
 
   const renderLinks = () => (
     <>
+      <Link href="/user/dashboard" className={styles.link}>Dashboard</Link>
       <Link href="/all-courses" className={styles.link}>Kursevi</Link>
       <Link href="/chat" className={styles.link}>Chat</Link>
       <Link href="/creator" className={styles.link}>Creator Dashboard</Link>
