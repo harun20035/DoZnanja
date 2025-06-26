@@ -151,6 +151,7 @@ def count_cart_items(db : Session, user_id: int) -> int:
 def get_user_cart_courses(db: Session, user_id: int):
     statement = (
         select(
+            Cart.id.label("cart_id"),                # ✅ dodano da dobijemo ID iz Cart
             Course.id,
             Course.title,
             Course.image_thumbnail,
@@ -307,3 +308,12 @@ def fetch_last_two_enrollments(db: Session, user_id: int):
         })
 
     return final
+
+
+
+def get_cart_item_by_id(db: Session, cart_id: int):
+    return db.query(Cart).filter(Cart.id == cart_id).first()
+
+def delete_cart_item(db: Session, cart_item: Cart):
+    db.delete(cart_item)
+    db.commit()

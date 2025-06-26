@@ -74,3 +74,18 @@ def get_user_statistics(db: Session, user_id: int):
 
 def get_last_two_enrollments(db: Session, user_id: int):
     return dashboard_repository.fetch_last_two_enrollments(db, user_id)
+
+
+def remove_cart_item(db: Session, cart_id: int, user_id: int):
+    cart_item = dashboard_repository.get_cart_item_by_id(db, cart_id)
+
+    if not cart_item:
+        raise HTTPException(status_code=404, detail="Stavka u korpi nije pronađena.")
+
+    if cart_item.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Nemate dozvolu za ovu akciju.")
+    print("USER:", user_id, "CART ITEM:", cart_item.user_id)
+
+
+    dashboard_repository.delete_cart_item(db, cart_item)
+    return {"message": "Stavka uspješno uklonjena iz korpe."}

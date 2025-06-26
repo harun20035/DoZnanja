@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Box, Typography, Card, CardMedia, CardContent, CardActions, Button, Container,
   Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
@@ -26,24 +26,35 @@ export default function CartPage() {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [missingCredits, setMissingCredits] = useState(0);
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const token = localStorage.getItem("auth_token");
-        const res = await axios.get("http://localhost:8000/user/cart", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCartCourses(res.data);
-      } catch (err) {
-        console.error("Greška pri fetchanju korpe:", err);
-      }
-    };
-    fetchCart();
+  const fetchCart = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      const res = await axios.get("http://localhost:8000/user/cart", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCartCourses(res.data);
+    } catch (err) {
+      console.error("Greška pri fetchanju korpe:", err);
+    }
   }, []);
 
-  const handleRemoveFromCart = (id) => {
-    setCartCourses((prev) => prev.filter((c) => c.id !== id));
-    setSnackbar({ open: true, message: "Kurs je uklonjen iz korpe", severity: "info" });
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  const handleRemoveFromCart = async (cartId) => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      await axios.delete(`http://localhost:8000/user/cart-delete/${cartId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setSnackbar({ open: true, message: "Kurs je uklonjen iz korpe", severity: "info" });
+      fetchCart(); // osvježi listu
+    } catch (err) {
+      console.error("Greška pri brisanju iz korpe:", err);
+      setSnackbar({ open: true, message: "Greška pri uklanjanju kursa", severity: "error" });
+    }
   };
 
   const handleBuyCourse = (course) => {
@@ -57,8 +68,8 @@ export default function CartPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setCartCourses((prev) => prev.filter(c => c.id !== purchaseDialog.course.id));
       setSnackbar({ open: true, message: `Uspješno ste kupili \"${purchaseDialog.course.title}\"!`, severity: "success" });
+      fetchCart(); // ponovo učitaj korpu
     } catch (err) {
       const detail = err.response?.data?.detail?.toLowerCase() || "";
       if (detail.includes("nedovoljno kredita")) {
@@ -86,7 +97,6 @@ export default function CartPage() {
     Napredni: "#ef4444",
   }[level] || "#6b7280");
 
-  // 📊 Izračun cijena
   const totalOriginalPrice = cartCourses.reduce((acc, c) => acc + c.price, 0);
   const totalDiscountPrice = cartCourses.reduce((acc, c) => acc + (c.price * (1 - (c.discount_percent || 0) / 100)), 0);
   const totalSavings = totalOriginalPrice - totalDiscountPrice;
@@ -126,7 +136,6 @@ export default function CartPage() {
                 </>
               )}
             </Paper>
-
           </Box>
         </Container>
       </Box>
@@ -148,7 +157,7 @@ export default function CartPage() {
                       {course.discount_percent > 0 && (
                         <Chip label={`-${course.discount_percent}%`} className={styles.cdiscountChip} size="small" />
                       )}
-                      <IconButton onClick={() => handleRemoveFromCart(course.id)} className={styles.cremoveButton}>
+                      <IconButton onClick={() => handleRemoveFromCart(course.cart_id)} className={styles.cremoveButton}>
                         <Delete />
                       </IconButton>
                     </Box>
