@@ -15,7 +15,7 @@ export default function CreatorHeader({ role }) {
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
-    router.push('/login');
+    router.push('/');
   };
 
   useEffect(() => {
@@ -66,10 +66,7 @@ export default function CreatorHeader({ role }) {
   const renderLinks = () => (
     <>
       <Link href="/all-courses" className={styles.link}>Kursevi</Link>
-      <Link href="/about" className={styles.link}>O nama</Link>
-      <Link href="/contact" className={styles.link}>Kontakt</Link>
-      <Link href="/blog" className={styles.link}>Blog</Link>
-      <Link href="/categories" className={styles.link}>Kategorije</Link>
+      <Link href="/chat" className={styles.link}>Chat</Link>
       <Link href="/creator" className={styles.link}>Creator Dashboard</Link>
     </>
   );
@@ -78,10 +75,10 @@ export default function CreatorHeader({ role }) {
     <header className={styles.header}>
       <div className="container d-flex justify-content-between align-items-center py-3">
         {/* Logo */}
-        <Link href="/" className={styles.brand}>
+        <div  className={styles.brand}>
           <span className="fs-3 me-2">📚</span>
           <span className="fw-bold">DoZnanja</span>
-        </Link>
+        </div>
 
         {/* Navigacija */}
         <nav className={`d-flex flex-wrap align-items-center ${styles.nav}`}>
@@ -99,7 +96,6 @@ export default function CreatorHeader({ role }) {
           <div className={styles.avatar} onClick={toggleDropdown}>👤</div>
           {dropdownOpen && (
             <div className={styles.dropdown}>
-              <Link href="/notifications" className={styles.dropdownItem}>🔔 Notifikacije</Link>
               <Link href="/user/dashboard/cart" className={styles.dropdownItem}>
                 <div className="d-flex align-items-center gap-2">
                   <span className={styles.cartBadge}>{cartCount}</span>
