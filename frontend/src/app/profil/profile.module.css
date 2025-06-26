@@ -76,11 +76,11 @@
   width: 128px;
   height: 128px;
   border-radius: 50%;
-  background-color: #6b46c1;
+ 
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #6b46c1;
   font-size: 2.5rem;
   font-weight: bold;
   border: 4px solid #e9d5ff;
@@ -153,11 +153,13 @@
 
 .card {
   padding: 1.5rem;
-  min-height: 600px; /* Ista visina za sve kartice */
+  height: 515px; /* fiksna visina */
+  width: 600px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
+
 
 .cardHeader {
   margin-bottom: 1.5rem;
