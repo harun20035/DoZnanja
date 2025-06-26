@@ -265,3 +265,45 @@ def count_completed_steps(db: Session, user_id: int) -> int:
         CourseProgress.user_id == user_id,
         CourseProgress.completed == True
     ).scalar()
+
+
+def fetch_last_two_enrollments(db: Session, user_id: int):
+    statement = (
+        select(CourseEnrollment, Course)
+        .join(Course, Course.id == CourseEnrollment.course_id)
+        .where(CourseEnrollment.user_id == user_id)
+        .order_by(CourseEnrollment.enrolled_at.desc())
+        .limit(2)
+    )
+
+    results = db.execute(statement).all()
+    final = []
+
+    for enrollment, course in results:
+        # Ukupan broj stepova
+        total_steps = db.scalar(
+            select(func.count()).select_from(CourseStep).where(CourseStep.course_id == course.id)
+        ) or 0
+
+        # Završeni stepovi od strane usera
+        completed_steps = db.scalar(
+            select(func.count()).select_from(CourseProgress).where(
+                CourseProgress.course_id == course.id,
+                CourseProgress.user_id == user_id,
+                CourseProgress.completed == True
+            )
+        ) or 0
+
+        # Izračun postotka
+        progress = int((completed_steps / total_steps) * 100) if total_steps > 0 else 0
+
+        final.append({
+            "course_id": course.id,
+            "title": course.title,
+            "description": course.description,
+            "image_thumbnail": course.image_thumbnail,
+            "enrolled_at": enrollment.enrolled_at,
+            "progress": progress
+        })
+
+    return final

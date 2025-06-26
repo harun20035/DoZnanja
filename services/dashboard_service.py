@@ -70,3 +70,7 @@ def get_user_statistics(db: Session, user_id: int):
         "completed_courses": completed_courses,
         "completed_steps": completed_steps
     }
+
+
+def get_last_two_enrollments(db: Session, user_id: int):
+    return dashboard_repository.fetch_last_two_enrollments(db, user_id)

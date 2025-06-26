@@ -66,3 +66,8 @@ def get_course_stats(db: SessionDep):
 @router.get("/stats")
 def get_user_statistics(db: SessionDep, current_user: User = Depends(get_current_user)):
     return dashboard_service.get_user_statistics(db, current_user.id)
+
+
+@router.get("/last-enrollments")
+def get_last_two_enrollments(db: SessionDep, current_user: User = Depends(get_current_user)):
+    return dashboard_service.get_last_two_enrollments(db, current_user.id)
