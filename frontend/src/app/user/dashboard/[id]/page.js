@@ -909,7 +909,7 @@ export default function CourseViewerPage() {
               ))}
               <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
                 <Button variant="outlined" size="small" disabled={reviewPage === 1} onClick={() => setReviewPage(p => Math.max(1, p-1))}>Prethodna</Button>
-                <Button variant="outlined" size="small" disabled={reviews.length < REVIEWS_PER_PAGE} onClick={() => setReviewPage(p => p+1)}>Sledeća</Button>
+                <Button variant="outlined" size="small" disabled={reviews.length < REVIEWS_PER_PAGE} onClick={() => setReviewPage(p => p+1)}>Sljedeća</Button>
               </Box>
             </>
           )}
