@@ -53,13 +53,13 @@ export default function DashboardPage() {
       setUsername(userData.username || "")
       setRole(userData.role)
 
-      // Provjeri da li je korisnik kreator
-      if (userData.role === "CREATOR") {
-        console.log("✅ Korisnik je CREATOR - dozvoljavamo pristup")
+      // Provjeri da li je korisnik kreator ili admin
+      if (userData.role === "CREATOR" || userData.role === "ADMIN") {
+        console.log("✅ Korisnik je CREATOR ili ADMIN - dozvoljavamo pristup")
         setIsAuthorized(true)
         return true
       } else {
-        console.log("❌ Korisnik nije CREATOR, role:", userData.role)
+        console.log("❌ Korisnik nije CREATOR ni ADMIN, role:", userData.role)
         return false
       }
     } catch (err) {
@@ -75,8 +75,8 @@ export default function DashboardPage() {
       const isCreator = await checkUserStatus()
 
       if (!isCreator) {
-        console.log("Preusmjeravam na /creatorform")
-        router.push("/creatorform")
+        console.log("Preusmjeravam na /unauthorized")
+        router.push("/unauthorized")
       }
 
       setIsLoading(false)
