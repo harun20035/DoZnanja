@@ -6,12 +6,14 @@ import Image from "next/image";
 import "./styles.css";
 import Header from "../components/header/Header";
 import Footer from "../components/footer/Footer";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   const [categoryCounts, setCategoryCounts] = useState([]); // Držimo podatke o broju kurseva po kategorijama
   const [topCourses, setTopCourses] = useState([]); // Držimo podatke o istaknutim kursevima
   const [stats, setStats] = useState(null); // Držimo podatke o statistikama
   const [loading, setLoading] = useState(true); // Za upravljanje loading statusom
+  const router = useRouter();
 
   // Prevod sa engleskog na bosanski jezik
   const categoryTranslations = {
@@ -39,6 +41,14 @@ export default function HomePage() {
     if (!fixed.startsWith('/')) fixed = '/' + fixed; // Dodajemo početni slash ako ga nema
     return `http://localhost:8000${fixed}`; // Lokalni server za slike
   };
+
+  useEffect(() => {
+    // Redirect logged-in users to /user/dashboard
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      router.push("/user/dashboard");
+    }
+  }, [router]);
 
   useEffect(() => {
     // Poziv API-ja za broj kurseva po kategorijama
