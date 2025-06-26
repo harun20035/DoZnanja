@@ -1,6 +1,7 @@
 .chatContainer {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%);
+
 }
 
 /* Navbar Styles */
@@ -57,6 +58,7 @@
   color: white;
   padding: 3rem 0;
   margin-bottom: 2rem;
+  
 }
 
 .chatTitle {
@@ -73,6 +75,7 @@
 /* Main Content */
 .mainContent {
   padding-bottom: 3rem !important;
+  padding-top: 2rem !important;
 }
 
 .chatGrid {
