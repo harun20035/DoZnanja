@@ -12,7 +12,11 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Asinhrona konekcija za FastAPI
-database = Database(DATABASE_URL)
+database = Database(
+    DATABASE_URL,
+    min_size=5,
+    max_size=20
+)
 
 # Sinhrona konekcija za SQLAlchemy modele
 engine = create_engine(DATABASE_URL.replace("+asyncpg", ""), echo=True)

@@ -1,63 +1,73 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { User, Mail, Key, AtSign, Save, Eye, EyeOff } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { User, Mail, Key, AtSign, Save, Eye, EyeOff } from "lucide-react";
 import styles from "./profile.module.css";
-import { useParams } from "next/navigation"
-import { useRouter } from 'next/navigation';
-import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
+import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { getRoleFromToken, getUserDataFromToken } from "@/utils/auth";
 import getHeaderByRole from "../../components/layoutComponents";
 import Footer from "../../components/footer/Footer";
+import { Snackbar, Alert } from "@mui/material";
 
 const EditProfile = () => {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState("profile");
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [role, setRole] = useState(null);
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    nickname: '',
-    email: '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-    profile_image: '', // putanja slike
-    role: ''
+    firstName: "",
+    lastName: "",
+    nickname: "",
+    email: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+    profile_image: "",
+    role: ""
   });
 
   const fileInputRef = useRef(null);
   const [previewImage, setPreviewImage] = useState(null);
+
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     if (!token) return;
 
     fetch("http://localhost:8000/course/me", {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error("Greška pri dohvaćanju korisnika");
         return res.json();
       })
-      .then(data => {
-        const normalizedImagePath = data.profile_image ? data.profile_image.replace(/\\/g, '/') : null;
-
+      .then((data) => {
+        const normalizedImagePath = data.profile_image ? data.profile_image.replace(/\\/g, "/") : null;
         setFormData({
-          firstName: data.name || '',
-          lastName: data.surname || '',
-          nickname: data.username || '',
-          email: data.email || '',
-          profile_image: normalizedImagePath || '',
-          role: data.role || '',
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
+          firstName: data.name || "",
+          lastName: data.surname || "",
+          nickname: data.username || "",
+          email: data.email || "",
+          profile_image: normalizedImagePath || "",
+          role: data.role || "",
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: ""
         });
 
         if (normalizedImagePath) {
@@ -66,40 +76,36 @@ const EditProfile = () => {
           setPreviewImage(null);
         }
       })
-      .catch(err => console.error("Greška:", err));
+      .catch((err) => console.error("Greška:", err));
   }, []);
 
   useEffect(() => {
-      const checkAuthorization = () => {
-        try {
-          const role = getRoleFromToken();
-          setRole(role);
-          const user = getUserDataFromToken();
-          setUsername(user?.username || '');
-          
-          // Ako korisnik ima bilo koju rolu, smatramo ga autoriziranim
-          if (role) {
-            setIsAuthorized(true);
-            // Dodatna logika ako je potrebno
-          } else {
-            router.push("/login"); // Preusmjeri na login ako nema role
-          }
-        } catch (error) {
-          console.error("Authorization error:", error);
+    const checkAuthorization = () => {
+      try {
+        const role = getRoleFromToken();
+        setRole(role);
+        const user = getUserDataFromToken();
+        setUsername(user?.username || "");
+
+        if (role) {
+          setIsAuthorized(true);
+        } else {
           router.push("/login");
         }
-      };
-  
-      checkAuthorization();
-    }, [router]);
+      } catch (error) {
+        console.error("Authorization error:", error);
+        router.push("/login");
+      }
+    };
 
-  if (!isAuthorized) {
-    return null; // Ili neki loading spinner
-  }
+    checkAuthorization();
+  }, [router]);
+
+  if (!isAuthorized) return null;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const openFileDialog = () => {
@@ -114,26 +120,24 @@ const EditProfile = () => {
 
     const token = localStorage.getItem("auth_token");
     if (!token) {
-      alert("Niste prijavljeni!");
+      showSnackbar("Niste prijavljeni!", "error");
       return;
     }
 
     const formPayload = new FormData();
-    formPayload.append('profile_image', file);
+    formPayload.append("profile_image", file);
 
     try {
       const response = await fetch("http://localhost:8000/course/change-photo", {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
-        body: formPayload,
+        body: formPayload
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Greška pri uploadu slike:", errorData);
-        alert("Greška pri uploadu slike!");
-
-        // Vrati preview na staru sliku jer upload nije uspeo
+        showSnackbar("Greška pri uploadu slike!", "error");
         if (formData.profile_image) {
           setPreviewImage(`http://localhost:8000/${formData.profile_image}`);
         } else {
@@ -143,22 +147,21 @@ const EditProfile = () => {
       }
 
       const data = await response.json();
-      const normalizedImagePath = data.profile_image ? data.profile_image.replace(/\\/g, '/') : null;
+      const normalizedImagePath = data.profile_image ? data.profile_image.replace(/\\/g, "/") : null;
 
-      alert("Slika uspešno promenjena!");
+      showSnackbar("Slika uspješno promijenjena!");
 
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        profile_image: normalizedImagePath || '',
+        profile_image: normalizedImagePath || ""
       }));
 
       if (normalizedImagePath) {
         setPreviewImage(`http://localhost:8000/${normalizedImagePath}`);
       }
-
     } catch (err) {
       console.error("Greška:", err);
-      alert("Došlo je do greške prilikom upload-a slike!");
+      showSnackbar("Došlo je do greške prilikom upload-a slike!", "error");
       if (formData.profile_image) {
         setPreviewImage(`http://localhost:8000/${formData.profile_image}`);
       } else {
@@ -171,7 +174,7 @@ const EditProfile = () => {
     e.preventDefault();
     const token = localStorage.getItem("auth_token");
     if (!token) {
-      alert("Niste prijavljeni!");
+      showSnackbar("Niste prijavljeni!", "error");
       return;
     }
 
@@ -180,39 +183,37 @@ const EditProfile = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           name: formData.firstName,
           surname: formData.lastName,
           username: formData.nickname,
-          email: formData.email,
-          // profile_image se ne šalje ovde
-        }),
+          email: formData.email
+        })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Greška pri ažuriranju:", errorData);
-        alert("Greška pri ažuriranju profila!");
+        showSnackbar("Greška pri ažuriranju profila!", "error");
         return;
       }
 
       const updatedData = await response.json();
 
-      alert("Profil uspešno ažuriran!");
+      showSnackbar("Profil uspješno ažuriran!");
 
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         firstName: updatedData.name || prev.firstName,
         lastName: updatedData.surname || prev.lastName,
         nickname: updatedData.username || prev.nickname,
-        email: updatedData.email || prev.email,
+        email: updatedData.email || prev.email
       }));
-
     } catch (err) {
       console.error("Greška:", err);
-      alert("Došlo je do greške!");
+      showSnackbar("Došlo je do greške!", "error");
     }
   };
 
@@ -220,12 +221,12 @@ const EditProfile = () => {
     e.preventDefault();
     const token = localStorage.getItem("auth_token");
     if (!token) {
-      alert("Niste prijavljeni!");
+      showSnackbar("Niste prijavljeni!", "error");
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      alert("Nova lozinka i potvrda se ne podudaraju!");
+      showSnackbar("Nova lozinka i potvrda se ne podudaraju!", "error");
       return;
     }
 
@@ -234,32 +235,32 @@ const EditProfile = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           current_password: formData.currentPassword,
-          new_password: formData.newPassword,
-        }),
+          new_password: formData.newPassword
+        })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Greška pri promjeni lozinke:", errorData);
-        alert("Greška pri promeni lozinke!");
+        showSnackbar("Greška pri promjeni lozinke!", "error");
         return;
       }
 
-      alert("Lozinka uspešno promenjena!");
+      showSnackbar("Lozinka uspješno promijenjena!");
 
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
       }));
     } catch (err) {
       console.error("Greška:", err);
-      alert("Došlo je do greške prilikom promene lozinke!");
+      showSnackbar("Došlo je do greške prilikom promjene lozinke!", "error");
     }
   };
 
@@ -326,7 +327,7 @@ const EditProfile = () => {
               {activeTab === 'profile' && (
                 <div className={styles.card}>
                   <div className={styles.cardHeader}>
-                    <h2 className={styles.cardTitle}>Oosbne informacije</h2>
+                    <h2 className={styles.cardTitle}>Osobne informacije</h2>
                     <p className={styles.cardDescription}>
                       Azurirajte vase podatke ovdje koje ce biti prikazane javno.
                     </p>
@@ -398,7 +399,7 @@ const EditProfile = () => {
                     </div>
 
                     <div className={styles.cardFooter}>
-                      <button type="button" className={styles.buttonSecondary}>Izlaz</button>
+                      
                       <button type="submit" className={styles.buttonPrimary}>
                         <Save className={styles.buttonIcon} />
                         Sacuvaj promjene
@@ -505,6 +506,18 @@ const EditProfile = () => {
           </div>
         </main>
       </div>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbar.severity} onClose={handleCloseSnackbar} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
       <Footer />
     </>
   );

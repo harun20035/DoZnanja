@@ -42,13 +42,16 @@
 .avatar {
   height: 5rem !important;  /* Povećana slika */
   width: 5rem !important;  /* Povećana slika */
-  margin-bottom: 1.5rem; /* Veći razmak između slike i ostatka sadržaja */
+  margin-bottom: 1.5rem;
+  background-color: #e5e7eb !important;
+  border-color: #c084fc !important;
+  border:#c084fc !important /* Veći razmak između slike i ostatka sadržaja */
 }
 
 .avatarFallback {
-  background-color: #6b46c1;
-  color: white;
-  font-size: 2rem;  /* Povećan font za inicijale */
+  
+  color:#c084fc;
+  font-size: 1.5rem !important;  /* Povećan font za inicijale */
 }
 
 .userName {
