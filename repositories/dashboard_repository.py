@@ -11,6 +11,8 @@ from models.cart_model import Cart
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
+from models.quizResult_model import QuizResult
+from models.course_progress_model import CourseProgress
 
 
 
@@ -248,3 +250,18 @@ def get_course_stats(db: Session):
             "total_enrolled_users": result[2]
         }
     return {}
+
+def count_enrolled_courses(db: Session, user_id: int) -> int:
+    return db.query(func.count()).select_from(CourseEnrollment).filter(CourseEnrollment.user_id == user_id).scalar()
+
+def count_completed_courses(db: Session, user_id: int) -> int:
+    return db.query(func.count()).select_from(QuizResult).filter(
+        QuizResult.user_id == user_id,
+        QuizResult.passed == True
+    ).scalar()
+
+def count_completed_steps(db: Session, user_id: int) -> int:
+    return db.query(func.count()).select_from(CourseProgress).filter(
+        CourseProgress.user_id == user_id,
+        CourseProgress.completed == True
+    ).scalar()

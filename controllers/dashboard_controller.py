@@ -62,3 +62,7 @@ def courses_by_category(db: SessionDep):
 def get_course_stats(db: SessionDep):
     return dashboard_service.get_course_stats_service(db)
     
+
+@router.get("/stats")
+def get_user_statistics(db: SessionDep, current_user: User = Depends(get_current_user)):
+    return dashboard_service.get_user_statistics(db, current_user.id)

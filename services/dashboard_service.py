@@ -23,7 +23,7 @@ def user_courses(db: Session, current_user: User):
         if not courses:
             raise HTTPException(status_code=404, detail="No courses found for this user")
         
-        print("Dohvaćeni kursevi:", courses)  # Dodaj log za debagiranje
+        
         return courses
     
     except Exception as e:
@@ -59,3 +59,14 @@ def get_category_counts(db: Session):
 
 def get_course_stats_service(db: Session):
     return dashboard_repository.get_course_stats(db)
+
+def get_user_statistics(db: Session, user_id: int):
+    enrolled_count = dashboard_repository.count_enrolled_courses(db, user_id)
+    completed_courses = dashboard_repository.count_completed_courses(db, user_id)
+    completed_steps = dashboard_repository.count_completed_steps(db, user_id)
+
+    return {
+        "enrolled_courses": enrolled_count,
+        "completed_courses": completed_courses,
+        "completed_steps": completed_steps
+    }
