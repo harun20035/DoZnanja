@@ -3,19 +3,19 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function CreatorHeader({ role }) {
+export default function CreatorHeader() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const router = useRouter();
 
   const [user, setUser] = useState(null);
-  const [cartCount, setCartCount] = useState(0); // Dodano stanje za broj u korpi
+  const [cartCount, setCartCount] = useState(0);
 
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  const toggleDropdown = () => setDropdownOpen(prev => !prev);
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
-    router.push('/login');
+    router.push('/');
   };
 
   useEffect(() => {
@@ -34,20 +34,14 @@ export default function CreatorHeader({ role }) {
       if (!token) return;
 
       try {
-        // Dohvati podatke o korisniku
         const resUser = await fetch("http://localhost:8000/api/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         const dataUser = await resUser.json();
         setUser({ name: dataUser.username, coins: dataUser.credits });
 
-        // Dohvati broj kurseva u korpi
         const resCart = await fetch("http://localhost:8000/user/cart-count", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (resCart.ok) {
           const count = await resCart.json();
@@ -66,40 +60,35 @@ export default function CreatorHeader({ role }) {
   const renderLinks = () => (
     <>
       <Link href="/all-courses" className={styles.link}>Kursevi</Link>
-      <Link href="/about" className={styles.link}>O nama</Link>
-      <Link href="/contact" className={styles.link}>Kontakt</Link>
-      <Link href="/blog" className={styles.link}>Blog</Link>
-      <Link href="/categories" className={styles.link}>Kategorije</Link>
+      <Link href="/chat" className={styles.link}>Chat</Link>
       <Link href="/creator" className={styles.link}>Creator Dashboard</Link>
     </>
   );
 
   return (
     <header className={styles.header}>
-      <div className="container d-flex justify-content-between align-items-center py-3">
-        {/* Logo */}
-        <Link href="/" className={styles.brand}>
+      <div className={`container ${styles.headerRow}`}>
+        <div className={styles.brand}>
           <span className="fs-3 me-2">📚</span>
           <span className="fw-bold">DoZnanja</span>
-        </Link>
+        </div>
 
-        {/* Navigacija */}
-        <nav className={`d-flex flex-wrap align-items-center ${styles.nav}`}>
+        <nav className={styles.nav}>
           {renderLinks()}
         </nav>
 
-        {/* User info i avatar */}
-        <div className="d-flex align-items-center gap-2 position-relative" ref={dropdownRef}>
-          {user && (
-            <div className="text-end me-2">
-              <div className="fw-semibold">@{user.name}</div>
-              <div className="text-muted small">💰 {user.coins} Token/a</div>
-            </div>
-          )}
+        <div className={styles.profileWrap} ref={dropdownRef}>
+          <div className={styles.userInfo}>
+            {user && (
+              <>
+                <div className="fw-semibold">@{user.name}</div>
+                <div className="text-muted small">💰 {user.coins} Token/a</div>
+              </>
+            )}
+          </div>
           <div className={styles.avatar} onClick={toggleDropdown}>👤</div>
           {dropdownOpen && (
             <div className={styles.dropdown}>
-              <Link href="/notifications" className={styles.dropdownItem}>🔔 Notifikacije</Link>
               <Link href="/user/dashboard/cart" className={styles.dropdownItem}>
                 <div className="d-flex align-items-center gap-2">
                   <span className={styles.cartBadge}>{cartCount}</span>

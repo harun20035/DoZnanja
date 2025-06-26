@@ -1,12 +1,16 @@
-// app/creator/[course_id]/quiz/page.js
 "use client"
 
-import { useState } from "react"
-import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
 import "./page.css"
 
 export default function QuizCreationPage() {
   const { course_id } = useParams()
+  const router = useRouter()
+  const [quizId, setQuizId] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [quizCreated, setQuizCreated] = useState(false)
 
   const [questions, setQuestions] = useState(
     Array.from({ length: 5 }, () => ({
@@ -15,6 +19,55 @@ export default function QuizCreationPage() {
       correctIndex: null,
     }))
   )
+
+  useEffect(() => {
+    const checkAndCreateQuiz = async () => {
+      const token = localStorage.getItem("auth_token")
+      try {
+        // Prvo proveri da li već postoji kviz za ovaj kurs
+        const checkRes = await fetch(`http://localhost:8000/quiz/by-course/${course_id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (checkRes.ok) {
+          const existingQuiz = await checkRes.json()
+          setQuizId(existingQuiz.id)
+          setQuizCreated(true)
+          setLoading(false)
+          return
+        }
+
+        // Ako ne postoji, kreiraj novi kviz
+        const createRes = await fetch("http://localhost:8000/quiz/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            course_id: parseInt(course_id),
+            title: "Kviz za kurs " + course_id,
+            description: "Automatski generisan kviz.",
+          }),
+        })
+
+        const data = await createRes.json()
+        if (!createRes.ok) throw new Error(data.detail || "Greška pri kreiranju kviza.")
+        setQuizId(data.quiz_id)
+        setQuizCreated(true)
+      } catch (err) {
+        alert("Greška: " + err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (!quizCreated) {
+      checkAndCreateQuiz()
+    }
+  }, [course_id, quizCreated])
 
   const handleQuestionChange = (index, value) => {
     const updated = [...questions]
@@ -34,12 +87,59 @@ export default function QuizCreationPage() {
     setQuestions(updated)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Kviz za kurs:", course_id)
-    console.log("Pitanja:", questions)
-    // TODO: Pošalji podatke backendu
+    setSubmitting(true)
+
+    const token = localStorage.getItem("auth_token")
+    if (!token) {
+      alert("Niste prijavljeni.")
+      setSubmitting(false)
+      return
+    }
+
+    if (!quizId) {
+      alert("Nije pronađen validan ID kviza.")
+      setSubmitting(false)
+      return
+    }
+
+    try {
+      for (const q of questions) {
+        const payload = {
+          quiz_id: quizId,
+          question_text: q.question,
+          options: q.options.map((text, index) => ({
+            text,
+            is_correct: q.correctIndex === index,
+          })),
+        }
+
+        const res = await fetch("http://localhost:8000/quiz/create-question", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        })
+
+        const data = await res.json()
+        if (!res.ok) {
+          throw new Error(data.detail || "Greška prilikom slanja pitanja.")
+        }
+      }
+
+      alert("Kviz je uspješno spremljen!")
+      router.push("/creator")
+    } catch (err) {
+      alert("Greška: " + err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
+
+  if (loading) return <p>Učitavanje kviza...</p>
 
   return (
     <div className="quiz-container">
@@ -47,7 +147,7 @@ export default function QuizCreationPage() {
       <form onSubmit={handleSubmit}>
         {questions.map((q, qIndex) => (
           <div key={qIndex} className="question-block">
-            <label> Pitanje {qIndex + 1}:</label>
+            <label>Pitanje {qIndex + 1}:</label>
             <input
               type="text"
               value={q.question}
@@ -75,7 +175,7 @@ export default function QuizCreationPage() {
             </div>
           </div>
         ))}
-        <button type="submit">Spremi kviz</button>
+        <button type="submit" disabled={submitting || !quizId}>{submitting ? "Spremanje..." : "Spremi kviz"}</button>
       </form>
     </div>
   )

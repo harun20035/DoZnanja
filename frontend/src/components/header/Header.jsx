@@ -8,12 +8,12 @@ export default function Header({ role }) {
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   const renderLinks = () => {
-  return (
-    <>
-     
-    </>
-  );
-};
+    return (
+      <>
+        {/* Tu možeš dodati linkove ako želiš */}
+      </>
+    );
+  };
 
   const renderAuth = () => {
     if (role === 'user' || role === 'creator') {
@@ -32,7 +32,7 @@ export default function Header({ role }) {
       return (
         <>
           <Link href="/login" className={styles.link}>Prijava</Link>
-          <Link href="/register" className={styles.registerButton}>Registracija</Link>
+          <Link href="/register" className={styles.ctaLink}>Registracija</Link> {/* Ovdje sam stavio ctaLink */}
         </>
       );
     }
@@ -48,7 +48,7 @@ export default function Header({ role }) {
         </Link>
 
         {/* Navigacija */}
-        <nav className={`d-flex flex-wrapalign-items-center gap-4 ${styles.nav}`}>
+        <nav className={`d-flex flex-wrap align-items-center gap-4 ${styles.nav}`}>
           {renderLinks()}
         </nav>
 

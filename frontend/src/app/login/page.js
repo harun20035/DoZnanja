@@ -58,6 +58,18 @@ const Login = () => {
 
       if (data.access_token) {
         localStorage.setItem('auth_token', data.access_token);
+
+        // Fetch user data
+        const userRes = await fetch('http://localhost:8000/users/me', {
+          headers: {
+            'Authorization': `Bearer ${data.access_token}`,
+          },
+        });
+        if (userRes.ok) {
+          const user = await userRes.json();
+          localStorage.setItem('user_data', JSON.stringify(user));
+        }
+
         window.location.href = '/user/dashboard';
       }
     } catch (error) {

@@ -1,6 +1,13 @@
+
 /* cCartt.module.css sa prefiksom "c" za svaku klasu */
 
 .ccartContainer {
+
+/* cart-redesign.module.css */
+
+.dashboardContainer {
+  padding: 2rem;
+  background-color: #f9f6ff;
   min-height: 100vh;
   background: linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%);
 }
@@ -402,6 +409,7 @@
   }
 }
 
+
 @keyframes cslideIn {
   from {
     opacity: 0;
@@ -467,5 +475,14 @@
 
 .strikethrough {
   text-decoration: line-through;
+}
+
+
+.success {
+  border-left: 6px solid #4caf50;
+}
+
+.error {
+  border-left: 6px solid #f44336;
 }
 

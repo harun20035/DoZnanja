@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
 import {
   Box,
   Typography,
@@ -18,119 +19,571 @@ import {
   AppBar,
   Toolbar,
   Button,
+  CircularProgress,
+  Alert,
+  Modal,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  Snackbar,
 } from "@mui/material"
 import { CheckCircle, RadioButtonUnchecked, School, AccessTime, PlayCircleOutline, Image } from "@mui/icons-material"
+import Rating from '@mui/material/Rating';
+import { format } from 'date-fns';
+import getHeaderByRole from "../../../../components/layoutComponents"
+import Footer from "../../../../components/footer/Footer"
+import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
+
+// Konfiguracija API URL-a
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 export default function CourseViewerPage() {
-  // Hardcoded course data
-  const course = {
-    id: 1,
-    title: "Kompletni React.js Kurs za Početnike",
-    description:
-      "Naučite React.js od osnova do naprednih koncepata. Ovaj kurs pokriva sve što trebate znati da postanete React developer.",
-    price: 199.99,
-    category: "Programming",
-    image_thumbnail: "/placeholder.svg?height=300&width=400",
-    video_demo: "https://www.youtube.com/embed/dGcsHMXbSOA",
-    average_rating: 4.8,
-    creator_name: "Marko",
-    creator_surname: "Petrović",
+  const params = useParams()
+  const router = useRouter()
+  const courseId = params.id
+
+  const [courseData, setCourseData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [selectedStep, setSelectedStep] = useState(null)
+  const [completedSteps, setCompletedSteps] = useState(new Set())
+  const [savingProgress, setSavingProgress] = useState(false)
+  const [quizModalOpen, setQuizModalOpen] = useState(false)
+  const [quiz, setQuiz] = useState(null)
+  const [quizQuestions, setQuizQuestions] = useState([])
+  const [quizAnswers, setQuizAnswers] = useState({})
+  const [quizResult, setQuizResult] = useState(null)
+  const [quizLoading, setQuizLoading] = useState(false)
+  const [quizSubmitted, setQuizSubmitted] = useState(false)
+  const [showReview, setShowReview] = useState(false)
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', success: false })
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [commentText, setCommentText] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const REVIEWS_PER_PAGE = 5;
+  const [quizResultStatus, setQuizResultStatus] = useState(null); // null | 'passed' | 'failed'
+  const [role, setRole] = useState(null);
+  const [username, setUsername] = useState('');
+
+  // Funkcija za učitavanje završenih koraka sa backend-a
+  const fetchCompletedSteps = async (userId) => {
+    try {
+      const token = localStorage.getItem("auth_token")
+      const response = await fetch(`${API_BASE_URL}/progress/completed/${userId}/${courseId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        const completedStepIds = await response.json()
+        return new Set(completedStepIds)
+      }
+    } catch (err) {
+      console.error("Greška pri učitavanju napretka:", err)
+    }
+    return new Set()
   }
 
-  // Hardcoded steps data - različiti scenariji
-  const steps = [
-    {
-      id: 1,
-      course_id: 1,
-      title: "Uvod u React.js",
-      description:
-        "U ovoj lekciji ćemo se upoznati sa React.js bibliotekom, njenim osnovnim konceptima i zašto je toliko popularna u web developmentu. Vidjet ćemo i dijagram arhitekture React aplikacije.",
-      video_url: "https://www.youtube.com/embed/dGcsHMXbSOA",
-      image_url: "/placeholder.svg?height=400&width=600",
-    },
-    {
-      id: 2,
-      course_id: 1,
-      title: "Instalacija i Setup",
-      description: "Korak po korak vodič za instalaciju Node.js-a, npm-a i kreiranje prvog React projekta.",
-      video_url: "https://www.youtube.com/embed/SqcY0GlETPk",
-      image_url: null, // Samo video
-    },
-    {
-      id: 3,
-      course_id: 1,
-      title: "JSX Sintaksa - Dijagram",
-      description:
-        "Duboko zavirite u JSX sintaksu - React-ov način pisanja HTML-a u JavaScript-u. Ova lekcija sadrži samo dijagram sa objašnjenjem.",
-      video_url: null, // Samo slika
-      image_url: "/placeholder.svg?height=500&width=800",
-    },
-    {
-      id: 4,
-      course_id: 1,
-      title: "Komponente i Props - Kompletna lekcija",
-      description:
-        "Naučite kako da kreirate i koristite React komponente. Ova lekcija sadrži i video objašnjenje i dijagram komponenti.",
-      video_url: "https://www.youtube.com/embed/9D1x7-2FmTA",
-      image_url: "/placeholder.svg?height=450&width=700",
-    },
-    {
-      id: 5,
-      course_id: 1,
-      title: "State i Event Handling",
-      description: "Ovladajte React State-om i event handling-om. Samo tekstualno objašnjenje bez dodatnih materijala.",
-      video_url: null, // Samo tekst
-      image_url: null,
-    },
-  ]
+    useEffect(() => {
+      const checkAuthorization = () => {
+        try {
+          const role = getRoleFromToken();
+          setRole(role);
+          const user = getUserDataFromToken();
+          setUsername(user?.username || '');
+          
+          // Ako korisnik ima bilo koju rolu, smatramo ga autoriziranim
+          if (role) {
+            // Dodatna logika ako je potrebno
+          } else {
+            router.push("/login"); // Preusmjeri na login ako nema role
+          }
+        } catch (error) {
+          console.error("Authorization error:", error);
+          router.push("/login");
+        }
+      };
+  
+      checkAuthorization();
+    }, [router]);
 
-  const [selectedStep, setSelectedStep] = useState(steps[0])
-  const [completedSteps, setCompletedSteps] = useState(new Set())
+  // Funkcija za čuvanje završenog koraka na backend
+  const saveStepProgress = async (stepId) => {
+    try {
+      setSavingProgress(true)
+      const token = localStorage.getItem("auth_token")
+      const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+      const userId = userData.id
+
+      if (!userId) {
+        console.error("User ID nije pronađen")
+        return false
+      }
+
+      const response = await fetch(`${API_BASE_URL}/progress/complete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          course_id: parseInt(courseId),
+          step_id: stepId,
+          completed: true
+        }),
+      })
+
+      if (response.ok) {
+        return true
+      } else {
+        console.error("Greška pri čuvanju napretka:", response.statusText)
+        return false
+      }
+    } catch (err) {
+      console.error("Greška pri čuvanju napretka:", err)
+      return false
+    } finally {
+      setSavingProgress(false)
+    }
+  }
+
+  // Funkcija za čuvanje u localStorage kao fallback
+  const saveToLocalStorage = (stepId, userId) => {
+    try {
+      const key = `course_progress_${userId}_${courseId}`
+      const existingProgress = JSON.parse(localStorage.getItem(key) || "[]")
+      if (!existingProgress.includes(stepId)) {
+        existingProgress.push(stepId)
+        localStorage.setItem(key, JSON.stringify(existingProgress))
+      }
+    } catch (err) {
+      console.error("Greška pri čuvanju u localStorage:", err)
+    }
+  }
+
+  // Funkcija za učitavanje iz localStorage kao fallback
+  const loadFromLocalStorage = (userId) => {
+    try {
+      const key = `course_progress_${userId}_${courseId}`
+      const progress = JSON.parse(localStorage.getItem(key) || "[]")
+      return new Set(progress)
+    } catch (err) {
+      console.error("Greška pri učitavanju iz localStorage:", err)
+      return new Set()
+    }
+  }
+
+  // Učitavanje podataka o kursu i napretku
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      const token = localStorage.getItem("auth_token")
+      const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+      const userId = userData.id
+      console.log("📦 Token:", token)
+
+      if (!token) {
+        setError("Niste prijavljeni.")
+        setLoading(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/course/view/${courseId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (!response.ok) {
+          const text = await response.text()
+          throw new Error(`HTTP error! status: ${response.status} - ${text}`)
+        }
+
+        if (response.status === 403) {
+          alert("Nemate pristup ovom kursu.");
+          router.push("/user/dashboard");
+          return;
+        }
+
+        const data = await response.json()
+        setCourseData(data)
+        if (data.steps.length > 0) setSelectedStep(data.steps[0])
+
+        // Učitavanje napretka
+        if (userId) {
+          // Prvo pokušaj da učitamo sa backend-a
+          const backendProgress = await fetchCompletedSteps(userId)
+          if (backendProgress.size > 0) {
+            setCompletedSteps(backendProgress)
+          } else {
+            // Ako nema podataka na backend-u, učitaj iz localStorage
+            const localProgress = loadFromLocalStorage(userId)
+            setCompletedSteps(localProgress)
+          }
+        } else {
+          // Ako nema user ID, koristi samo localStorage
+          const localProgress = loadFromLocalStorage('guest')
+          setCompletedSteps(localProgress)
+        }
+
+      } catch (err) {
+        setError(`Greška: ${err.message}`)
+        // U slučaju greške, učitaj iz localStorage
+        const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+        const userId = userData.id || 'guest'
+        const localProgress = loadFromLocalStorage(userId)
+        setCompletedSteps(localProgress)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (courseId) fetchCourseData()
+  }, [courseId])
+
+  // Provera da li je korisnik već položio kviz
+  useEffect(() => {
+    const checkQuizResult = async () => {
+      try {
+        const token = localStorage.getItem('auth_token')
+        const res = await fetch(`${API_BASE_URL}/quiz/result/by-course/${courseId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        if (data.exists && data.passed) {
+          setShowReview(true)
+          setQuizResultStatus('passed')
+        } else if (data.exists && !data.passed) {
+          setShowReview(true)
+          setQuizResultStatus('failed')
+        } else {
+          setShowReview(false)
+          setQuizResultStatus(null)
+        }
+      } catch (err) {
+        setShowReview(false)
+        setQuizResultStatus(null)
+      }
+    }
+    if (courseId) checkQuizResult()
+  }, [courseId])
+
+  const markStepCompleted = async (stepId) => {
+    const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+    const userId = userData.id || 'guest'
+    // Dodaj u lokalno stanje odmah
+    setCompletedSteps((prev) => new Set([...prev, stepId]))
+    
+    // Sačuvaj u localStorage kao fallback
+    saveToLocalStorage(stepId, userId)
+    
+    // Pokušaj da sačuvaš na backend
+    const backendSuccess = await saveStepProgress(stepId)
+    
+    if (!backendSuccess) {
+      console.warn("Napretak nije sačuvan na backend-u, ali je sačuvan lokalno")
+    }
+  }
 
   const handleStepClick = (step) => {
     setSelectedStep(step)
   }
 
-  const markStepCompleted = (stepId) => {
-    setCompletedSteps((prev) => new Set([...prev, stepId]))
+  // Fetch quiz and questions
+  const fetchQuizAndQuestions = async () => {
+    setQuizLoading(true)
+    try {
+      const token = localStorage.getItem('auth_token')
+      // 1. Fetch quiz for this course
+      const quizRes = await fetch(`${API_BASE_URL}/quiz/by-course/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!quizRes.ok) throw new Error('Kviz nije pronađen za ovaj kurs.')
+      const quizData = await quizRes.json()
+      setQuiz(quizData)
+      // 2. Fetch questions for this quiz
+      const questionsRes = await fetch(`${API_BASE_URL}/quiz/questions/${quizData.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!questionsRes.ok) throw new Error('Pitanja nisu pronađena.')
+      const questionsData = await questionsRes.json()
+      setQuizQuestions(questionsData)
+      setQuizAnswers({})
+      setQuizResult(null)
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, success: false })
+    } finally {
+      setQuizLoading(false)
+    }
   }
+
+  // Otvori modal i fetchuj kviz
+  const handleOpenQuizModal = () => {
+    setQuizModalOpen(true)
+    fetchQuizAndQuestions()
+  }
+  const handleCloseQuizModal = () => {
+    setQuizModalOpen(false)
+    setQuizResult(null)
+    setQuizAnswers({})
+    setQuizSubmitted(false)
+  }
+
+  // Selektovanje odgovora
+  const handleAnswerChange = (questionId, optionId) => {
+    setQuizAnswers(prev => ({ ...prev, [questionId]: optionId }))
+  }
+
+  // Submit kviza
+  const handleQuizSubmit = async () => {
+    // Provera da li su sva pitanja odgovorena
+    if (quizQuestions.some(q => !quizAnswers[q.id])) {
+      setSnackbar({ open: true, message: 'Odgovorite na sva pitanja!', success: false })
+      return
+    }
+    
+    // Zaključaj dugme nakon prvog klika
+    setQuizSubmitted(true)
+    
+    try {
+      const token = localStorage.getItem('auth_token')
+      const userData = JSON.parse(localStorage.getItem('user_data') || '{}')
+      // Pripremi payload
+      const payload = quizQuestions.map(q => ({
+        course_id: courseId,
+        user_id: userData.id,
+        question_id: q.id,
+        answer_given: quizAnswers[q.id]
+      }))
+      // Pretpostavljam da postoji endpoint /quiz/answer/bulk za slanje svih odgovora odjednom
+      const res = await fetch(`${API_BASE_URL}/quiz/answer/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      })
+      if (!res.ok) throw new Error('Greška pri slanju odgovora.')
+      const result = await res.json()
+      setQuizResult(result)
+      setSnackbar({ open: true, message: result.passed ? 'Čestitamo, položili ste kviz!' : 'Nažalost, niste položili kviz.', success: result.passed })
+      setShowReview(true)
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, success: false })
+      // Ako je greška, otključaj dugme da korisnik može ponovo pokušati
+      setQuizSubmitted(false)
+    }
+  }
+
+  // Fetch recenzije
+  const fetchReviews = async (page = 1) => {
+    setReviewsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/course/reviews/by-course/${courseId}?skip=${(page-1)*REVIEWS_PER_PAGE}&limit=${REVIEWS_PER_PAGE}`);
+      if (!res.ok) throw new Error('Greška pri učitavanju recenzija.');
+      const data = await res.json();
+      setReviews(data);
+    } catch (err) {
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (courseId) fetchReviews(reviewPage);
+    // eslint-disable-next-line
+  }, [courseId, reviewPage]);
+
+  // Nakon slanja recenzije refresuj listu
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    setReviewSubmitting(true);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+      const res = await fetch(`${API_BASE_URL}/course/reviews/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          rating: reviewRating,
+          course_id: parseInt(courseId),
+        }),
+      });
+      if (!res.ok) throw new Error("Greška pri slanju ocene.");
+      setSnackbar({ open: true, message: "Ocena uspješno sačuvana!", success: true });
+      setReviewModalOpen(false);
+      setReviewRating(5);
+      fetchReviews(1); // Refresuj na prvu stranicu
+      setReviewPage(1);
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, success: false });
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  // Funkcija za slanje komentara
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    setCommentSubmitting(true);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`${API_BASE_URL}/course/comments/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          course_id: parseInt(courseId),
+          comment: commentText,
+        }),
+      });
+      if (!res.ok) throw new Error("Greška pri slanju komentara.");
+      setSnackbar({ open: true, message: "Komentar uspješno sačuvan!", success: true });
+      setCommentModalOpen(false);
+      setCommentText("");
+      fetchReviews(1); // Refresuj na prvu stranicu
+      setReviewPage(1);
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, success: false });
+    } finally {
+      setCommentSubmitting(false);
+    }
+  };
+
+  // Ako korisnik nije upisan na kurs, prikaži poruku i zabrani pristup
+  if (courseData && courseData.is_enrolled === false) {
+    return (
+      <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)" }}>
+        <Container maxWidth="sm">
+          <Alert severity="error" sx={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+            Nemate pristup ovom kursu. Kupite kurs da biste mogli da učite.
+          </Alert>
+          <Box sx={{ textAlign: "center", marginTop: "1rem" }}>
+            <Button variant="contained" onClick={() => router.push("/user/dashboard")} sx={{ background: "#8b5cf6" }}>
+              Nazad na dashboard
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+    )
+  }
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)",
+        }}
+      >
+        <Box sx={{ textAlign: "center" }}>
+          <CircularProgress size={60} sx={{ color: "#8b5cf6", marginBottom: "1rem" }} />
+          <Typography variant="h6" sx={{ color: "#8b5cf6" }}>
+            Učitavanje kursa...
+          </Typography>
+          <Typography variant="body2" sx={{ color: "#666", marginTop: "0.5rem" }}>
+            API: {API_BASE_URL}/courses/view/{courseId}
+          </Typography>
+        </Box>
+      </Box>
+    )
+  }
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)",
+        }}
+      >
+        <Container maxWidth="md">
+          <Alert severity="error" sx={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
+            {error}
+          </Alert>
+          <Paper sx={{ padding: "1rem", backgroundColor: "#f5f5f5" }}>
+            <Typography variant="h6" sx={{ marginBottom: "1rem" }}>
+              Debug informacije:
+            </Typography>
+            <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+              API URL: {API_BASE_URL}/courses/view/{courseId}
+            </Typography>
+            <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+              Course ID: {courseId}
+            </Typography>
+            <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
+              Environment: {process.env.NODE_ENV}
+            </Typography>
+          </Paper>
+          <Box sx={{ textAlign: "center", marginTop: "1rem" }}>
+            <Button variant="contained" onClick={() => window.location.reload()} sx={{ background: "#8b5cf6" }}>
+              Pokušaj ponovo
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+    )
+  }
+
+  if (!courseData) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)",
+        }}
+      >
+        <Container maxWidth="md">
+          <Alert severity="warning" sx={{ fontSize: "1.1rem" }}>
+            Kurs nije pronađen.
+          </Alert>
+        </Container>
+      </Box>
+    )
+  }
+
+  const { course, creator, steps, is_enrolled, total_steps } = courseData
 
   return (
     <Box sx={{ minHeight: "100vh", background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)" }}>
-      {/* Navbar */}
-      <AppBar
-        position="static"
-        sx={{
-          background: "linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%)",
-          boxShadow: "0 4px 20px rgba(139, 92, 246, 0.3)",
-        }}
-      >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 2rem" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <School sx={{ fontSize: "2rem", color: "white" }} />
-            <Typography variant="h6" sx={{ fontWeight: 700, color: "white", fontSize: "1.5rem" }}>
-              EduPlatform
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: "1rem" }}>
-            <Button color="inherit" sx={{ fontWeight: 500 }}>
-              Kursevi
-            </Button>
-            <Button color="inherit" sx={{ fontWeight: 500 }}>
-              Moji Kursevi
-            </Button>
-            <Button color="inherit" sx={{ fontWeight: 500 }}>
-              Korpa
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      {getHeaderByRole(role)}
 
       {/* Course Header */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%)",
+          background: "linear-gradient(135deg,rgb(89, 59, 158) 0%,rgb(191, 176, 205) 50%,rgb(65, 18, 109) 100%)",
           color: "white",
           padding: "3rem 0",
           marginBottom: "2rem",
@@ -142,9 +595,17 @@ export default function CourseViewerPage() {
               <Typography variant="h3" sx={{ fontWeight: 700, marginBottom: "1rem" }}>
                 {course.title}
               </Typography>
-              <Typography variant="h6" sx={{ opacity: 0.95, marginBottom: "1.5rem", lineHeight: 1.6 }}>
+              <Typography variant="h6" sx={{ opacity: 0.95, marginBottom: "1rem", lineHeight: 1.6 }}>
                 {course.description}
               </Typography>
+
+              {creator && (
+                <Typography variant="body1" sx={{ opacity: 0.9, marginBottom: "1.5rem" }}>
+                  Kreator: {creator.name} {creator.surname} (@{creator.username})
+                </Typography>
+              )}
+              
+
               <Box sx={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
                 <Chip
                   icon={<School />}
@@ -157,13 +618,24 @@ export default function CourseViewerPage() {
                 />
                 <Chip
                   icon={<AccessTime />}
-                  label={`${steps.length} lekcija`}
+                  label={`${total_steps} lekcija`}
                   sx={{
                     backgroundColor: "rgba(255, 255, 255, 0.15)",
                     color: "white",
                     border: "1px solid rgba(255, 255, 255, 0.3)",
                   }}
                 />
+                {is_enrolled && (
+                  <Chip
+                    icon={<CheckCircle />}
+                    label="Enrollovan"
+                    sx={{
+                      backgroundColor: "rgba(16, 185, 129, 0.2)",
+                      color: "white",
+                      border: "1px solid rgba(16, 185, 129, 0.3)",
+                    }}
+                  />
+                )}
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -171,7 +643,11 @@ export default function CourseViewerPage() {
                 <CardMedia
                   component="img"
                   height="200"
-                  image="/placeholder.svg?height=300&width=400"
+                  image={
+                    course.image_thumbnail
+                      ? `${API_BASE_URL}/${course.image_thumbnail}`
+                      : "/placeholder.svg?height=300&width=400"
+                  }
                   alt={course.title}
                 />
               </Card>
@@ -180,7 +656,7 @@ export default function CourseViewerPage() {
         </Container>
       </Box>
 
-      {/* Main Content */}
+      {/* Main Content - ostatak koda ostaje isti */}
       <Container maxWidth="xl" sx={{ paddingBottom: "3rem" }}>
         <Grid container spacing={3}>
           {/* Steps Sidebar */}
@@ -252,7 +728,7 @@ export default function CourseViewerPage() {
             </Paper>
           </Grid>
 
-          {/* Step Content */}
+          {/* Step Content - ostatak komponente */}
           <Grid item xs={12} md={8} lg={9}>
             {selectedStep ? (
               <Paper
@@ -264,7 +740,6 @@ export default function CourseViewerPage() {
                   overflow: "hidden",
                 }}
               >
-                {/* Step Header */}
                 <Box
                   sx={{
                     padding: "2rem",
@@ -278,154 +753,88 @@ export default function CourseViewerPage() {
                   <Typography variant="body1" sx={{ color: "#6b7280", lineHeight: 1.7 }}>
                     {selectedStep.description}
                   </Typography>
-
-                  {/* Content Type Indicators */}
-                  <Box sx={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-                    {selectedStep.video_url && (
-                      <Chip
-                        icon={<PlayCircleOutline />}
-                        label="Video"
-                        size="small"
-                        sx={{ backgroundColor: "rgba(139, 92, 246, 0.1)", color: "#8b5cf6" }}
-                      />
-                    )}
-                    {selectedStep.image_url && (
-                      <Chip
-                        icon={<Image />}
-                        label="Dijagram"
-                        size="small"
-                        sx={{ backgroundColor: "rgba(168, 85, 247, 0.1)", color: "#a855f7" }}
-                      />
-                    )}
-                    {!selectedStep.video_url && !selectedStep.image_url && (
-                      <Chip
-                        label="Tekstualna lekcija"
-                        size="small"
-                        sx={{ backgroundColor: "rgba(107, 114, 128, 0.1)", color: "#6b7280" }}
-                      />
-                    )}
-                  </Box>
                 </Box>
 
                 {/* Video Content */}
                 {selectedStep.video_url && (
                   <Box sx={{ padding: "2rem", background: "white" }}>
-                    <Typography variant="h6" sx={{ color: "#8b5cf6", marginBottom: "1rem", fontWeight: 600 }}>
-                      📹 Video lekcija
-                    </Typography>
-                    <Box
-                      sx={{
-                        position: "relative",
-                        paddingTop: "56.25%",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                      }}
-                    >
-                      <iframe
-                        src={selectedStep.video_url}
-                        title={selectedStep.title}
-                        frameBorder="0"
-                        allowFullScreen
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%",
-                          border: "none",
-                        }}
-                      />
+                    <Box sx={{ position: "relative", paddingTop: "56.25%", borderRadius: "8px", overflow: "hidden", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)" }}>
+                      {selectedStep.video_url.includes('youtube.com') || selectedStep.video_url.includes('youtu.be') ? (
+                        // YouTube video
+                        <iframe
+                          src={selectedStep.video_url}
+                          title={selectedStep.title}
+                          frameBorder="0"
+                          allowFullScreen
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                          }}
+                        />
+                      ) : (
+                        // Local video file
+                        <video
+                          controls
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                          }}
+                        >
+                          <source 
+                            src={`${API_BASE_URL}/${selectedStep.video_url.replace(/\\/g, '/')}`} 
+                            type="video/mp4" 
+                          />
+                          Vaš browser ne podržava video tag.
+                        </video>
+                      )}
                     </Box>
                   </Box>
                 )}
 
                 {/* Image Content */}
                 {selectedStep.image_url && (
-                  <Box sx={{ padding: "2rem", background: selectedStep.video_url ? "#fafafa" : "white" }}>
-                    <Typography variant="h6" sx={{ color: "#a855f7", marginBottom: "1rem", fontWeight: 600 }}>
-                      📊 Dijagram i objašnjenje
-                    </Typography>
-                    <Box
-                      sx={{
-                        textAlign: "center",
-                        padding: "1rem",
-                        backgroundColor: "white",
+                  <Box sx={{ padding: "2rem", background: "white", textAlign: "center" }}>
+                    <img
+                      src={`${API_BASE_URL}/${selectedStep.image_url.replace(/\\/g, '/')}`}
+                      alt={selectedStep.title}
+                      style={{
+                        maxWidth: "100%",
+                        height: "auto",
                         borderRadius: "8px",
-                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
                       }}
-                    >
-                      <img
-                        src={selectedStep.image_url || "/placeholder.svg"}
-                        alt={selectedStep.title}
-                        style={{
-                          maxWidth: "100%",
-                          height: "auto",
-                          borderRadius: "8px",
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                        }}
-                      />
-                    </Box>
-                  </Box>
-                )}
-
-                {/* No Media Content */}
-                {!selectedStep.video_url && !selectedStep.image_url && (
-                  <Box sx={{ padding: "2rem", background: "white" }}>
-                    <Typography variant="h6" sx={{ color: "#6b7280", marginBottom: "1rem", fontWeight: 600 }}>
-                      📝 Tekstualna lekcija
-                    </Typography>
-                    <Box
-                      sx={{
-                        padding: "1.5rem",
-                        backgroundColor: "#f9fafb",
-                        borderRadius: "8px",
-                        border: "1px solid #e5e7eb",
-                      }}
-                    >
-                      <Typography variant="body1" sx={{ color: "#374151", lineHeight: 1.8 }}>
-                        Ova lekcija sadrži detaljno tekstualno objašnjenje koncepata. Pročitajte pažljivo i pratite
-                        primjere koda koji će biti prikazani u narednim lekcijama.
-                      </Typography>
-                    </Box>
+                    />
                   </Box>
                 )}
 
                 {/* Step Actions */}
-                <Box
-                  sx={{
-                    padding: "2rem",
-                    background: "white",
-                    borderTop: "1px solid rgba(139, 92, 246, 0.1)",
-                  }}
-                >
-                  {!completedSteps.has(selectedStep.id) ? (
-                    <Button
-                      onClick={() => markStepCompleted(selectedStep.id)}
-                      sx={{
-                        background: "linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)",
-                        color: "white",
-                        border: "none",
-                        padding: "0.75rem 2rem",
-                        borderRadius: "8px",
-                        fontWeight: 500,
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        boxShadow: "0 2px 8px rgba(139, 92, 246, 0.3)",
-                        "&:hover": {
-                          transform: "translateY(-1px)",
-                          boxShadow: "0 4px 12px rgba(139, 92, 246, 0.4)",
-                        },
-                      }}
-                    >
-                      ✓ Označi kao završeno
-                    </Button>
-                  ) : (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <CheckCircle sx={{ color: "#10b981", fontSize: "1.5rem" }} />
-                      <Typography sx={{ color: "#10b981", fontWeight: 600 }}>Lekcija je završena!</Typography>
-                    </Box>
-                  )}
+                <Box sx={{ padding: "2rem", background: "white", borderTop: "1px solid rgba(139, 92, 246, 0.1)" }}>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "#8b5cf6",
+                      "&:hover": { backgroundColor: "#7c3aed" },
+                    }}
+                    disabled={completedSteps.has(selectedStep?.id) || savingProgress || !selectedStep}
+                    onClick={async () => {
+                      if (!selectedStep) return
+                      
+                      await markStepCompleted(selectedStep.id)
+
+                      // Otključavanje sljedećeg koraka
+                      const currentIndex = steps.findIndex(s => s.id === selectedStep.id)
+                      const nextStep = steps[currentIndex + 1]
+                      if (nextStep) setSelectedStep(nextStep)
+                    }}
+                  >
+                    {savingProgress ? "Čuvanje..." : completedSteps.has(selectedStep?.id) ? "Završeno" : "Označi kao završeno"}
+                  </Button>
                 </Box>
               </Paper>
             ) : (
@@ -445,58 +854,196 @@ export default function CourseViewerPage() {
             )}
           </Grid>
         </Grid>
+        
+        {/* Dugme za kviz ili recenziju */}
+        {completedSteps.size === steps.length && !showReview && (
+          <Box sx={{ textAlign: "center", marginTop: "2rem" }}>
+            <Button variant="contained" sx={{ backgroundColor: "#10b981" }} onClick={handleOpenQuizModal}>
+              Radi kviz
+            </Button>
+          </Box>
+        )}
+        {/* Prikaz statusa kviza */}
+        {quizResultStatus === 'passed' && (
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <span style={{ color: '#10b981', fontWeight: 600, fontSize: 18 }}>Položili ste kviz!</span>
+          </Box>
+        )}
+        {quizResultStatus === 'failed' && (
+          <Box sx={{ textAlign: 'center', mt: 2 }}>
+            <span style={{ color: '#ef4444', fontWeight: 600, fontSize: 18 }}>Niste položili kviz.</span>
+          </Box>
+        )}
+        {showReview && (
+          <Box sx={{ textAlign: "center", marginTop: "2rem" }}>
+            <Button variant="contained" sx={{ backgroundColor: "#8b5cf6", mr: 2 }} onClick={() => setReviewModalOpen(true)}>
+              Ostavi ocenu
+            </Button>
+            <Button variant="outlined" sx={{ borderColor: "#8b5cf6", color: "#8b5cf6" }} onClick={() => setCommentModalOpen(true)}>
+              Ostavi komentar
+            </Button>
+          </Box>
+        )}
+        {/* Prikaz recenzija */}
+        <Box sx={{ maxWidth: 600, margin: '2rem auto 0 auto', textAlign: 'center' }}>
+          <Typography variant="h5" sx={{ mb: 2 }}>Ocene i komentari</Typography>
+          {reviewsLoading ? (
+            <Typography>Učitavanje...</Typography>
+          ) : reviews.length === 0 ? (
+            <Typography>Nema ocena i komentara za ovaj kurs.</Typography>
+          ) : (
+            <>
+              {reviews.map((r) => (
+                <Box key={r.id} sx={{ border: '1px solid #eee', borderRadius: 2, p: 2, mb: 2, textAlign: 'left' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Typography sx={{ fontWeight: 600 }}>{r.username || 'Korisnik'}</Typography>
+                    {r.rating > 0 && (
+                      <Rating value={r.rating} readOnly size="small" max={5} precision={0.5} />
+                    )}
+                    <Typography sx={{ color: '#888', fontSize: 13 }}>{format(new Date(r.created_at), 'dd.MM.yyyy.')}</Typography>
+                  </Box>
+                  {r.comment && (
+                    <Typography sx={{ fontSize: 15 }}>{r.comment}</Typography>
+                  )}
+                </Box>
+              ))}
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+                <Button variant="outlined" size="small" disabled={reviewPage === 1} onClick={() => setReviewPage(p => Math.max(1, p-1))}>Prethodna</Button>
+                <Button variant="outlined" size="small" disabled={reviews.length < REVIEWS_PER_PAGE} onClick={() => setReviewPage(p => p+1)}>Sledeća</Button>
+              </Box>
+            </>
+          )}
+        </Box>
       </Container>
 
-      {/* Footer */}
-      <Box
-        component="footer"
-        sx={{
-          background: "linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%)",
-          color: "white",
-          padding: "3rem 0 1rem",
-          marginTop: "4rem",
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-                <School sx={{ fontSize: "2rem", color: "white" }} />
-                <Typography variant="h6" sx={{ fontWeight: 700, color: "white" }}>
-                  EduPlatform
-                </Typography>
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{ color: "rgba(255, 255, 255, 0.8)", lineHeight: 1.6, marginBottom: "1rem" }}
-              >
-                Vaša destinacija za online učenje. Pristupite kvalitetnim kursevima i razvijajte svoje vještine uz
-                najbolje instruktore.
+      {/* Kviz modal */}
+      <Modal open={quizModalOpen} onClose={handleCloseQuizModal}>
+        <Box sx={{
+          maxWidth: 600,
+          maxHeight: '80vh',
+          margin: '5% auto',
+          background: 'white',
+          borderRadius: 4,
+          p: 4,
+          boxShadow: 24,
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <Typography variant="h5" sx={{ mb: 2 }}>Kviz za kurs</Typography>
+          {quizLoading ? (
+            <Typography>Učitavanje kviza...</Typography>
+          ) : quizQuestions.length > 0 ? (
+            <form onSubmit={e => { e.preventDefault(); handleQuizSubmit(); }}>
+              {quizQuestions.map((q, idx) => (
+                <FormControl key={q.id} component="fieldset" sx={{ mb: 3, width: '100%' }}>
+                  <FormLabel component="legend">{idx + 1}. {q.question_text}</FormLabel>
+                  <RadioGroup
+                    value={quizAnswers[q.id] || ''}
+                    onChange={e => handleAnswerChange(q.id, e.target.value)}
+                  >
+                    {q.options.map(opt => (
+                      <FormControlLabel
+                        key={opt.id}
+                        value={opt.id}
+                        control={<Radio />}
+                        label={opt.text}
+                      />
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+              ))}
+              <Button type="submit" variant="contained" sx={{ mt: 2, backgroundColor: '#10b981' }} disabled={quizSubmitted}>
+                {quizSubmitted ? 'Odgovori poslani...' : 'Pošalji odgovore'}
+              </Button>
+            </form>
+          ) : (
+            <Typography>Nema dostupnih pitanja za ovaj kviz.</Typography>
+          )}
+          {quizResult && (
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
+              <Typography variant="h6" color={quizResult.passed ? 'success.main' : 'error.main'}>
+                {quizResult.passed ? 'Čestitamo, položili ste kviz!' : 'Nažalost, niste položili kviz.'}
               </Typography>
-            </Grid>
-
-            <Grid item xs={12} md={8}>
-              <Typography variant="h6" sx={{ fontWeight: 600, marginBottom: "1rem", color: "white" }}>
-                © 2024 EduPlatform. Sva prava zadržana.
-              </Typography>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
+              {quizResult.score !== undefined && (
+                <Typography sx={{ mt: 1 }}>Rezultat: {quizResult.score} / {quizQuestions.length}</Typography>
+              )}
+              <Button sx={{ mt: 2 }} onClick={handleCloseQuizModal}>Zatvori</Button>
+            </Box>
+          )}
+        </Box>
+      </Modal>
+      {/* Review modal */}
+      <Modal open={reviewModalOpen} onClose={() => setReviewModalOpen(false)}>
+        <Box sx={{
+          maxWidth: 400,
+          margin: '10% auto',
+          background: 'white',
+          borderRadius: 4,
+          p: 4,
+          boxShadow: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>Ostavi ocenu</Typography>
+          <form onSubmit={handleReviewSubmit} style={{ width: '100%' }}>
+            <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Rating
+                name="review-rating"
+                value={reviewRating}
+                onChange={(_, newValue) => setReviewRating(newValue)}
+                precision={1}
+                size="large"
+                max={5}
+              />
+            </Box>
+            <Button type="submit" variant="contained" sx={{ backgroundColor: '#8b5cf6', width: '100%' }} disabled={reviewSubmitting}>
+              {reviewSubmitting ? 'Spremanje...' : 'Spasi ocenu'}
+            </Button>
+          </form>
+        </Box>
+      </Modal>
+      {/* Comment modal */}
+      <Modal open={commentModalOpen} onClose={() => setCommentModalOpen(false)}>
+        <Box sx={{
+          maxWidth: 400,
+          margin: '10% auto',
+          background: 'white',
+          borderRadius: 4,
+          p: 4,
+          boxShadow: 24,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>Ostavi komentar</Typography>
+          <form onSubmit={handleCommentSubmit} style={{ width: '100%' }}>
+            <Box sx={{ mb: 2 }}>
+              <textarea
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                placeholder="Vaš komentar"
+                rows={4}
+                style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc', resize: 'vertical' }}
+                required
+              />
+            </Box>
+            <Button type="submit" variant="contained" sx={{ backgroundColor: '#8b5cf6', width: '100%' }} disabled={commentSubmitting}>
+              {commentSubmitting ? 'Spremanje...' : 'Spasi komentar'}
+            </Button>
+          </form>
+        </Box>
+      </Modal>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        message={snackbar.message}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      />
+      <Footer/>
     </Box>
+    
   )
 }
-/* import CourseViewer from "../components/CourseViewer"
-import Navbar from "../components/Navbar"
-import Footer from "../components/Footer"
-
-export default function HomePage() {
-  return (
-    <>
-      <Navbar />
-      <CourseViewer />
-      <Footer />
-    </>
-  )
-}
- */

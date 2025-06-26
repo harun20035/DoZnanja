@@ -1,7 +1,7 @@
 from fastapi import UploadFile, HTTPException, status
 from sqlalchemy.orm import Session
 from models.course_model import Course
-from schemas.course_schema import CourseCreate, UserUpdate, ChangePassword, ChangePhoto, StepDate
+from schemas.course_schema import CourseCreate, UserUpdate, ChangePassword, ChangePhoto, StepDate, CourseWithDetailsResponse
 from repositories import course_repository
 from datetime import datetime
 from models.user_model import User
@@ -13,10 +13,9 @@ import uuid
 from sqlmodel import Session, select
 from models.course_model import Course
 from sqlmodel import Session
-from typing import List
+from typing import List, Optional
 from repositories import course_repository
 from passlib.context import CryptContext
-from typing import Optional
 from repositories.course_repository import get_course_by_id, get_all_courses
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -59,10 +58,65 @@ def create_course(
 
     return course_repository.create_course(db, new_course)
 
-
 def fetch_all_courses(db: Session) -> List[dict]:
     courses = course_repository.get_all_courses(db)
     return [course.dict() for course in courses]
+
+# NOVA FUNKCIJA - Dohvatanje kursa sa svim detaljima
+def get_course_with_details(db: Session, course_id: int, user_id: Optional[int] = None):
+    course_data = course_repository.get_course_with_details(db, course_id)
+    
+    if not course_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Kurs nije pronađen"
+        )
+    
+    course = course_data["course"]
+    creator = course_data["creator"]
+    steps = course_data["steps"]
+    
+    # Provjeri da li je korisnik enrollovan (ako je user_id proslijeđen)
+    is_enrolled = False
+    if user_id:
+        is_enrolled = course_repository.is_user_enrolled(db, user_id, course_id)
+    
+    # Formatiranje step-ova
+    formatted_steps = []
+    for step in steps:
+        formatted_steps.append({
+            "id": step.id,
+            "course_id": step.course_id,
+            "title": step.title,
+            "description": step.description,
+            "video_url": step.video_url,
+            "image_url": step.image_url
+        })
+    
+    return {
+        "course": {
+            "id": course.id,
+            "title": course.title,
+            "description": course.description,
+            "price": course.price,
+            "discount_percent": course.discount_percent,
+            "category": course.category.value,
+            "image_thumbnail": course.image_thumbnail,
+            "video_demo": course.video_demo,
+            "average_rating": course.average_rating,
+            "created_at": course.created_at,
+            "status": course.status.value
+        },
+        "creator": {
+            "id": creator.id,
+            "name": creator.name,
+            "surname": creator.surname,
+            "username": creator.username
+        } if creator else None,
+        "steps": formatted_steps,
+        "is_enrolled": is_enrolled,
+        "total_steps": len(formatted_steps)
+    }
 
 def update_user_data(user_data: UserUpdate, db: Session, current_user: User):
     user_db = course_repository.get_user_by_id(db, current_user.id)
@@ -89,7 +143,6 @@ def update_user_data(user_data: UserUpdate, db: Session, current_user: User):
 
     return course_repository.update_user(db, user_db)
 
-
 def change_password_data(user_data : ChangePassword, db : Session, current_user : User) :
     user_id = current_user.id
     user = db.query(User).filter(User.id == user_id).first()
@@ -103,19 +156,15 @@ def change_password_data(user_data : ChangePassword, db : Session, current_user 
 
     return course_repository.change_password(db, user)
 
-
 def change_photo_data(db: Session, profile_image: UploadFile,  current_user: User):
     image_path = save_file(profile_image, "images")
     current_user.profile_image = image_path
 
     return course_repository.change_photo(db, current_user)
 
-
 def get_creator_courses_list(db : Session, current_user : User) -> List[dict] :
     courses = course_repository.get_creator_courses(db, current_user.id)
     return [course.dict() for course in courses]
-
-
 
 def create_step_course_service(
     db: Session, 
@@ -139,7 +188,6 @@ def create_step_course_service(
 
 def get_step_course_service(db:Session,course_id:int):
     steps=course_repository.get_step(db,course_id)
-    print(steps)
     return [step.dict() for step in steps]
 
 def delete_step_course_service(db:Session,step_id:int):
@@ -166,7 +214,6 @@ def update_step_course_service(
 
     return course_repository.update_step_course(db, step_db)
 
-
 def get_course(session, course_id: int) -> Course:
     course = get_course_by_id(session, course_id)
     if not course:
@@ -175,7 +222,6 @@ def get_course(session, course_id: int) -> Course:
             detail="Course not found"
         )
     return course
-
 
 def get_creator_courses_with_stats(db: Session, user: User):
     if user.role != "CREATOR":
