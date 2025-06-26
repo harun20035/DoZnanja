@@ -49,3 +49,7 @@ def get_chat_messages(db: Session, user1_id: int, user2_id: int, course_id: int)
     print("Receiver ID:", user2_id)
     print("Course ID:", course_id)
     return chat_repository.get_messages_between_users(db, user1_id, user2_id, course_id)
+
+
+def get_last_chat_previews(db: Session, user_id: int):
+    return chat_repository.get_last_messages_with_partners(db, user_id)

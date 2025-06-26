@@ -21,3 +21,13 @@ class ChatMessageResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+
+class LastChatPreviewResponse(BaseModel):
+    id: int
+    name: str
+    surname: str
+    avatar: Optional[str]
+    message: str
+    timestamp: datetime

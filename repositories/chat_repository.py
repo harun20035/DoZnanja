@@ -5,6 +5,8 @@ from models.course_model import Course
 from models.courseEnrollment_model import CourseEnrollment
 from datetime import datetime
 from models.chatMessage_model import ChatMessage
+from sqlalchemy import or_, desc, func, and_, case
+
 
 def get_chat_partners_for_user(db: Session, user_id: int):
     return (
@@ -73,3 +75,61 @@ def get_messages_between_users(db: Session, user1_id: int, user2_id: int, course
         ((ChatMessage.sender_id == user1_id) & (ChatMessage.receiver_id == user2_id)) |
         ((ChatMessage.sender_id == user2_id) & (ChatMessage.receiver_id == user1_id))
     ).order_by(ChatMessage.timestamp.asc()).all()
+
+
+def get_last_messages_with_partners(db: Session, user_id: int):
+    # Subquery: zadnja poruka po paru i kursu
+    subquery = (
+        db.query(
+            func.max(ChatMessage.timestamp).label("last_ts"),
+            func.least(ChatMessage.sender_id, ChatMessage.receiver_id).label("u1"),
+            func.greatest(ChatMessage.sender_id, ChatMessage.receiver_id).label("u2"),
+            ChatMessage.course_id
+        )
+        .filter(
+            or_(
+                ChatMessage.sender_id == user_id,
+                ChatMessage.receiver_id == user_id
+            )
+        )
+        .group_by("u1", "u2", ChatMessage.course_id)
+        .order_by(desc("last_ts"))
+        .limit(3)
+        .subquery()
+    )
+
+    # Glavni query: uzmi te poruke i spoji sa partnerom (ne current_userom)
+    messages = (
+        db.query(ChatMessage, User)
+        .join(
+            subquery,
+            and_(
+                ChatMessage.timestamp == subquery.c.last_ts,
+                func.least(ChatMessage.sender_id, ChatMessage.receiver_id) == subquery.c.u1,
+                func.greatest(ChatMessage.sender_id, ChatMessage.receiver_id) == subquery.c.u2,
+                ChatMessage.course_id == subquery.c.course_id
+            )
+        )
+        .join(
+            User,
+            or_(
+                and_(ChatMessage.sender_id == user_id, User.id == ChatMessage.receiver_id),
+                and_(ChatMessage.receiver_id == user_id, User.id == ChatMessage.sender_id)
+            )
+        )
+        .order_by(desc(ChatMessage.timestamp))
+        .all()
+    )
+
+    result = []
+    for msg, partner in messages:
+        result.append({
+            "id": partner.id,
+            "name": partner.name,
+            "surname": partner.surname,
+            "avatar": partner.profile_image,
+            "message": msg.content,
+            "timestamp": msg.timestamp,
+        })
+
+    return result

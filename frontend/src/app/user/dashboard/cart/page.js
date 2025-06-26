@@ -1,23 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useEffect, useState } from "react";
 import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardMedia,
-  Grid,
-  Modal,
-  Typography,
-} from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import InfoIcon from '@mui/icons-material/Info';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import ErrorIcon from '@mui/icons-material/Error';
-import styles from './Cart.module.css';
+  Box, Typography, Card, CardMedia, CardContent, CardActions, Button, Container,
+  Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
+  Alert, Snackbar, Paper
+} from "@mui/material";
+import {
+  ShoppingCart, Delete, CreditCard, School
+} from "@mui/icons-material";
+import axios from "axios";
+import styles from "./Cart.module.css";
 
 const normalizePath = (path) => {
   if (!path) return "/placeholder.svg";
@@ -27,220 +20,194 @@ const normalizePath = (path) => {
   return `http://localhost:8000${fixed}`;
 };
 
-export default function Cart() {
-  const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
-  const [videoOpen, setVideoOpen] = useState(false);
-  const [lowCreditsOpen, setLowCreditsOpen] = useState(false);
+export default function CartPage() {
+  const [cartCourses, setCartCourses] = useState([]);
+  const [purchaseDialog, setPurchaseDialog] = useState({ open: false, course: null });
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [missingCredits, setMissingCredits] = useState(0);
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchCart = async () => {
       try {
-        const token = localStorage.getItem('auth_token');
-        const res = await axios.get('http://localhost:8000/user/cart', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const token = localStorage.getItem("auth_token");
+        const res = await axios.get("http://localhost:8000/user/cart", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setCourses(res.data);
+        setCartCourses(res.data);
       } catch (err) {
-        console.error('Greška pri fetchanju korpe:', err.response?.data || err.message);
+        console.error("Greška pri fetchanju korpe:", err);
       }
     };
-
-    fetchCourses();
+    fetchCart();
   }, []);
 
-  const handleBuyClick = (course) => {
-    setSelectedCourse(course);
-    setConfirmOpen(true);
+  const handleRemoveFromCart = (id) => {
+    setCartCourses((prev) => prev.filter((c) => c.id !== id));
+    setSnackbar({ open: true, message: "Kurs je uklonjen iz korpe", severity: "info" });
   };
 
-  const handleDetailsClick = (course) => {
-    setSelectedCourse(course);
-    setVideoOpen(true);
+  const handleBuyCourse = (course) => {
+    setPurchaseDialog({ open: true, course });
   };
 
   const confirmPurchase = async () => {
-  setConfirmOpen(false);
-  try {
-    const token = localStorage.getItem('auth_token');
-    await axios.post(`http://localhost:8000/user/purchase/${selectedCourse.id}`, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const token = localStorage.getItem("auth_token");
+      await axios.post(`http://localhost:8000/user/purchase/${purchaseDialog.course.id}`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    setSuccessOpen(true);
-    setCourses(prev => prev.filter(c => c.id !== selectedCourse.id));
-  } catch (err) {
-    const detail = err.response?.data?.detail?.toLowerCase() || '';
-
-    if (detail.includes("nedovoljno kredita")) {
-      const match = detail.match(/nedostaje\s+(\d+)/i);
-      if (match) {
-        setMissingCredits(parseInt(match[1]));
+      setCartCourses((prev) => prev.filter(c => c.id !== purchaseDialog.course.id));
+      setSnackbar({ open: true, message: `Uspješno ste kupili \"${purchaseDialog.course.title}\"!`, severity: "success" });
+    } catch (err) {
+      const detail = err.response?.data?.detail?.toLowerCase() || "";
+      if (detail.includes("nedovoljno kredita")) {
+        const match = detail.match(/nedostaje\s+(\d+)/i);
+        setMissingCredits(match ? parseInt(match[1]) : 0);
+        setSnackbar({ open: true, message: `Nedovoljno kredita! Nedostaje ${missingCredits} KM`, severity: "error" });
       } else {
-        setMissingCredits(0);
+        setSnackbar({ open: true, message: "Greška pri kupovini!", severity: "error" });
       }
-      setLowCreditsOpen(true);
-    } else {
-      // fallback za sve ostale greške
-      console.error("Greška pri kupovini:", err);
-      alert("Greška pri kupovini: " + (detail || err.message));
+    } finally {
+      setPurchaseDialog({ open: false, course: null });
     }
-  }
-};
+  };
 
+  const getCategoryColor = (category) => ({
+    Programming: "#8b5cf6",
+    Design: "#ec4899",
+    Marketing: "#f59e0b",
+    Business: "#10b981",
+  }[category] || "#6b7280");
+
+  const getLevelColor = (level) => ({
+    Početnik: "#10b981",
+    Srednji: "#f59e0b",
+    Napredni: "#ef4444",
+  }[level] || "#6b7280");
+
+  // 📊 Izračun cijena
+  const totalOriginalPrice = cartCourses.reduce((acc, c) => acc + c.price, 0);
+  const totalDiscountPrice = cartCourses.reduce((acc, c) => acc + (c.price * (1 - (c.discount_percent || 0) / 100)), 0);
+  const totalSavings = totalOriginalPrice - totalDiscountPrice;
 
   return (
-    <Box className={styles.dashboardContainer}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Moja Korpa
-      </Typography>
-
-      <Grid container spacing={3} className={styles.courseGrid}>
-        {courses.map((course) => (
-          <Grid item xs={12} sm={6} md={4} key={course.id}>
-            <Card className={styles.courseCard}>
-              <div className={styles.imageContainer}>
-                <CardMedia
-                  component="img"
-                  height="180"
-                  image={normalizePath(course.image_thumbnail)}
-                  alt={course.title}
-                  className={styles.courseImage}
-                />
-              </div>
-              <CardContent className={styles.cardContent}>
-                <Typography className={styles.courseTitle}>{course.title}</Typography>
-                <Typography className={styles.courseInstructor}>
-                  Autor: {course.name} {course.surname}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {course.description}
-                </Typography>
-                <Typography className={styles.salePrice}>Cijena: {course.price} KM</Typography>
-              </CardContent>
-              <CardActions>
-                <Button
-                  size="small"
-                  color="primary"
-                  startIcon={<ShoppingCartIcon />}
-                  onClick={() => handleBuyClick(course)}
-                >
-                  Kupi
-                </Button>
-                <Button
-                  size="small"
-                  color="secondary"
-                  startIcon={<InfoIcon />}
-                  onClick={() => handleDetailsClick(course)}
-                >
-                  Detalji
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Modal: potvrda kupovine */}
-      <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <Box className={styles.modalBox}>
-          <Typography variant="h6">
-            Potvrditi kupovinu: <strong>{selectedCourse?.title}</strong>?
-          </Typography>
-          <Box className={styles.modalButtons}>
-            <Button onClick={() => setConfirmOpen(false)} variant="outlined">
-              Odustani
-            </Button>
-            <Button onClick={confirmPurchase} variant="contained" color="primary">
-              Potvrdi
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      {/* Modal: uspješna kupovina */}
-      <Modal open={successOpen} onClose={() => setSuccessOpen(false)}>
-        <Box className={styles.modalBox}>
-          <CheckCircleIcon sx={{ fontSize: 40, color: 'green', mb: 1 }} />
-          <Typography variant="h6" fontWeight="bold">
-            Uspješno ste kupili kurs!
-          </Typography>
-          <Typography variant="body2">{selectedCourse?.title}</Typography>
-          <Box sx={{ marginTop: 2 }}>
-            <Button onClick={() => setSuccessOpen(false)} variant="contained">
-              Zatvori
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      {/* Modal: prikaz videa */}
-      <Modal open={videoOpen} onClose={() => setVideoOpen(false)}>
-        <Box className={styles.modalBox}>
-          <Typography variant="h6" gutterBottom>
-            Pregled kursa: {selectedCourse?.title}
-          </Typography>
-          {selectedCourse?.video_demo ? (
-            <Box sx={{ position: 'relative', paddingTop: '56.25%' }}>
-              <iframe
-                src={normalizePath(selectedCourse.video_demo)}
-                title="Video kursa"
-                frameBorder="0"
-                allowFullScreen
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                }}
-              />
+    <Box className={styles.ccartContainer}>
+      <Box className={styles.ccartHeader}>
+        <Container maxWidth="xl">
+          <Box className={styles.cheaderContent}>
+            <Box className={styles.cheaderLeft}>
+              <Typography variant="h3" className={styles.ccartTitle}>
+                <ShoppingCart className={styles.ccartIcon} />
+                Moja Korpa
+              </Typography>
+              <Typography variant="h6" className={styles.ccartDescription}>
+                {cartCourses.length > 0
+                  ? `${cartCourses.length} kurs${cartCourses.length === 1 ? "" : "eva"} u korpi`
+                  : "Vaša korpa je prazna"}
+              </Typography>
             </Box>
-          ) : (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-              Ovaj kurs trenutno nema video demonstraciju.
-            </Typography>
-          )}
-          <Box sx={{ marginTop: 2 }}>
-            <Button onClick={() => setVideoOpen(false)} variant="contained">
-              Zatvori
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
 
-      {/* Modal: nedovoljno kredita */}
-      <Modal open={lowCreditsOpen} onClose={() => setLowCreditsOpen(false)}>
-        <Box className={styles.modalBox}>
-          <ErrorIcon sx={{ fontSize: 40, color: 'red', mb: 1 }} />
-          <Typography variant="h6" fontWeight="bold" color="error">
-            Nedovoljno kredita!
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            Nemate dovoljno kredita za kupovinu kursa <strong>{selectedCourse?.title}</strong>.
-          </Typography>
-          {missingCredits > 0 && (
-            <Typography sx={{ mt: 1 }}>
-              Nedostaje vam još <strong>{missingCredits} kredita</strong>.
-            </Typography>
-          )}
-          <Box sx={{ marginTop: 2 }}>
-            <Button onClick={() => setLowCreditsOpen(false)} variant="outlined" color="error">
-              Zatvori
-            </Button>
-            <Button onClick={() => setLowCreditsOpen(false)} variant="contained" color="primary" sx={{ ml: 2 }}>
-              Nadopuni kredite
-            </Button>
+            <Paper className={styles.statsCard}>
+              <Typography variant="h6" className={styles.statsTitle}>
+                Ukupno
+              </Typography>
+              <Typography variant="h4" className={styles.totalPrice}>
+                {totalDiscountPrice.toFixed(2)} KM
+              </Typography>
+              {totalSavings > 0 && (
+                <>
+                  <Typography variant="body2" className={styles.originalPrice}>
+                    <span className={styles.strikethrough}>{totalOriginalPrice.toFixed(2)} KM</span>
+                  </Typography>
+                  <Typography variant="body2" className={styles.savings}>
+                    Ušteda: {totalSavings.toFixed(2)} KM
+                  </Typography>
+                </>
+              )}
+            </Paper>
+
           </Box>
-        </Box>
-      </Modal>
+        </Container>
+      </Box>
+
+      <Container maxWidth="xl">
+        {cartCourses.length > 0 ? (
+          <div className={styles.ccardGrid}>
+            {cartCourses.map((course) => (
+              <div className={styles.ccardWrapper} key={course.id}>
+                <Card className={styles.ccourseCard}>
+                  <Box className={styles.cimageContainer}>
+                    <CardMedia
+                      component="img"
+                      image={normalizePath(course.image_thumbnail)}
+                      alt={course.title}
+                      className={styles.cfixedImage}
+                    />
+                    <Box className={styles.cimageOverlay}>
+                      {course.discount_percent > 0 && (
+                        <Chip label={`-${course.discount_percent}%`} className={styles.cdiscountChip} size="small" />
+                      )}
+                      <IconButton onClick={() => handleRemoveFromCart(course.id)} className={styles.cremoveButton}>
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                  <CardContent>
+                    <Typography variant="h6" mt={1}>{course.title}</Typography>
+                    <Typography variant="body2" mb={1}>
+                      <School fontSize="small" /> {course.name} {course.surname}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">{course.description}</Typography>
+                    <Box mt={2}>
+                      <Typography variant="h5">
+                        {(course.price * (1 - (course.discount_percent || 0) / 100)).toFixed(2)} KM
+                      </Typography>
+                      {course.discount_percent > 0 && (
+                        <Typography variant="body2" className={styles.cstrikethrough}>
+                          {course.price.toFixed(2)} KM
+                        </Typography>
+                      )}
+                    </Box>
+                  </CardContent>
+                  <CardActions>
+                    <Button onClick={() => handleBuyCourse(course)} variant="contained" fullWidth startIcon={<CreditCard />}>
+                      Kupi sada
+                    </Button>
+                  </CardActions>
+                </Card>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Typography variant="h5" align="center">Vaša korpa je prazna</Typography>
+        )}
+      </Container>
+
+      <Dialog open={purchaseDialog.open} onClose={() => setPurchaseDialog({ open: false, course: null })}>
+        <DialogTitle>Potvrdi kupovinu</DialogTitle>
+        <DialogContent>
+          <Typography>{purchaseDialog.course?.title}</Typography>
+          <Typography>
+            Cijena: {(purchaseDialog.course?.price * (1 - (purchaseDialog.course?.discount_percent || 0) / 100)).toFixed(2)} KM
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPurchaseDialog({ open: false, course: null })}>Odustani</Button>
+          <Button onClick={confirmPurchase} variant="contained">Potvrdi</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

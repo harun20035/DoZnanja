@@ -136,14 +136,18 @@ export function PopularCourses() {
                 <Box className={styles.courseFooter} display="flex" justifyContent="space-between" alignItems="center">
                   <Box className={styles.priceContainer}>
                     <Typography variant="h6" component="span" className={styles.salePrice}>
-                      ${course.sale_price}
+                      ${Number(course.sale_price).toFixed(2)}
                     </Typography>
-                    <Typography variant="body2" component="span" className={styles.originalPrice} sx={{ marginLeft: 1 }}>
-                      ${course.price}
-                    </Typography>
+                    {Number(course.sale_price) < Number(course.price) && (
+                      <Typography variant="body2" component="span" className={styles.originalPrice} sx={{ marginLeft: 1 }}>
+                        ${Number(course.price).toFixed(2)}
+                      </Typography>
+                    )}
+
+
                   </Box>
                   <Button size="small" className={styles.addButton} onClick={() => handleAddToCart(course.id)}>
-                    DODAJ U KORPU
+                    KORPA
                   </Button>
                 </Box>
               </CardContent>

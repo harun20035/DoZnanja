@@ -107,11 +107,7 @@ export function EnrolledCourses() {
         )}
       </div>
 
-      <div className={styles.viewAllContainer}>
-        <Button variant="outlined" className={styles.viewAllButton}>
-          Pogledaj sve moje kurseve
-        </Button>
-      </div>
+      
     </div>
   );
 }
