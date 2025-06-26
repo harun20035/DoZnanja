@@ -186,9 +186,8 @@ export default function ChatPage() {
   }
 
   return (
-     <Box className={styles.chatContainer}>
-      
-                {getHeaderByRole(role)}
+    <Box className={styles.chatContainer}>
+      {getHeaderByRole(role)}
       <Container maxWidth="xl" className={styles.mainContent}>
         <Box display="flex" gap={2} width="100%">
           <Paper className={styles.usersSidebar} style={{ flex: 1 }}>
@@ -280,9 +279,7 @@ export default function ChatPage() {
           </Paper>
         </Box>
       </Container>
-      
+      <Footer />
     </Box>
-      
   )
-  
 }

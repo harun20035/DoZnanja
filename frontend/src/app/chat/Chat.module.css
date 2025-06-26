@@ -1,7 +1,19 @@
 .chatContainer {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fc;
+}
 
+/* Ensure header takes full width within chat container */
+.chatContainer header {
+  width: 100% !important;
+}
+
+.chatContainer .header {
+  width: 100% !important;
 }
 
 /* Navbar Styles */
@@ -532,7 +544,7 @@
   display: flex;
   flex-direction: column;
   background: #f8f9fc;
-  align-items: center;
+  width: 100%;
 }
 
 .chatHeader {
