@@ -1,3 +1,6 @@
+/* Header.module.css */
+
+/* Glavni header */
 .header {
   background-color: #6f42c1;
   border-bottom: 1px solid #5a32a3;
@@ -6,35 +9,68 @@
   z-index: 1000;
 }
 
+/* Red u headeru */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  padding: 1rem 0;
+  gap: 1rem;
+}
+
+/* Brand (DoZnanja + emoji) */
 .brand {
   text-decoration: none;
   color: #fff;
   font-weight: bold;
   display: flex;
   align-items: center;
+  white-space: nowrap;
 }
 
+/* Navigacija */
+.nav {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  align-items: center;
+}
+
+/* Linkovi u navigaciji */
 .link {
   text-decoration: none;
   color: #fff;
   font-weight: 500;
   transition: color 0.2s ease-in-out;
+  white-space: nowrap;
 }
 
 .link:hover {
   color: #d5bfff;
 }
 
-.nav {
-  gap: 3.5rem !important;
-  flex-wrap: wrap;
+/* CTA dugme (Postani Kreator, Registracija) */
+.ctaLink {
+  background-color: #fff;
+  color: #6f42c1;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
 
-.avatarContainer {
-  position: relative;
-  cursor: pointer;
+.ctaLink:hover {
+  background-color: #f5f0fa;
+  border-color: #fff;
+  color: #5a32a3;
 }
 
+/* Avatar ikonica */
 .avatar {
   width: 40px;
   height: 40px;
@@ -47,12 +83,29 @@
   justify-content: center;
   cursor: pointer;
   transition: background 0.3s;
+  user-select: none;
 }
 
 .avatar:hover {
   background-color: #5b1891;
 }
 
+/* Wrap za user info i avatar */
+.profileWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  white-space: nowrap;
+}
+
+/* Info o korisniku (username i tokeni) */
+.userInfo {
+  text-align: right;
+  min-width: 110px;
+}
+
+/* Dropdown meni */
 .dropdown {
   position: absolute;
   top: 50px;
@@ -66,50 +119,21 @@
   padding: 0.5rem 0;
 }
 
+/* Pojedinačna stavka u dropdownu */
 .dropdownItem {
   display: block;
   padding: 0.5rem 1rem;
   color: #6f42c1;
   text-decoration: none;
   transition: background 0.2s;
+  cursor: pointer;
 }
 
 .dropdownItem:hover {
   background-color: #f3ecfb;
 }
 
-.registerButton {
-  background-color: #fff;
-  color: #6f42c1;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: background-color 0.2s ease-in-out;
-  border: 1px solid transparent;
-}
-
-.registerButton:hover {
-  background-color: #f5f0fa;
-  border-color: #fff;
-}
-
-.ctaLink {
-  background-color: #fff;
-  color: #6f42c1;
-  padding: 0.4rem 1rem;
-  border-radius: 6px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color 0.2s ease-in-out;
-  border: 1px solid transparent;
-}
-
-.ctaLink:hover {
-  background-color: #f5f0fa;
-  border-color: #fff;
-  color: #5a32a3;
-}
+/* Broj kurseva u korpi */
 .cartBadge {
   background-color: #dc3545;
   color: white;
@@ -120,4 +144,34 @@
   min-width: 20px;
   text-align: center;
   line-height: 1;
+}
+
+/* RESPONSIVE */
+
+/* Ekrani do 768px */
+@media (max-width: 768px) {
+  .headerRow {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav {
+    width: 100%;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 0.75rem;
+    order: 2;
+    padding-left: 0;
+  }
+
+  .profileWrap {
+    order: 1;
+    margin-left: auto;
+    gap: 0.5rem;
+  }
+
+  .userInfo {
+    font-size: 0.9rem;
+  }
 }
