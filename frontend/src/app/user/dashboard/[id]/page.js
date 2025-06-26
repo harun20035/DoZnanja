@@ -32,6 +32,9 @@ import {
 import { CheckCircle, RadioButtonUnchecked, School, AccessTime, PlayCircleOutline, Image } from "@mui/icons-material"
 import Rating from '@mui/material/Rating';
 import { format } from 'date-fns';
+import getHeaderByRole from "../../../../components/layoutComponents"
+import Footer from "../../../../components/footer/Footer"
+import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
 
 // Konfiguracija API URL-a
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
@@ -68,6 +71,8 @@ export default function CourseViewerPage() {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const REVIEWS_PER_PAGE = 5;
   const [quizResultStatus, setQuizResultStatus] = useState(null); // null | 'passed' | 'failed'
+  const [role, setRole] = useState(null);
+  const [username, setUsername] = useState('');
 
   // Funkcija za učitavanje završenih koraka sa backend-a
   const fetchCompletedSteps = async (userId) => {
@@ -90,6 +95,29 @@ export default function CourseViewerPage() {
     }
     return new Set()
   }
+
+    useEffect(() => {
+      const checkAuthorization = () => {
+        try {
+          const role = getRoleFromToken();
+          setRole(role);
+          const user = getUserDataFromToken();
+          setUsername(user?.username || '');
+          
+          // Ako korisnik ima bilo koju rolu, smatramo ga autoriziranim
+          if (role) {
+            // Dodatna logika ako je potrebno
+          } else {
+            router.push("/login"); // Preusmjeri na login ako nema role
+          }
+        } catch (error) {
+          console.error("Authorization error:", error);
+          router.push("/login");
+        }
+      };
+  
+      checkAuthorization();
+    }, [router]);
 
   // Funkcija za čuvanje završenog koraka na backend
   const saveStepProgress = async (stepId) => {
@@ -550,40 +578,12 @@ export default function CourseViewerPage() {
 
   return (
     <Box sx={{ minHeight: "100vh", background: "linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%)" }}>
-      {/* Navbar */}
-      <AppBar
-        position="static"
-        sx={{
-          background: "linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%)",
-          boxShadow: "0 4px 20px rgba(139, 92, 246, 0.3)",
-        }}
-      >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between", padding: "0.5rem 2rem" }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <School sx={{ fontSize: "2rem", color: "white" }} />
-            <Typography variant="h6" sx={{ fontWeight: 700, color: "white", fontSize: "1.5rem" }}>
-              DoZnanja
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: "1rem" }}>
-            <Button color="inherit" sx={{ fontWeight: 500 }}>
-              Kursevi
-            </Button>
-            <Button color="inherit" sx={{ fontWeight: 500 }}>
-              Moji Kursevi
-            </Button>
-            <Button color="inherit" sx={{ fontWeight: 500 }}>
-              Profil
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      {getHeaderByRole(role)}
 
       {/* Course Header */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%)",
+          background: "linear-gradient(135deg,rgb(89, 59, 158) 0%,rgb(191, 176, 205) 50%,rgb(65, 18, 109) 100%)",
           color: "white",
           padding: "3rem 0",
           marginBottom: "2rem",
@@ -604,6 +604,7 @@ export default function CourseViewerPage() {
                   Kreator: {creator.name} {creator.surname} (@{creator.username})
                 </Typography>
               )}
+              
 
               <Box sx={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
                 <Chip
@@ -1041,6 +1042,8 @@ export default function CourseViewerPage() {
         message={snackbar.message}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       />
+      <Footer/>
     </Box>
+    
   )
 }
