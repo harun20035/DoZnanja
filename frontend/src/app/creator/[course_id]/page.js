@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {
   ChevronDown, ChevronUp, Plus, Edit, Trash,
   Video, Image, Save, CheckCircle
@@ -10,13 +10,20 @@ import "./edit_course.css";
 
 const CourseStepEditor = () => {
   const params = useParams();
+  const router = useRouter();
   const courseId = params.course_id || 1;
 
+  // Role check logic
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // All other state hooks
   const [steps, setSteps] = useState([]);
   const [newStep, setNewStep] = useState({ title: '', description: '' });
   const [newStepFiles, setNewStepFiles] = useState({ video_file: null, image_file: null });
   const [showAddForm, setShowAddForm] = useState(false);
 
+  // Move fetchSteps above useEffect
   const fetchSteps = async () => {
     try {
       const response = await fetch(`http://localhost:8000/course/${courseId}`);
@@ -46,11 +53,48 @@ const CourseStepEditor = () => {
     }
   };
 
+  // All useEffect hooks
+  useEffect(() => {
+    const checkRole = async () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+      try {
+        const res = await fetch('http://localhost:8000/api/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+          router.push('/login');
+          return;
+        }
+        const data = await res.json();
+        if (data.role === 'CREATOR' || data.role === 'ADMIN') {
+          setIsAuthorized(true);
+        } else {
+          router.push('/unauthorized');
+        }
+      } catch {
+        router.push('/unauthorized');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkRole();
+  }, [router]);
+
   useEffect(() => {
     if (courseId) {
       fetchSteps();
     }
   }, [courseId]);
+
+  // Only after all hooks, do conditional return
+  if (isLoading) {
+    return <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></div>;
+  }
+  if (!isAuthorized) return null;
 
   const toggleExpand = (stepId) => {
     setSteps(steps.map(step =>
@@ -132,40 +176,39 @@ const CourseStepEditor = () => {
   };
 
   const saveStep = async (stepId) => {
-  const token = localStorage.getItem("auth_token");
-  const step = steps.find(s => s.id === stepId);
+    const token = localStorage.getItem("auth_token");
+    const step = steps.find(s => s.id === stepId);
 
-  try {
-    const formData = new FormData();
-    formData.append("title", step.title);
-    formData.append("description", step.description);
-    if (step.newVideoFile) formData.append("video_url", step.newVideoFile);
-    if (step.newImageFile) formData.append("image_url", step.newImageFile);
+    try {
+      const formData = new FormData();
+      formData.append("title", step.title);
+      formData.append("description", step.description);
+      if (step.newVideoFile) formData.append("video_url", step.newVideoFile);
+      if (step.newImageFile) formData.append("image_url", step.newImageFile);
 
-    const response = await fetch(`http://localhost:8000/course/${stepId}`, {
-      method: "PUT",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
+      const response = await fetch(`http://localhost:8000/course/${stepId}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
 
-    if (!response.ok) throw new Error("Greška pri ažuriranju.");
+      if (!response.ok) throw new Error("Greška pri ažuriranju.");
 
-    await fetchSteps();
+      await fetchSteps();
 
-    // Resetuj polja za nove fajlove i isEditing
-    setSteps(prevSteps =>
-      prevSteps.map(s =>
-        s.id === stepId
-          ? { ...s, newVideoFile: null, newImageFile: null, isEditing: false }
-          : s
-      )
-    );
-  } catch (err) {
-    console.error(err);
-    alert("Neuspješno ažuriranje koraka.");
-  }
-};
-
+      // Resetuj polja za nove fajlove i isEditing
+      setSteps(prevSteps =>
+        prevSteps.map(s =>
+          s.id === stepId
+            ? { ...s, newVideoFile: null, newImageFile: null, isEditing: false }
+            : s
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Neuspješno ažuriranje koraka.");
+    }
+  };
 
   return (
     <div className="course-step-editor">
