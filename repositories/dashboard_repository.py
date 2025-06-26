@@ -11,6 +11,8 @@ from models.cart_model import Cart
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
+from models.quizResult_model import QuizResult
+from models.course_progress_model import CourseProgress
 
 
 
@@ -149,6 +151,7 @@ def count_cart_items(db : Session, user_id: int) -> int:
 def get_user_cart_courses(db: Session, user_id: int):
     statement = (
         select(
+            Cart.id.label("cart_id"),                # ✅ dodano da dobijemo ID iz Cart
             Course.id,
             Course.title,
             Course.image_thumbnail,
@@ -248,3 +251,69 @@ def get_course_stats(db: Session):
             "total_enrolled_users": result[2]
         }
     return {}
+
+def count_enrolled_courses(db: Session, user_id: int) -> int:
+    return db.query(func.count()).select_from(CourseEnrollment).filter(CourseEnrollment.user_id == user_id).scalar()
+
+def count_completed_courses(db: Session, user_id: int) -> int:
+    return db.query(func.count()).select_from(QuizResult).filter(
+        QuizResult.user_id == user_id,
+        QuizResult.passed == True
+    ).scalar()
+
+def count_completed_steps(db: Session, user_id: int) -> int:
+    return db.query(func.count()).select_from(CourseProgress).filter(
+        CourseProgress.user_id == user_id,
+        CourseProgress.completed == True
+    ).scalar()
+
+
+def fetch_last_two_enrollments(db: Session, user_id: int):
+    statement = (
+        select(CourseEnrollment, Course)
+        .join(Course, Course.id == CourseEnrollment.course_id)
+        .where(CourseEnrollment.user_id == user_id)
+        .order_by(CourseEnrollment.enrolled_at.desc())
+        .limit(2)
+    )
+
+    results = db.execute(statement).all()
+    final = []
+
+    for enrollment, course in results:
+        # Ukupan broj stepova
+        total_steps = db.scalar(
+            select(func.count()).select_from(CourseStep).where(CourseStep.course_id == course.id)
+        ) or 0
+
+        # Završeni stepovi od strane usera
+        completed_steps = db.scalar(
+            select(func.count()).select_from(CourseProgress).where(
+                CourseProgress.course_id == course.id,
+                CourseProgress.user_id == user_id,
+                CourseProgress.completed == True
+            )
+        ) or 0
+
+        # Izračun postotka
+        progress = int((completed_steps / total_steps) * 100) if total_steps > 0 else 0
+
+        final.append({
+            "course_id": course.id,
+            "title": course.title,
+            "description": course.description,
+            "image_thumbnail": course.image_thumbnail,
+            "enrolled_at": enrollment.enrolled_at,
+            "progress": progress
+        })
+
+    return final
+
+
+
+def get_cart_item_by_id(db: Session, cart_id: int):
+    return db.query(Cart).filter(Cart.id == cart_id).first()
+
+def delete_cart_item(db: Session, cart_item: Cart):
+    db.delete(cart_item)
+    db.commit()

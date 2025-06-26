@@ -14,8 +14,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # Asinhrona konekcija za FastAPI
 database = Database(
     DATABASE_URL,
-    min_size=5,
-    max_size=20
+    min_size=1, max_size=5
 )
 
 # Sinhrona konekcija za SQLAlchemy modele

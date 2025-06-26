@@ -1,28 +1,45 @@
-import "./dashboard.css"
+"use client";
+import "./dashboard.css";
+import { useEffect, useState } from "react";
 
 export default function StatisticsSection() {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+
+    if (!token) return;
+
+    fetch("http://localhost:8000/course/statistika", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Greška pri dohvaćanju statistike");
+        return res.json();
+      })
+      .then((data) => setStats(data))
+      .catch((err) => console.error("Greška:", err));
+  }, []);
+
+  if (!stats) return <div className="course-stats">Učitavanje statistike...</div>;
+
   return (
     <div className="course-stats">
       <div className="stats-header">
         <h2>📊 Statistika kurseva</h2>
-        <select className="stats-select">
-          <option>Zadnjih 7 dana</option>
-          <option>Zadnjih 30 dana</option>
-          <option>Zadnja 3 mjeseca</option>
-          <option>Od početka</option>
-        </select>
       </div>
 
       <div className="stats-grid">
         <div className="card stats-card">
-          <div className="card-header">Ukupno studenata</div>
+          <div className="card-header">Ukupno kurseva</div>
           <div className="card-content">
             <div className="stats-info">
               <div>
-                <div className="stats-number">1,248</div>
-                <div className="stats-change">+12% u odnosu na prošli mjesec</div>
+                <div className="stats-number">{stats.total_courses}</div>
               </div>
-              <div className="stats-icon">👥</div>
+              <div className="stats-icon">🎓</div>
             </div>
           </div>
         </div>
@@ -32,8 +49,7 @@ export default function StatisticsSection() {
           <div className="card-content">
             <div className="stats-info">
               <div>
-                <div className="stats-number">$8,492</div>
-                <div className="stats-change">+8% u odnosu na prošli mjesec</div>
+                <div className="stats-number">${stats.total_revenue}</div>
               </div>
               <div className="stats-icon">💵</div>
             </div>
@@ -45,8 +61,7 @@ export default function StatisticsSection() {
           <div className="card-content">
             <div className="stats-info">
               <div>
-                <div className="stats-number">432</div>
-                <div className="stats-change">+5% u odnosu na prošli mjesec</div>
+                <div className="stats-number">{stats.completed_courses}</div>
               </div>
               <div className="stats-icon">📘</div>
             </div>
@@ -58,8 +73,7 @@ export default function StatisticsSection() {
           <div className="card-content">
             <div className="stats-info">
               <div>
-                <div className="stats-number">4.8/5</div>
-                <div className="stats-change">+0.2 u odnosu na prošli mjesec</div>
+                <div className="stats-number">{stats.average_rating}/5</div>
               </div>
               <div className="stats-icon">📈</div>
             </div>
@@ -67,5 +81,5 @@ export default function StatisticsSection() {
         </div>
       </div>
     </div>
-  )
+  );
 }

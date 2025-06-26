@@ -211,7 +211,18 @@ export default function MyCoursesSection() {
                     priority
                     sizes="192px"
                   />
-                  {!course.published && <span className="draft-badge">Skica</span>}
+                  {course.status && (
+                    <span className="draft-badge">
+                      {course.status === "APPROVED"
+                        ? "Odobren"
+                        : course.status === "PENDING"
+                        ? "Na čekanju"
+                        : course.status === "REJECTED"
+                        ? "Odbijen"
+                        : course.status}
+                    </span>
+                  )}
+
                 </div>
 
                 <div className="course-content">
@@ -224,7 +235,7 @@ export default function MyCoursesSection() {
                       <button onClick={() => handleCreateQuizClick(course.id)} className="btn-outline">
                         ✏ Kreiraj kviz
                       </button>
-                      <button className="btn-outline">📊 Statistika</button>
+                      
                     </div>
                   </div>
 

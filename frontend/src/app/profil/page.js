@@ -493,7 +493,6 @@ const EditProfile = () => {
                     </div>
 
                     <div className={styles.cardFooter}>
-                      <button type="button" className={styles.buttonSecondary}>Izadji</button>
                       <button type="submit" className={styles.buttonPrimary}>
                         <Save className={styles.buttonIcon} />
                         Promijeni lozinku
