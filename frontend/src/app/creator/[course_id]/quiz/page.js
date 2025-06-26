@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import "./page.css"
+import Snackbar from '@mui/material/Snackbar';
 
 export default function QuizCreationPage() {
   const { course_id } = useParams()
@@ -11,6 +12,8 @@ export default function QuizCreationPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [quizCreated, setQuizCreated] = useState(false)
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState("");
 
   // Role check logic
   const [isAuthorized, setIsAuthorized] = useState(false)
@@ -23,6 +26,11 @@ export default function QuizCreationPage() {
       correctIndex: null,
     }))
   )
+
+  const showSnackbar = (msg) => {
+    setSnackbarMsg(msg);
+    setSnackbarOpen(true);
+  };
 
   useEffect(() => {
     const checkRole = async () => {
@@ -92,7 +100,7 @@ export default function QuizCreationPage() {
         setQuizId(data.quiz_id)
         setQuizCreated(true)
       } catch (err) {
-        alert("Greška: " + err.message)
+        showSnackbar("Greška: " + err.message)
       } finally {
         setLoading(false)
       }
@@ -127,13 +135,13 @@ export default function QuizCreationPage() {
 
     const token = localStorage.getItem("auth_token")
     if (!token) {
-      alert("Niste prijavljeni.")
+      showSnackbar("Niste prijavljeni.")
       setSubmitting(false)
       return
     }
 
     if (!quizId) {
-      alert("Nije pronađen validan ID kviza.")
+      showSnackbar("Nije pronađen validan ID kviza.")
       setSubmitting(false)
       return
     }
@@ -164,10 +172,10 @@ export default function QuizCreationPage() {
         }
       }
 
-      alert("Kviz je uspješno spremljen!")
+      showSnackbar("Kviz je uspješno spremljen!")
       router.push("/creator")
     } catch (err) {
-      alert("Greška: " + err.message)
+      showSnackbar("Greška: " + err.message)
     } finally {
       setSubmitting(false)
     }
@@ -216,6 +224,7 @@ export default function QuizCreationPage() {
         ))}
         <button type="submit" disabled={submitting || !quizId}>{submitting ? "Spremanje..." : "Spremi kviz"}</button>
       </form>
+      <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={() => setSnackbarOpen(false)} message={snackbarMsg} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />
     </div>
   )
 }

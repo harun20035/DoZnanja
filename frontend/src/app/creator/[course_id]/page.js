@@ -7,6 +7,7 @@ import {
   Video, Image, Save, CheckCircle
 } from 'lucide-react';
 import "./edit_course.css";
+import Snackbar from '@mui/material/Snackbar';
 
 const CourseStepEditor = () => {
   const params = useParams();
@@ -22,6 +23,13 @@ const CourseStepEditor = () => {
   const [newStep, setNewStep] = useState({ title: '', description: '' });
   const [newStepFiles, setNewStepFiles] = useState({ video_file: null, image_file: null });
   const [showAddForm, setShowAddForm] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState("");
+
+  const showSnackbar = (msg) => {
+    setSnackbarMsg(msg);
+    setSnackbarOpen(true);
+  };
 
   // Move fetchSteps above useEffect
   const fetchSteps = async () => {
@@ -49,7 +57,7 @@ const CourseStepEditor = () => {
       setSteps(enhancedSteps);
     } catch (err) {
       console.error("Fetch greška:", err);
-      alert("Nismo mogli dohvatiti korake za ovaj kurs.");
+      showSnackbar("Nismo mogli dohvatiti korake za ovaj kurs.");
     }
   };
 
@@ -150,7 +158,7 @@ const CourseStepEditor = () => {
       setShowAddForm(false);
     } catch (err) {
       console.error(err);
-      alert("Greška pri dodavanju koraka.");
+      showSnackbar("Greška pri dodavanju koraka.");
     }
   };
 
@@ -171,7 +179,7 @@ const CourseStepEditor = () => {
       setSteps(prevSteps => prevSteps.filter(step => step.id !== stepId));
     } catch (error) {
       console.error("Greška pri brisanju:", error);
-      alert("Došlo je do greške pri brisanju koraka.");
+      showSnackbar("Došlo je do greške pri brisanju koraka.");
     }
   };
 
@@ -192,7 +200,7 @@ const CourseStepEditor = () => {
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Greška pri ažuriranju.");
+      if (!response.ok) throw new Error("Neuspješno ažuriranje koraka.");
 
       await fetchSteps();
 
@@ -206,7 +214,7 @@ const CourseStepEditor = () => {
       );
     } catch (err) {
       console.error(err);
-      alert("Neuspješno ažuriranje koraka.");
+      showSnackbar("Neuspješno ažuriranje koraka.");
     }
   };
 
@@ -351,6 +359,7 @@ const CourseStepEditor = () => {
           ))
         )}
       </div>
+      <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={() => setSnackbarOpen(false)} message={snackbarMsg} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />
     </div>
   );
 };
