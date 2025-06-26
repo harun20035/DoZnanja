@@ -1,13 +1,16 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import "./page.css"
 
 export default function QuizCreationPage() {
   const { course_id } = useParams()
+  const router = useRouter()
   const [quizId, setQuizId] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [quizCreated, setQuizCreated] = useState(false)
 
   const [questions, setQuestions] = useState(
     Array.from({ length: 5 }, () => ({
@@ -18,10 +21,26 @@ export default function QuizCreationPage() {
   )
 
   useEffect(() => {
-    const createQuiz = async () => {
+    const checkAndCreateQuiz = async () => {
       const token = localStorage.getItem("auth_token")
       try {
-        const res = await fetch("http://localhost:8000/quiz/create", {
+        // Prvo proveri da li već postoji kviz za ovaj kurs
+        const checkRes = await fetch(`http://localhost:8000/quiz/by-course/${course_id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (checkRes.ok) {
+          const existingQuiz = await checkRes.json()
+          setQuizId(existingQuiz.id)
+          setQuizCreated(true)
+          setLoading(false)
+          return
+        }
+
+        // Ako ne postoji, kreiraj novi kviz
+        const createRes = await fetch("http://localhost:8000/quiz/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -34,9 +53,10 @@ export default function QuizCreationPage() {
           }),
         })
 
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.detail || "Greška pri kreiranju kviza.")
+        const data = await createRes.json()
+        if (!createRes.ok) throw new Error(data.detail || "Greška pri kreiranju kviza.")
         setQuizId(data.quiz_id)
+        setQuizCreated(true)
       } catch (err) {
         alert("Greška: " + err.message)
       } finally {
@@ -44,8 +64,10 @@ export default function QuizCreationPage() {
       }
     }
 
-    createQuiz()
-  }, [course_id])
+    if (!quizCreated) {
+      checkAndCreateQuiz()
+    }
+  }, [course_id, quizCreated])
 
   const handleQuestionChange = (index, value) => {
     const updated = [...questions]
@@ -67,15 +89,18 @@ export default function QuizCreationPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitting(true)
 
     const token = localStorage.getItem("auth_token")
     if (!token) {
       alert("Niste prijavljeni.")
+      setSubmitting(false)
       return
     }
 
     if (!quizId) {
       alert("Nije pronađen validan ID kviza.")
+      setSubmitting(false)
       return
     }
 
@@ -106,8 +131,11 @@ export default function QuizCreationPage() {
       }
 
       alert("Kviz je uspješno spremljen!")
+      router.push("/creator")
     } catch (err) {
       alert("Greška: " + err.message)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -147,7 +175,7 @@ export default function QuizCreationPage() {
             </div>
           </div>
         ))}
-        <button type="submit">Spremi kviz</button>
+        <button type="submit" disabled={submitting || !quizId}>{submitting ? "Spremanje..." : "Spremi kviz"}</button>
       </form>
     </div>
   )
