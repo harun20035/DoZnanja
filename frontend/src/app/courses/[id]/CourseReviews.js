@@ -1,134 +1,86 @@
-"use client"
+// components/CourseReviews.js
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
+import { useEffect, useState } from "react";
+import { Box, Typography, Button, Rating } from "@mui/material";
+import { format } from "date-fns";
 
-export default function CourseReviews({ course }) {
-  const [showAllReviews, setShowAllReviews] = useState(false)
+const REVIEWS_PER_PAGE = 5;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-  // Use reviews from course if available, otherwise use mock data
-  const reviews = [
-    {
-      id: 1,
-      user: "Ana Anić",
-      avatar: "/placeholder.svg?height=40&width=40",
-      rating: 5,
-      date: "15.05.2023.",
-      content:
-        "Odličan kurs! Naučila sam mnogo novih stvari i sada se osjećam spremno za rad na pravim projektima. Instruktor objašnjava sve detaljno i jasno.",
-    },
-    {
-      id: 2,
-      user: "Emir Emirović",
-      avatar: "/placeholder.svg?height=40&width=40",
-      rating: 4,
-      date: "10.05.2023.",
-      content:
-        "Vrlo koristan kurs sa mnogo praktičnih primjera. Jedina zamjerka je što bi neki dijelovi mogli biti detaljnije objašnjeni.",
-    },
-    {
-      id: 3,
-      user: "Selma Selimović",
-      avatar: "/placeholder.svg?height=40&width=40",
-      rating: 5,
-      date: "05.05.2023.",
-      content:
-        "Najbolji kurs koji sam pohađala! Instruktor je vrlo stručan i pristupačan. Materijali su odlični i primjeri su relevantni za stvarne situacije.",
-    },
-    {
-      id: 4,
-      user: "Haris Hasić",
-      avatar: "/placeholder.svg?height=40&width=40",
-      rating: 4.5,
-      date: "01.05.2023.",
-      content: "Vrlo detaljan i informativan kurs. Preporučujem svima koji žele naučiti ovu tehnologiju.",
-    },
-    {
-      id: 5,
-      user: "Amina Aminović",
-      avatar: "/placeholder.svg?height=40&width=40",
-      rating: 3.5,
-      date: "25.04.2023.",
-      content: "Kurs je dobar, ali neki dijelovi su previše osnovni. Očekivala sam više naprednih tehnika.",
-    },
-  ]
+export default function CourseReviews({ courseId }) {
+  const [reviews, setReviews] = useState([]);
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
-  // Function to render stars based on rating
-  const renderStars = (rating) => {
-    const stars = []
-    const fullStars = Math.floor(rating)
-    const hasHalfStar = rating % 1 >= 0.5
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<i key={`full-${i}`} className="bi bi-star-fill"></i>)
+  const fetchReviews = async (page = 1) => {
+    setReviewsLoading(true);
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/course/reviews/by-course/${courseId}?skip=${(page - 1) * REVIEWS_PER_PAGE}&limit=${REVIEWS_PER_PAGE}`
+      );
+      if (!res.ok) throw new Error("Greška pri učitavanju recenzija.");
+      const data = await res.json();
+      setReviews(data);
+    } catch (err) {
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
     }
+  };
 
-    if (hasHalfStar) {
-      stars.push(<i key="half" className="bi bi-star-half"></i>)
-    }
-
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0)
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<i key={`empty-${i}`} className="bi bi-star"></i>)
-    }
-
-    return stars
-  }
-
-  // Display only first 3 reviews unless showAllReviews is true
-  const displayedReviews = showAllReviews ? reviews : reviews.slice(0, 3)
+  useEffect(() => {
+    if (courseId) fetchReviews(reviewPage);
+  }, [courseId, reviewPage]);
 
   return (
-    <div className="course-reviews">
-      <div className="course-section">
-        <h3 className="course-section-title">Recenzije studenata</h3>
-
-        <div className="course-rating">
-          <div className="course-rating-number">{course.average_rating.toFixed(1)}</div>
-          <div>
-            <div className="course-rating-stars">{renderStars(course.average_rating)}</div>
-            <div className="course-rating-count">Bazirano na {reviews.length} recenzija</div>
-          </div>
-        </div>
-
-        {displayedReviews.map((review) => (
-          <div key={review.id} className="course-review-item">
-            <div className="course-review-header">
-              <div className="course-review-user">
-                <div className="course-review-avatar">
-                  <Image src={review.avatar || "/placeholder.svg"} alt={review.user} width={40} height={40} />
-                </div>
-                <div>
-                  <div className="course-review-name">{review.user}</div>
-                  <div className="course-review-date">{review.date}</div>
-                </div>
-              </div>
-              <div className="course-review-rating">{renderStars(review.rating)}</div>
-            </div>
-            <div className="course-review-content">
-              <p>{review.content}</p>
-            </div>
-          </div>
-        ))}
-
-        {reviews.length > 3 && (
-          <div className="text-center mt-4">
-            <button className="btn btn-outline-purple" onClick={() => setShowAllReviews(!showAllReviews)}>
-              {showAllReviews ? (
-                <>
-                  <i className="bi bi-chevron-up me-2"></i>
-                  Prikaži manje
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-chevron-down me-2"></i>
-                  Prikaži sve recenzije ({reviews.length})
-                </>
+    <Box sx={{ maxWidth: 800, margin: "3rem auto 0 auto", textAlign: "center" }}>
+      <Typography variant="h5" sx={{ mb: 2 }}>Ocjene i komentari</Typography>
+      {reviewsLoading ? (
+        <Typography>Učitavanje...</Typography>
+      ) : reviews.length === 0 ? (
+        <Typography>Nema ocjena i komentara za ovaj kurs.</Typography>
+      ) : (
+        <>
+          {reviews.map((r) => (
+            <Box
+              key={r.id}
+              sx={{ border: "1px solid #eee", borderRadius: 2, p: 2, mb: 2, textAlign: "left" }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                <Typography sx={{ fontWeight: 600 }}>{r.username || "Korisnik"}</Typography>
+                {r.rating > 0 && (
+                  <Rating value={r.rating} readOnly size="small" max={5} precision={0.5} />
+                )}
+                <Typography sx={{ color: "#888", fontSize: 13 }}>
+                  {format(new Date(r.created_at), "dd.MM.yyyy.")}
+                </Typography>
+              </Box>
+              {r.comment && (
+                <Typography sx={{ fontSize: 15 }}>{r.comment}</Typography>
               )}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  )
+            </Box>
+          ))}
+          <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mt: 2 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={reviewPage === 1}
+              onClick={() => setReviewPage((p) => Math.max(1, p - 1))}
+            >
+              Prethodna
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={reviews.length < REVIEWS_PER_PAGE}
+              onClick={() => setReviewPage((p) => p + 1)}
+            >
+              Sljedeća
+            </Button>
+          </Box>
+        </>
+      )}
+    </Box>
+  );
 }
