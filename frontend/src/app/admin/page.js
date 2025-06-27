@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import React from "react";
+import { useRouter } from "next/navigation";
+import { getRoleFromToken } from "@/utils/auth"
 
 import axios from "axios";
 import {
@@ -55,12 +57,21 @@ const normalizeImageUrl = (path) => {
 };
 
 export default function AdminPage() {
+  const router = useRouter();
   const [courses, setCourses] = useState([]);
   const [expandedCourse, setExpandedCourse] = useState(null);
   const [expandedStep, setExpandedStep] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, course: null, action: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
+
+  useEffect(() => {
+    const role = getRoleFromToken();
+    if (role !== "ADMIN") {
+      router.push("/unauthorized");
+      return;
+    }
+  }, []);
   
 
   useEffect(() => {

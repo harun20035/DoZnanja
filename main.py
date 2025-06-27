@@ -43,12 +43,6 @@ async def test_connection():
     return {"vreme_na_bazi": result[0]}
 
 
-from utils.email_utils import send_course_status_email
-
-@app.get("/test-mail")
-def test_email():
-    send_course_status_email("davudfazlic04@gmail.com", "Test kurs", "APPROVED")
-    return {"message": "Email poslan"}
 
 
 app.include_router(user_controller.router, prefix="/users", tags=["Users"])

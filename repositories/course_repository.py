@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.course_model import Course
+from models.course_model import Course,Status
 from models.courseStep_model import CourseStep
 from sqlmodel import Session, select
 from typing import List, Optional
@@ -17,7 +17,7 @@ def create_course(db: Session, course: Course) -> Course:
     return course
 
 def get_all_courses(db: Session) -> List[Course]:
-    statement = select(Course)
+    statement = select(Course).where(Course.status == Status.APPROVED)
     results = db.execute(statement).scalars()
     return results.all()
 
