@@ -8,31 +8,26 @@ import {
 } from 'lucide-react';
 import "./edit_course.css";
 
-import getHeaderByRole from '../../../components/layoutComponents';
-import Footer from '../../../components/footer/Footer';
-
 const CourseStepEditor = () => {
   const params = useParams();
   const router = useRouter();
   const courseId = params.course_id || 1;
 
-  // Role and authorization
-  const [role, setRole] = useState(null);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Course steps state
   const [steps, setSteps] = useState([]);
   const [newStep, setNewStep] = useState({ title: '', description: '' });
   const [newStepFiles, setNewStepFiles] = useState({ video_file: null, image_file: null });
   const [showAddForm, setShowAddForm] = useState(false);
+  const [courseTitle, setCourseTitle] = useState("");
 
-  // Fetch course steps
   const fetchSteps = async () => {
     try {
       const response = await fetch(`http://localhost:8000/course/${courseId}`);
-      if (!response.ok) throw new Error("Greška pri dohvaćanju koraka.");
+      if (!response.ok) throw new Error("Greška pri dohvaćanju podataka.");
 
       const data = await response.json();
+      setCourseTitle(data[0]?.course_title || `Kurs ${courseId}`);
 
       const enhancedSteps = data.map(step => {
         const normalizedVideo = step.video_url ? step.video_url.replace(/\\/g, '/') : null;
@@ -51,12 +46,11 @@ const CourseStepEditor = () => {
 
       setSteps(enhancedSteps);
     } catch (err) {
-      console.error("Fetch greška:", err);
-      alert("Nismo mogli dohvatiti korake za ovaj kurs.");
+      console.error("Greška:", err);
+      alert("Nismo mogli dohvatiti korake.");
     }
   };
 
-  // Check role and authorization
   useEffect(() => {
     const checkRole = async () => {
       const token = localStorage.getItem('auth_token');
@@ -74,7 +68,7 @@ const CourseStepEditor = () => {
         }
         const data = await res.json();
         if (data.role === 'CREATOR' || data.role === 'ADMIN') {
-          setRole(data.role);
+          setIsAuthorized(true);
         } else {
           router.push('/unauthorized');
         }
@@ -87,12 +81,9 @@ const CourseStepEditor = () => {
     checkRole();
   }, [router]);
 
-  // Fetch steps when courseId changes
   useEffect(() => {
-    if (role && courseId) {
-      fetchSteps();
-    }
-  }, [courseId, role]);
+    if (courseId) fetchSteps();
+  }, [courseId]);
 
   if (isLoading) {
     return (
@@ -103,9 +94,9 @@ const CourseStepEditor = () => {
       </div>
     );
   }
-  if (!role) return null;
 
-  // Toggles and handlers (isto kao i tvoj kod)
+  if (!isAuthorized) return null;
+
   const toggleExpand = (stepId) => {
     setSteps(steps.map(step =>
       step.id === stepId ? { ...step, isExpanded: !step.isExpanded } : step
@@ -220,153 +211,147 @@ const CourseStepEditor = () => {
   };
 
   return (
-    <>
-      {getHeaderByRole(role)}
-
-      <div className="course-step-editor">
-        <div className="editor-header">
-          <h2>Koraci kursa: {courseId}</h2>
-          <button className="add-step-button" onClick={() => setShowAddForm(!showAddForm)}>
-            <Plus size={16} /> {showAddForm ? 'Cancel' : 'Add Step'}
-          </button>
-        </div>
-
-        {showAddForm && (
-          <div className="step-form-container">
-            <form onSubmit={addStep} className="step-form">
-              <h3>Dodaj</h3>
-
-              <div className="form-group">
-                <label htmlFor="title">Step Title</label>
-                <input id="title" name="title" value={newStep.title} onChange={handleNewStepChange} required />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="description">Description</label>
-                <textarea id="description" name="description" value={newStep.description} onChange={handleNewStepChange} rows={4} required />
-              </div>
-
-              <div className="form-row">
-                <div className="form-group file-upload-group">
-                  <label>Upload Video (optional)</label>
-                  <label htmlFor="video_file" className="upload-icon-button">
-                    <Video size={32} />
-                  </label>
-                  <input type="file" id="video_file" accept="video/*" onChange={e => setNewStepFiles(prev => ({ ...prev, video_file: e.target.files[0] }))} style={{ display: 'none' }} />
-                  {newStepFiles.video_file && <div className="file-added-indicator"><CheckCircle size={20} color="green" /><span>Dodani video</span></div>}
-                </div>
-
-                <div className="form-group file-upload-group">
-                  <label>Upload Image (optional)</label>
-                  <label htmlFor="image_file" className="upload-icon-button">
-                    <Image size={32} />
-                  </label>
-                  <input type="file" id="image_file" accept="image/*" onChange={e => setNewStepFiles(prev => ({ ...prev, image_file: e.target.files[0] }))} style={{ display: 'none' }} />
-                  {newStepFiles.image_file && <div className="file-added-indicator"><CheckCircle size={20} color="green" /><span>Dodana slika</span></div>}
-                </div>
-              </div>
-
-              <div className="form-actions">
-                <button type="button" className="button-secondary" onClick={() => setShowAddForm(false)}>Izlaz</button>
-                <button type="submit" className="button-primary"><Plus size={16} />Dodaj</button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        <div className="steps-list">
-          {steps.length === 0 ? (
-            <div className="no-steps">
-              <p>Nema dodanih koraka, kliknite dodaj za doadavanje</p>
-            </div>
-          ) : (
-            steps.map((step, index) => (
-              <div key={step.id} className="step-item">
-                <div className="step-header">
-                  <div className="step-number">{index + 1}</div>
-
-                  {step.isEditing ? (
-                    <input value={step.title} onChange={(e) => handleStepChange(step.id, 'title', e.target.value)} className="step-title-input" />
-                  ) : (
-                    <h3 className="step-title">{step.title}</h3>
-                  )}
-
-                  <div className="step-actions">
-                    {step.isEditing ? (
-                      <button className="action-button save" onClick={() => saveStep(step.id)}><Save size={16} /></button>
-                    ) : (
-                      <button className="action-button edit" onClick={() => toggleEdit(step.id)}><Edit size={16} /></button>
-                    )}
-                    <button className="action-button delete" onClick={() => deleteStep(step.id)}><Trash size={16} /></button>
-                    <button className="action-button expand" onClick={() => toggleExpand(step.id)}>
-                      {step.isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                {step.isExpanded && (
-                  <div className="step-details">
-                    {step.isEditing ? (
-                      <div className="step-edit-form">
-                        <div className="form-group">
-                          <label>Description</label>
-                          <textarea value={step.description} onChange={(e) => handleStepChange(step.id, 'description', e.target.value)} rows={4} />
-                        </div>
-
-                        <div className="form-row">
-                          <div className="form-group file-upload-group">
-                            <label>Upload New Video</label>
-                            <label className="upload-icon-button">
-                              <Video size={24} />
-                              <input type="file" accept="video/*" onChange={e => handleStepFileChange(step.id, 'newVideoFile', e.target.files[0])} style={{ display: 'none' }} />
-                            </label>
-                            {step.newVideoFile && <span className="file-added-indicator">✔ Dodan novi video</span>}
-                          </div>
-
-                          <div className="form-group file-upload-group">
-                            <label>Upload New Image</label>
-                            <label className="upload-icon-button">
-                              <Image size={24} />
-                              <input type="file" accept="image/*" onChange={e => handleStepFileChange(step.id, 'newImageFile', e.target.files[0])} style={{ display: 'none' }} />
-                            </label>
-                            {step.newImageFile && <span className="file-added-indicator">✔ Dodana nova slika</span>}
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="step-description">
-                          <p>{step.description}</p>
-                        </div>
-
-                        <div className="step-media">
-                          {step.video_url && (
-                            <div className="video-container">
-                              <h4><Video size={16} /> Video</h4>
-                              <video width="320" height="240" controls>
-                                <source src={step.video_url} type="video/mp4" />
-                              </video>
-                            </div>
-                          )}
-                          {step.image_url && (
-                            <div className="image-container">
-                              <h4><Image size={16} /> Image</h4>
-                              <img src={step.image_url} alt="Step image" className="step-image" />
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+    <div className="course-step-editor">
+      <div className="editor-header">
+        <h2>Koraci kursa: </h2>
+        <button className="add-step-button" onClick={() => setShowAddForm(!showAddForm)}>
+          <Plus size={16} /> {showAddForm ? 'Cancel' : 'Add Step'}
+        </button>
       </div>
 
-      <Footer />
-    </>
+      {showAddForm && (
+        <div className="step-form-container">
+          <form onSubmit={addStep} className="step-form">
+            <h3>Dodaj</h3>
+
+            <div className="form-group">
+              <label htmlFor="title">Step Title</label>
+              <input id="title" name="title" value={newStep.title} onChange={handleNewStepChange} required />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="description">Description</label>
+              <textarea id="description" name="description" value={newStep.description} onChange={handleNewStepChange} rows={4} required />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group file-upload-group">
+                <label>Upload Video (optional)</label>
+                <label htmlFor="video_file" className="upload-icon-button">
+                  <Video size={32} />
+                </label>
+                <input type="file" id="video_file" accept="video/*" onChange={e => setNewStepFiles(prev => ({ ...prev, video_file: e.target.files[0] }))} style={{ display: 'none' }} />
+                {newStepFiles.video_file && <div className="file-added-indicator"><CheckCircle size={20} color="green" /><span>Dodani video</span></div>}
+              </div>
+
+              <div className="form-group file-upload-group">
+                <label>Upload Image (optional)</label>
+                <label htmlFor="image_file" className="upload-icon-button">
+                  <Image size={32} />
+                </label>
+                <input type="file" id="image_file" accept="image/*" onChange={e => setNewStepFiles(prev => ({ ...prev, image_file: e.target.files[0] }))} style={{ display: 'none' }} />
+                {newStepFiles.image_file && <div className="file-added-indicator"><CheckCircle size={20} color="green" /><span>Dodana slika</span></div>}
+              </div>
+            </div>
+
+            <div className="form-actions">
+              <button type="button" className="button-secondary" onClick={() => setShowAddForm(false)}>Izlaz</button>
+              <button type="submit" className="button-primary"><Plus size={16} />Dodaj</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="steps-list">
+        {steps.length === 0 ? (
+          <div className="no-steps">
+            <p>Nema dodanih koraka, kliknite dodaj za dodavanje</p>
+          </div>
+        ) : (
+          steps.map((step, index) => (
+            <div key={step.id} className="step-item">
+              <div className="step-header">
+                <div className="step-number">{index + 1}</div>
+
+                {step.isEditing ? (
+                  <input value={step.title} onChange={(e) => handleStepChange(step.id, 'title', e.target.value)} className="step-title-input" />
+                ) : (
+                  <h3 className="step-title">{step.title}</h3>
+                )}
+
+                <div className="step-actions">
+                  {step.isEditing ? (
+                    <button className="action-button save" onClick={() => saveStep(step.id)}><Save size={16} /></button>
+                  ) : (
+                    <button className="action-button edit" onClick={() => toggleEdit(step.id)}><Edit size={16} /></button>
+                  )}
+                  <button className="action-button delete" onClick={() => deleteStep(step.id)}><Trash size={16} /></button>
+                  <button className="action-button expand" onClick={() => toggleExpand(step.id)}>
+                    {step.isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {step.isExpanded && (
+                <div className="step-details">
+                  {step.isEditing ? (
+                    <div className="step-edit-form">
+                      <div className="form-group">
+                        <label>Description</label>
+                        <textarea value={step.description} onChange={(e) => handleStepChange(step.id, 'description', e.target.value)} rows={4} />
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group file-upload-group">
+                          <label>Upload New Video</label>
+                          <label className="upload-icon-button">
+                            <Video size={24} />
+                            <input type="file" accept="video/*" onChange={e => handleStepFileChange(step.id, 'newVideoFile', e.target.files[0])} style={{ display: 'none' }} />
+                          </label>
+                          {step.newVideoFile && <span className="file-added-indicator">✔ Dodan novi video</span>}
+                        </div>
+
+                        <div className="form-group file-upload-group">
+                          <label>Upload New Image</label>
+                          <label className="upload-icon-button">
+                            <Image size={24} />
+                            <input type="file" accept="image/*" onChange={e => handleStepFileChange(step.id, 'newImageFile', e.target.files[0])} style={{ display: 'none' }} />
+                          </label>
+                          {step.newImageFile && <span className="file-added-indicator">✔ Dodana nova slika</span>}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="step-description">
+                        <p>{step.description}</p>
+                      </div>
+
+                      <div className="step-media">
+                        {step.video_url && (
+                          <div className="video-container">
+                            <h4><Video size={16} /> Video</h4>
+                            <video width="320" height="240" controls>
+                              <source src={step.video_url} type="video/mp4" />
+                            </video>
+                          </div>
+                        )}
+                        {step.image_url && (
+                          <div className="image-container">
+                            <h4><Image size={16} /> Image</h4>
+                            <img src={step.image_url} alt="Step image" className="step-image" />
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
   );
 };
 

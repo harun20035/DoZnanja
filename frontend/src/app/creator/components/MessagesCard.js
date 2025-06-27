@@ -73,7 +73,7 @@ export default function MessagesCard() {
       </div>
 
       <div className="card-footer">
-        <Link href="/creator/chat" className="btn full-btn">💬 Pogledaj sve poruke</Link>
+        <Link href="/chat" className="btn full-btn">💬 Pogledaj sve poruke</Link>
       </div>
     </div>
   )

@@ -64,14 +64,14 @@ export default function CourseCard({ course }) {
             {course.discount_percent > 0 ? (
               <>
                 <span className="text-decoration-line-through text-muted me-2">
-                  {course.price.toFixed(2)} KM
+                  {course.price.toFixed(2)} Tokena
                 </span>
                 <span className="fw-bold text-danger">
-                  {discountedPrice.toFixed(2)} KM
+                  {discountedPrice.toFixed(2)} Tokena
                 </span>
               </>
             ) : (
-              <span className="fw-bold">{course.price.toFixed(2)} KM</span>
+              <span className="fw-bold">{course.price.toFixed(2)} Tokena</span>
             )}
           </div>
           <Link href={`/courses/${course.id}`} className="btn btn-outline-primary">

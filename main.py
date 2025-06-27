@@ -5,7 +5,7 @@ from controllers import user_controller, course_controller, dashboard_controller
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from controllers import quiz_controller
-from controllers import course_progress_controller
+from controllers import course_progress_controller,admin_controller
 
 from fastapi.staticfiles import StaticFiles
 
@@ -54,3 +54,4 @@ app.include_router(creator_controller.router, tags=["Creator"])
 app.include_router(chat_controller.router,prefix ="/chat",tags=["Chat"])
 app.include_router(quiz_controller.router)
 app.include_router(course_progress_controller.router)
+app.include_router(admin_controller.router,prefix="/admin",tags=["Admin"])

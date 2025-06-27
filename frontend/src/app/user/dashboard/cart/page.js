@@ -12,10 +12,8 @@ import {
 import axios from "axios";
 import styles from "./Cart.module.css";
 
-// Header & Footer
-import { getRoleFromToken, getUserDataFromToken } from "@/utils/auth";
+import { getRoleFromToken } from "@/utils/auth";
 import getHeaderByRole from "@/components/layoutComponents";
-
 
 const normalizePath = (path) => {
   if (!path) return "/placeholder.svg";
@@ -65,9 +63,8 @@ export default function CartPage() {
       });
 
       setSnackbar({ open: true, message: "Kurs je uklonjen iz korpe", severity: "info" });
-      fetchCart(); // osvježi listu
+      fetchCart();
     } catch (err) {
-      console.error("Greška pri brisanju iz korpe:", err);
       setSnackbar({ open: true, message: "Greška pri uklanjanju kursa", severity: "error" });
     }
   };
@@ -83,14 +80,14 @@ export default function CartPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setSnackbar({ open: true, message: `Uspješno ste kupili \"${purchaseDialog.course.title}\"!`, severity: "success" });
-      fetchCart(); // ponovo učitaj korpu
+      setSnackbar({ open: true, message: `Uspješno ste kupili "${purchaseDialog.course.title}"!`, severity: "success" });
+      fetchCart();
     } catch (err) {
       const detail = err.response?.data?.detail?.toLowerCase() || "";
       if (detail.includes("nedovoljno kredita")) {
         const match = detail.match(/nedostaje\s+(\d+)/i);
         setMissingCredits(match ? parseInt(match[1]) : 0);
-        setSnackbar({ open: true, message: `Nedovoljno kredita! Nedostaje ${missingCredits} KM`, severity: "error" });
+        setSnackbar({ open: true, message: `Nedovoljno kredita! Nedostaje ${missingCredits} Tokena`, severity: "error" });
       } else {
         setSnackbar({ open: true, message: "Greška pri kupovini!", severity: "error" });
       }
@@ -98,19 +95,6 @@ export default function CartPage() {
       setPurchaseDialog({ open: false, course: null });
     }
   };
-
-  const getCategoryColor = (category) => ({
-    Programming: "#8b5cf6",
-    Design: "#ec4899",
-    Marketing: "#f59e0b",
-    Business: "#10b981",
-  }[category] || "#6b7280");
-
-  const getLevelColor = (level) => ({
-    Početnik: "#10b981",
-    Srednji: "#f59e0b",
-    Napredni: "#ef4444",
-  }[level] || "#6b7280");
 
   const totalOriginalPrice = cartCourses.reduce((acc, c) => acc + c.price, 0);
   const totalDiscountPrice = cartCourses.reduce((acc, c) => acc + (c.price * (1 - (c.discount_percent || 0) / 100)), 0);
@@ -137,19 +121,17 @@ export default function CartPage() {
               </Box>
 
               <Paper className={styles.statsCard}>
-                <Typography variant="h6" className={styles.statsTitle}>
-                  Ukupno
-                </Typography>
+                <Typography variant="h6" className={styles.statsTitle}>Ukupno</Typography>
                 <Typography variant="h4" className={styles.totalPrice}>
-                  {totalDiscountPrice.toFixed(2)} KM
+                  {totalDiscountPrice.toFixed(2)} Tokena
                 </Typography>
                 {totalSavings > 0 && (
                   <>
                     <Typography variant="body2" className={styles.originalPrice}>
-                      <span className={styles.strikethrough}>{totalOriginalPrice.toFixed(2)} KM</span>
+                      <span className={styles.strikethrough}>{totalOriginalPrice.toFixed(2)} Tokena</span>
                     </Typography>
                     <Typography variant="body2" className={styles.savings}>
-                      Ušteda: {totalSavings.toFixed(2)} KM
+                      Ušteda: {totalSavings.toFixed(2)} Tokena
                     </Typography>
                   </>
                 )}
@@ -188,11 +170,11 @@ export default function CartPage() {
                       <Typography variant="body2" color="text.secondary">{course.description}</Typography>
                       <Box mt={2}>
                         <Typography variant="h5">
-                          {(course.price * (1 - (course.discount_percent || 0) / 100)).toFixed(2)} KM
+                          {(course.price * (1 - (course.discount_percent || 0) / 100)).toFixed(2)} Tokena
                         </Typography>
                         {course.discount_percent > 0 && (
                           <Typography variant="body2" className={styles.cstrikethrough}>
-                            {course.price.toFixed(2)} KM
+                            {course.price.toFixed(2)} Tokena
                           </Typography>
                         )}
                       </Box>
@@ -216,7 +198,7 @@ export default function CartPage() {
           <DialogContent>
             <Typography>{purchaseDialog.course?.title}</Typography>
             <Typography>
-              Cijena: {(purchaseDialog.course?.price * (1 - (purchaseDialog.course?.discount_percent || 0) / 100)).toFixed(2)} KM
+              Cijena: {(purchaseDialog.course?.price * (1 - (purchaseDialog.course?.discount_percent || 0) / 100)).toFixed(2)} Tokena
             </Typography>
           </DialogContent>
           <DialogActions>
@@ -236,8 +218,6 @@ export default function CartPage() {
           </Alert>
         </Snackbar>
       </Box>
-
-      
     </>
   );
 }

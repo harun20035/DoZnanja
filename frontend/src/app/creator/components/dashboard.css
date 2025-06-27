@@ -584,3 +584,55 @@
 
 
 /* Možeš dodati još klasa za kartice, profile, poruke itd. */
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.create-course-card .card-footer {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b21a8;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.card-text {
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.purple-header {
+  background-color: #faf5ff;
+  padding-bottom: 10px;
+}
+
+.btn-purple {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background-color: #7e22ce;
+  color: #fff;
+  padding: 10px 0;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-purple:hover {
+  background-color: #6b21a8;
+}
+
+.larger-text {
+  font-size: 15px;
+  line-height: 1.7;
+}

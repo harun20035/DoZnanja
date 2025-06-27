@@ -45,30 +45,10 @@ export default function CourseHeader({ course }) {
       <div className="container">
         <h1 className="course-title mb-4">{course.title}</h1>
 
-        <div className="course-meta d-flex flex-wrap gap-4">
-          <div className="d-flex align-items-center gap-2">
-            <i className="bi bi-calendar"></i>
-            <span>Objavljeno: {formattedDate}</span>
-          </div>
-          <div className="d-flex align-items-center gap-2">
-            <i className="bi bi-tag"></i>
-            <span>Kategorija: {course.category}</span>
-          </div>
-          <div className="d-flex align-items-center gap-2">
-            <div className="course-rating-stars">{renderStars(course.average_rating)}</div>
-            <span>({course.average_rating.toFixed(1)})</span>
-          </div>
-          <div className="d-flex align-items-center gap-2">
-            <i className="bi bi-person-circle"></i>
-            <span>Instruktor: {course.instructor_name || "Nepoznato"}</span>
-          </div>
-          {course.status && (
-            <div className="d-flex align-items-center">
-              <span className={`badge ${getStatusBadgeClass(course.status)}`}>{course.status}</span>
-            </div>
-          )}
+        
+         
         </div>
       </div>
-    </div>
+    
   )
 }

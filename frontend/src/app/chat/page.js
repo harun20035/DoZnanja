@@ -279,7 +279,6 @@ export default function ChatPage() {
           </Paper>
         </Box>
       </Container>
-      <Footer />
     </Box>
   )
 }

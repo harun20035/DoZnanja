@@ -6,7 +6,10 @@ export default function CategoryFilter({ categories, selectedCategory, setSelect
     "Design": "Dizajn",
     "Marketing": "Marketing",
     "Business": "Biznis",
-    "Photography": "Fotografija"
+    "Photography": "Fotografija",
+    "Music":"Muzika",
+    "Languages":"Jezici",
+    "Other":"Ostalo"
   };
 
   return (
