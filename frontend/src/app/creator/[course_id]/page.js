@@ -369,11 +369,11 @@ const CourseStepEditor = () => {
         </div>
       </div>
       <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={() => setSnackbarOpen(false)} message={snackbarMsg} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} />
-    </div>
+    
 
 
       <Footer />
-    </>
+      </>
   );
 };
 
