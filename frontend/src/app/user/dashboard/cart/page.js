@@ -15,7 +15,7 @@ import styles from "./Cart.module.css";
 // Header & Footer
 import { getRoleFromToken, getUserDataFromToken } from "@/utils/auth";
 import getHeaderByRole from "@/components/layoutComponents";
-import Footer from "@/components/footer/Footer";
+
 
 const normalizePath = (path) => {
   if (!path) return "/placeholder.svg";
@@ -237,7 +237,7 @@ export default function CartPage() {
         </Snackbar>
       </Box>
 
-      <Footer />
+      
     </>
   );
 }
