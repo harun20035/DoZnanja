@@ -97,7 +97,7 @@ export function UserChatPreview() {
       </CardContent>
       <CardActions className={styles.cardFooter}>
         <Button variant="outlined" className={styles.viewAllButton}>
-          <Link href="/user/chat" className={styles.viewAllLink}>
+          <Link href="/chat" className={styles.viewAllLink}>
             <MessageSquare className={styles.buttonIcon} />
             Pogledaj sve poruke
           </Link>
