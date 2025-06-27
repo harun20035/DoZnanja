@@ -42,13 +42,7 @@ export default function HomePage() {
     return `http://localhost:8000${fixed}`; // Lokalni server za slike
   };
 
-  useEffect(() => {
-    // Redirect logged-in users to /user/dashboard
-    const token = localStorage.getItem("auth_token");
-    if (token) {
-      router.push("/user/dashboard");
-    }
-  }, [router]);
+ 
 
   useEffect(() => {
     // Poziv API-ja za broj kurseva po kategorijama
