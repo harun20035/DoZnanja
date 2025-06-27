@@ -227,3 +227,18 @@ def get_creator_courses_with_stats(db: Session, user: User):
     if user.role != "CREATOR":
         raise HTTPException(status_code=403, detail="Niste kreator.")
     return course_repository.get_courses_with_stats(db, user.id)
+
+
+
+def get_creator_stats(db: Session, creator_id: int):
+    course_count = course_repository.get_total_courses(db, creator_id)
+    total_revenue = course_repository.get_total_revenue(db, creator_id)
+    avg_rating = course_repository.get_average_rating(db, creator_id)
+    completed_courses = course_repository.get_completed_courses_count(db, creator_id)
+
+    return {
+        "total_courses": course_count,
+        "total_revenue": round(total_revenue, 2),
+        "average_rating": round(avg_rating or 0, 1),
+        "completed_courses": completed_courses
+    }

@@ -16,12 +16,13 @@ import {
 
 export function UserProfileCard() {
   const [userData, setUserData] = useState(null);
+  const [userStats, setUserStats] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
-
     if (!token) return;
 
+    // Fetch korisničkih podataka
     fetch("http://localhost:8000/course/me", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -31,9 +32,20 @@ export function UserProfileCard() {
         if (!res.ok) throw new Error("Greška pri dohvaćanju korisnika");
         return res.json();
       })
-      .then((data) => {
-        setUserData(data);
+      .then((data) => setUserData(data))
+      .catch((err) => console.error("Greška:", err));
+
+    // Fetch korisničkih statistika
+    fetch("http://localhost:8000/user/stats", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Greška pri dohvaćanju statistika");
+        return res.json();
       })
+      .then((data) => setUserStats(data))
       .catch((err) => console.error("Greška:", err));
   }, []);
 
@@ -46,9 +58,8 @@ export function UserProfileCard() {
       .toUpperCase();
   };
 
-  if (!userData) return <div>Učitavanje profila...</div>;
+  if (!userData || !userStats) return <div>Učitavanje profila...</div>;
 
-  // Normalizuj putanju slike (zamena '\' sa '/')
   const normalizedImagePath = userData.profile_image
     ? userData.profile_image.replace(/\\/g, "/")
     : null;
@@ -74,22 +85,22 @@ export function UserProfileCard() {
               </Typography>
             )}
           </Avatar>
-          <Typography className={styles.userName}>{userData.name} {userData.surname}</Typography> {/* Prikazujemo ime i prezime */}
-          <Typography className={styles.userRole}>@{userData.username}</Typography> {/* Prikazujemo nickname (username) */}
+          <Typography className={styles.userName}>{userData.name} {userData.surname}</Typography>
+          <Typography className={styles.userRole}>@{userData.username}</Typography>
         </Stack>
 
         <Box className={styles.statsGrid}>
           <Box className={styles.statItem}>
-            <Typography className={styles.statValue}>7</Typography>
+            <Typography className={styles.statValue}>{userStats.enrolled_courses}</Typography>
             <Typography className={styles.statLabel}>Kursevi</Typography>
           </Box>
           <Box className={styles.statItem}>
-            <Typography className={styles.statValue}>12</Typography>
-            <Typography className={styles.statLabel}>Certifikati</Typography>
+            <Typography className={styles.statValue}>{userStats.completed_courses}</Typography>
+            <Typography className={styles.statLabel}>Završeni</Typography>
           </Box>
           <Box className={styles.statItem}>
-            <Typography className={styles.statValue}>86h</Typography>
-            <Typography className={styles.statLabel}>Učenje</Typography>
+            <Typography className={styles.statValue}>{userStats.completed_steps}</Typography>
+            <Typography className={styles.statLabel}>Koraci</Typography>
           </Box>
         </Box>
       </CardContent>

@@ -20,11 +20,11 @@ const categories = [
 ];
 
 const sortOptions = [
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "rating-desc", label: "Highest Rated" },
-  { value: "newest", label: "Newest" },
-  { value: "popular", label: "Most Popular" }
+  { value: "price-asc", label: "Cijena: Najniža do najviša" },
+  { value: "price-desc", label: "Cijena: Najviša do najniža" },
+  { value: "rating-desc", label: "Najveća ocjena" },
+  { value: "newest", label: "Najnoviji" },
+  { value: "popular", label: "Najpopularniji" }
 ];
 
 export default function AllCoursesPage() {
@@ -96,7 +96,7 @@ export default function AllCoursesPage() {
         />
 
         {loading ? (
-          <div>Loading courses...</div>
+          <div>Učitavanje kurseva...</div>
         ) : error ? (
           <div>Error: {error.message}</div>
         ) : filteredCourses.length === 0 ? (

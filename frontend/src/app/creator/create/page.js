@@ -5,14 +5,18 @@ import { useRouter } from 'next/navigation';
 import { ImagePlus, Video, CheckCircle, AlertTriangle } from 'lucide-react';
 import './createCourse.css';
 
+// Dodano
+import getHeaderByRole from '@/components/layoutComponents';
+import Footer from '@/components/footer/Footer';
+import { getRoleFromToken } from '@/utils/auth';
+
 export default function CreateCourseForm() {
   const router = useRouter();
 
-  // Role check logic
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [role, setRole] = useState(null); // Dodano
 
-  // All other state hooks
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -24,7 +28,6 @@ export default function CreateCourseForm() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // All useEffect hooks
   useEffect(() => {
     const checkRole = async () => {
       const token = localStorage.getItem('auth_token');
@@ -41,6 +44,7 @@ export default function CreateCourseForm() {
           return;
         }
         const data = await res.json();
+        setRole(data.role); // Dodano
         if (data.role === 'CREATOR' || data.role === 'ADMIN') {
           setIsAuthorized(true);
         } else {
@@ -74,10 +78,16 @@ export default function CreateCourseForm() {
     }
   }, [showErrorModal]);
 
-  // Only after all hooks, do conditional return
   if (isLoading) {
-    return <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></div>;
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
+
   if (!isAuthorized) return null;
 
   const handleSubmit = async (e) => {
@@ -130,7 +140,6 @@ export default function CreateCourseForm() {
         setShowErrorModal(true);
       } else {
         setShowSuccessModal(true);
-        // Reset polja
         setTitle('');
         setDescription('');
         setPrice('');
@@ -147,69 +156,75 @@ export default function CreateCourseForm() {
   };
 
   return (
-    <div className="form-container">
-      <h2 className="form-title">Kreiraj Kurs</h2>
-      <form onSubmit={handleSubmit} className="form-fields">
-        <input type="text" placeholder="Naslov" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        <textarea placeholder="Opis" value={description} onChange={(e) => setDescription(e.target.value)} required />
-        <input type="number" placeholder="Cena" value={price} onChange={(e) => setPrice(e.target.value)} required />
-        <input type="number" placeholder="Popust (%)" value={discount} onChange={(e) => setDiscount(e.target.value)} />
-        <select value={category} onChange={(e) => setCategory(e.target.value)} required>
-          <option value="Programming">Programiranje</option>
-          <option value="Design">Dizajn</option>
-          <option value="Marketing">Marketing</option>
-          <option value="Business">Biznis</option>
-          <option value="Photography">Fotografija</option>
-          <option value="Music">Muzika</option>
-          <option value="Other">Ostalo</option>
-        </select>
+    <>
+      {getHeaderByRole(role)}
 
-        <div className="upload-wrapper">
-          <label htmlFor="thumbnail-upload" className="upload-btn">
-            <ImagePlus className="icon" />
-            Dodaj Sliku
-          </label>
-          <input id="thumbnail-upload" type="file" accept="image/*" onChange={(e) => setThumbnail(e.target.files?.[0] || null)} hidden />
-          {thumbnail && (
-            <span className="upload-success">
-              <CheckCircle size={16} /> Dodana slika
-            </span>
-          )}
-        </div>
+      <div className="form-container">
+        <h2 className="form-title">Kreiraj Kurs</h2>
+        <form onSubmit={handleSubmit} className="form-fields">
+          <input type="text" placeholder="Naslov" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <textarea placeholder="Opis" value={description} onChange={(e) => setDescription(e.target.value)} required />
+          <input type="number" placeholder="Cena" value={price} onChange={(e) => setPrice(e.target.value)} required />
+          <input type="number" placeholder="Popust (%)" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+          <select value={category} onChange={(e) => setCategory(e.target.value)} required>
+            <option value="Programming">Programiranje</option>
+            <option value="Design">Dizajn</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Business">Biznis</option>
+            <option value="Photography">Fotografija</option>
+            <option value="Music">Muzika</option>
+            <option value="Other">Ostalo</option>
+          </select>
 
-        <div className="upload-wrapper">
-          <label htmlFor="video-upload" className="upload-btn">
-            <Video className="icon" />
-            Dodaj Video
-          </label>
-          <input id="video-upload" type="file" accept="video/*" onChange={(e) => setVideo(e.target.files?.[0] || null)} hidden />
-          {video && (
-            <span className="upload-success">
-              <CheckCircle size={16} /> Dodan video
-            </span>
-          )}
-        </div>
-
-        <button type="submit" className="submit-btn">Kreiraj</button>
-      </form>
-
-      {showSuccessModal && (
-        <div className="modal-popup success">
-          <div className="modal-content">
-            <CheckCircle size={28} className="modal-icon" />
-            Kurs uspešno kreiran!
+          <div className="upload-wrapper">
+            <label htmlFor="thumbnail-upload" className="upload-btn">
+              <ImagePlus className="icon" />
+              Dodaj Sliku
+            </label>
+            <input id="thumbnail-upload" type="file" accept="image/*" onChange={(e) => setThumbnail(e.target.files?.[0] || null)} hidden />
+            {thumbnail && (
+              <span className="upload-success">
+                <CheckCircle size={16} /> Dodana slika
+              </span>
+            )}
           </div>
-        </div>
-      )}
 
-      {showErrorModal && (
-        <div className="modal-popup error">
-          <div className="modal-content">
-            <AlertTriangle size={28} className="modal-icon error" />
-            {errorMessage}
+          <div className="upload-wrapper">
+            <label htmlFor="video-upload" className="upload-btn">
+              <Video className="icon" />
+              Dodaj Video
+            </label>
+            <input id="video-upload" type="file" accept="video/*" onChange={(e) => setVideo(e.target.files?.[0] || null)} hidden />
+            {video && (
+              <span className="upload-success">
+                <CheckCircle size={16} /> Dodan video
+              </span>
+            )}
           </div>
-        </div>
-      )}
-    </div>
+
+          <button type="submit" className="submit-btn">Kreiraj</button>
+        </form>
+
+        {showSuccessModal && (
+          <div className="modal-popup success">
+            <div className="modal-content">
+              <CheckCircle size={28} className="modal-icon" />
+              Kurs uspešno kreiran!
+            </div>
+          </div>
+        )}
+
+        {showErrorModal && (
+          <div className="modal-popup error">
+            <div className="modal-content">
+              <AlertTriangle size={28} className="modal-icon error" />
+              {errorMessage}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Footer />
+    </>
   );
 }

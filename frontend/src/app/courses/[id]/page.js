@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { getRoleFromToken, getUserDataFromToken } from '@/utils/auth';
 import getHeaderByRole from "../../../components/layoutComponents";
 import Footer from "../../../components/footer/Footer";
+import CourseReviews from "./CourseReviews"
 
 export default function CourseDetailPage() {
   const { id } = useParams()
@@ -147,6 +148,7 @@ export default function CourseDetailPage() {
       <div className="course-detail-container">
         <CourseHeader course={course} />
         <CourseInfo course={course} />
+        
       </div>
       <Footer />
     </>

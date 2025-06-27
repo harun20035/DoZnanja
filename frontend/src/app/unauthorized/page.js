@@ -11,8 +11,11 @@ export default function UnauthorizedPage() {
   const redirectToDashboard = () => {
     const role = getRoleFromToken();
     if (role === "CREATOR") {
-      router.push("/creator/dashboard");
-    } else {
+      router.push("/creator");
+    }else if(role === "ADMIN"){
+      router.push("/admin")
+    } 
+    else{
       router.push("/user/dashboard");
     }
   };

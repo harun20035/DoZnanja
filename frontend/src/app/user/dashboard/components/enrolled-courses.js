@@ -97,7 +97,12 @@ export function EnrolledCourses() {
                     <Star className={styles.starIcon} />
                     <span>{course.average_rating}</span>
                   </div>
-                  <Button size="small" variant="contained" className={styles.continueButton}>
+                  <Button 
+                    size="small" 
+                    variant="contained" 
+                    className={styles.continueButton}
+                    href={`/user/dashboard/${course.id}`}
+                  >
                     Nastavi
                   </Button>
                 </div>
