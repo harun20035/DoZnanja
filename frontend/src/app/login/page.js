@@ -66,11 +66,18 @@ const Login = () => {
           },
         });
         if (userRes.ok) {
-          const user = await userRes.json();
-          localStorage.setItem('user_data', JSON.stringify(user));
-        }
+  const user = await userRes.json();
+  localStorage.setItem('user_data', JSON.stringify(user));
 
-        window.location.href = '/user/dashboard';
+  if (user.role === "ADMIN") {
+    window.location.href = '/admin';
+  } else if (user.role === "CREATOR") {
+    window.location.href = '/creator';
+  } else {
+    window.location.href = '/user/dashboard';
+  }
+}
+
       }
     } catch (error) {
       setErrorMessage(error.message);
