@@ -13,23 +13,21 @@ const CourseStepEditor = () => {
   const router = useRouter();
   const courseId = params.course_id || 1;
 
-  // Role check logic
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  // All other state hooks
   const [steps, setSteps] = useState([]);
   const [newStep, setNewStep] = useState({ title: '', description: '' });
   const [newStepFiles, setNewStepFiles] = useState({ video_file: null, image_file: null });
   const [showAddForm, setShowAddForm] = useState(false);
+  const [courseTitle, setCourseTitle] = useState("");
 
-  // Move fetchSteps above useEffect
   const fetchSteps = async () => {
     try {
       const response = await fetch(`http://localhost:8000/course/${courseId}`);
-      if (!response.ok) throw new Error("Greška pri dohvaćanju koraka.");
+      if (!response.ok) throw new Error("Greška pri dohvaćanju podataka.");
 
       const data = await response.json();
+      setCourseTitle(data[0]?.course_title || `Kurs ${courseId}`);
 
       const enhancedSteps = data.map(step => {
         const normalizedVideo = step.video_url ? step.video_url.replace(/\\/g, '/') : null;
@@ -48,12 +46,11 @@ const CourseStepEditor = () => {
 
       setSteps(enhancedSteps);
     } catch (err) {
-      console.error("Fetch greška:", err);
-      alert("Nismo mogli dohvatiti korake za ovaj kurs.");
+      console.error("Greška:", err);
+      alert("Nismo mogli dohvatiti korake.");
     }
   };
 
-  // All useEffect hooks
   useEffect(() => {
     const checkRole = async () => {
       const token = localStorage.getItem('auth_token');
@@ -85,15 +82,19 @@ const CourseStepEditor = () => {
   }, [router]);
 
   useEffect(() => {
-    if (courseId) {
-      fetchSteps();
-    }
+    if (courseId) fetchSteps();
   }, [courseId]);
 
-  // Only after all hooks, do conditional return
   if (isLoading) {
-    return <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></div>;
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   }
+
   if (!isAuthorized) return null;
 
   const toggleExpand = (stepId) => {
@@ -196,7 +197,6 @@ const CourseStepEditor = () => {
 
       await fetchSteps();
 
-      // Resetuj polja za nove fajlove i isEditing
       setSteps(prevSteps =>
         prevSteps.map(s =>
           s.id === stepId
@@ -213,7 +213,7 @@ const CourseStepEditor = () => {
   return (
     <div className="course-step-editor">
       <div className="editor-header">
-        <h2>Koraci kursa: {courseId}</h2>
+        <h2>Koraci kursa: </h2>
         <button className="add-step-button" onClick={() => setShowAddForm(!showAddForm)}>
           <Plus size={16} /> {showAddForm ? 'Cancel' : 'Add Step'}
         </button>
@@ -265,7 +265,7 @@ const CourseStepEditor = () => {
       <div className="steps-list">
         {steps.length === 0 ? (
           <div className="no-steps">
-            <p>Nema dodanih koraka, kliknite dodaj za doadavanje</p>
+            <p>Nema dodanih koraka, kliknite dodaj za dodavanje</p>
           </div>
         ) : (
           steps.map((step, index) => (

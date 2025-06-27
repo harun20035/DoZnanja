@@ -134,10 +134,13 @@ export default function MyCoursesSection() {
         };
       });
 
-      setCourses(mapped);
-    } catch (error) {
-      setError(error.message || "Došlo je do greške.");
-      setShowToast(true);
+      const filtered = mapped.filter(
+        (course) => course.status === "APPROVED" || course.status === "PENDING"
+      );
+
+      setCourses(filtered);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -222,7 +225,6 @@ export default function MyCoursesSection() {
                         : course.status}
                     </span>
                   )}
-
                 </div>
 
                 <div className="course-content">
@@ -232,10 +234,12 @@ export default function MyCoursesSection() {
                       <Link href={`/creator/${course.id}`} className="btn-outline">
                         ✏ Uredi
                       </Link>
-                      <button onClick={() => handleCreateQuizClick(course.id)} className="btn-outline">
+                      <button
+                        onClick={() => handleCreateQuizClick(course.id)}
+                        className="btn-outline"
+                      >
                         ✏ Kreiraj kviz
                       </button>
-                      
                     </div>
                   </div>
 
@@ -271,8 +275,15 @@ export default function MyCoursesSection() {
               Želite li kreirati kviz za ovaj kurs?
             </h3>
             <div style={modalActionsStyle}>
-              <button style={confirmButtonStyle} onClick={handleConfirmCreate}>Da</button>
-              <button style={cancelButtonStyle} onClick={() => setShowCreateModal(false)}>Ne</button>
+              <button style={confirmButtonStyle} onClick={handleConfirmCreate}>
+                Da
+              </button>
+              <button
+                style={cancelButtonStyle}
+                onClick={() => setShowCreateModal(false)}
+              >
+                Ne
+              </button>
             </div>
           </div>
         </div>
@@ -286,29 +297,36 @@ export default function MyCoursesSection() {
             </h3>
             <div style={modalActionsStyle}>
               <button style={confirmButtonStyle} onClick={handleConfirmDelete}>
-                  Izbriši
+                Izbriši
               </button>
-              <button style={cancelButtonStyle} onClick={() => setShowDeleteModal(false)}>Odustani</button>
+              <button
+                style={cancelButtonStyle}
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Odustani
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {showToast && error && (
-        <div style={{
-          position: "fixed",
-          bottom: "30px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          backgroundColor: "#ffe6e6",
-          color: "#cc0000",
-          padding: "1rem 1.5rem",
-          borderRadius: "8px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-          fontWeight: "bold",
-          zIndex: 9999,
-          animation: "fadeInOut 3s ease-in-out"
-        }}>
+        <div
+          style={{
+            position: "fixed",
+            bottom: "30px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "#ffe6e6",
+            color: "#cc0000",
+            padding: "1rem 1.5rem",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            fontWeight: "bold",
+            zIndex: 9999,
+            animation: "fadeInOut 3s ease-in-out",
+          }}
+        >
           {error}
         </div>
       )}
@@ -326,7 +344,7 @@ const modalBackdropStyle = {
   zIndex: 9999,
   display: "flex",
   alignItems: "center",
-  justifyContent: "center"
+  justifyContent: "center",
 };
 
 const modalStyle = {
@@ -336,13 +354,13 @@ const modalStyle = {
   width: "90%",
   maxWidth: "400px",
   boxShadow: "0 0 20px rgba(0,0,0,0.25)",
-  textAlign: "center"
+  textAlign: "center",
 };
 
 const modalActionsStyle = {
   display: "flex",
   justifyContent: "space-around",
-  marginTop: "1.5rem"
+  marginTop: "1.5rem",
 };
 
 const confirmButtonStyle = {
@@ -351,7 +369,7 @@ const confirmButtonStyle = {
   padding: "0.6rem 1.2rem",
   border: "none",
   borderRadius: "8px",
-  cursor: "pointer"
+  cursor: "pointer",
 };
 
 const cancelButtonStyle = {
@@ -360,5 +378,5 @@ const cancelButtonStyle = {
   color: "#6a0dad",
   padding: "0.6rem 1.2rem",
   borderRadius: "8px",
-  cursor: "pointer"
+  cursor: "pointer",
 };
