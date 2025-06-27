@@ -12,6 +12,11 @@ import {
 import axios from "axios";
 import styles from "./Cart.module.css";
 
+// Header & Footer
+import { getRoleFromToken, getUserDataFromToken } from "@/utils/auth";
+import getHeaderByRole from "@/components/layoutComponents";
+import Footer from "@/components/footer/Footer";
+
 const normalizePath = (path) => {
   if (!path) return "/placeholder.svg";
   let fixed = path.replace(/\\/g, '/');
@@ -25,6 +30,7 @@ export default function CartPage() {
   const [purchaseDialog, setPurchaseDialog] = useState({ open: false, course: null });
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [missingCredits, setMissingCredits] = useState(0);
+  const [role, setRole] = useState(null);
 
   const fetchCart = useCallback(async () => {
     try {
@@ -41,6 +47,15 @@ export default function CartPage() {
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
+
+  useEffect(() => {
+    try {
+      const userRole = getRoleFromToken();
+      setRole(userRole);
+    } catch (error) {
+      console.error("Greška pri dohvatanju role:", error);
+    }
+  }, []);
 
   const handleRemoveFromCart = async (cartId) => {
     try {
@@ -102,121 +117,127 @@ export default function CartPage() {
   const totalSavings = totalOriginalPrice - totalDiscountPrice;
 
   return (
-    <Box className={styles.ccartContainer}>
-      <Box className={styles.ccartHeader}>
-        <Container maxWidth="xl">
-          <Box className={styles.cheaderContent}>
-            <Box className={styles.cheaderLeft}>
-              <Typography variant="h3" className={styles.ccartTitle}>
-                <ShoppingCart className={styles.ccartIcon} />
-                Moja Korpa
-              </Typography>
-              <Typography variant="h6" className={styles.ccartDescription}>
-                {cartCourses.length > 0
-                  ? `${cartCourses.length} kurs${cartCourses.length === 1 ? "" : "eva"} u korpi`
-                  : "Vaša korpa je prazna"}
-              </Typography>
-            </Box>
+    <>
+      {getHeaderByRole(role)}
 
-            <Paper className={styles.statsCard}>
-              <Typography variant="h6" className={styles.statsTitle}>
-                Ukupno
-              </Typography>
-              <Typography variant="h4" className={styles.totalPrice}>
-                {totalDiscountPrice.toFixed(2)} KM
-              </Typography>
-              {totalSavings > 0 && (
-                <>
-                  <Typography variant="body2" className={styles.originalPrice}>
-                    <span className={styles.strikethrough}>{totalOriginalPrice.toFixed(2)} KM</span>
-                  </Typography>
-                  <Typography variant="body2" className={styles.savings}>
-                    Ušteda: {totalSavings.toFixed(2)} KM
-                  </Typography>
-                </>
-              )}
-            </Paper>
-          </Box>
+      <Box className={styles.ccartContainer}>
+        <Box className={styles.ccartHeader}>
+          <Container maxWidth="xl">
+            <Box className={styles.cheaderContent}>
+              <Box className={styles.cheaderLeft}>
+                <Typography variant="h3" className={styles.ccartTitle}>
+                  <ShoppingCart className={styles.ccartIcon} />
+                  Moja Korpa
+                </Typography>
+                <Typography variant="h6" className={styles.ccartDescription}>
+                  {cartCourses.length > 0
+                    ? `${cartCourses.length} kurs${cartCourses.length === 1 ? "" : "eva"} u korpi`
+                    : "Vaša korpa je prazna"}
+                </Typography>
+              </Box>
+
+              <Paper className={styles.statsCard}>
+                <Typography variant="h6" className={styles.statsTitle}>
+                  Ukupno
+                </Typography>
+                <Typography variant="h4" className={styles.totalPrice}>
+                  {totalDiscountPrice.toFixed(2)} KM
+                </Typography>
+                {totalSavings > 0 && (
+                  <>
+                    <Typography variant="body2" className={styles.originalPrice}>
+                      <span className={styles.strikethrough}>{totalOriginalPrice.toFixed(2)} KM</span>
+                    </Typography>
+                    <Typography variant="body2" className={styles.savings}>
+                      Ušteda: {totalSavings.toFixed(2)} KM
+                    </Typography>
+                  </>
+                )}
+              </Paper>
+            </Box>
+          </Container>
+        </Box>
+
+        <Container maxWidth="xl">
+          {cartCourses.length > 0 ? (
+            <div className={styles.ccardGrid}>
+              {cartCourses.map((course) => (
+                <div className={styles.ccardWrapper} key={course.id}>
+                  <Card className={styles.ccourseCard}>
+                    <Box className={styles.cimageContainer}>
+                      <CardMedia
+                        component="img"
+                        image={normalizePath(course.image_thumbnail)}
+                        alt={course.title}
+                        className={styles.cfixedImage}
+                      />
+                      <Box className={styles.cimageOverlay}>
+                        {course.discount_percent > 0 && (
+                          <Chip label={`-${course.discount_percent}%`} className={styles.cdiscountChip} size="small" />
+                        )}
+                        <IconButton onClick={() => handleRemoveFromCart(course.cart_id)} className={styles.cremoveButton}>
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                    <CardContent>
+                      <Typography variant="h6" mt={1}>{course.title}</Typography>
+                      <Typography variant="body2" mb={1}>
+                        <School fontSize="small" /> {course.name} {course.surname}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">{course.description}</Typography>
+                      <Box mt={2}>
+                        <Typography variant="h5">
+                          {(course.price * (1 - (course.discount_percent || 0) / 100)).toFixed(2)} KM
+                        </Typography>
+                        {course.discount_percent > 0 && (
+                          <Typography variant="body2" className={styles.cstrikethrough}>
+                            {course.price.toFixed(2)} KM
+                          </Typography>
+                        )}
+                      </Box>
+                    </CardContent>
+                    <CardActions>
+                      <Button onClick={() => handleBuyCourse(course)} variant="contained" fullWidth startIcon={<CreditCard />}>
+                        Kupi sada
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Typography variant="h5" align="center">Vaša korpa je prazna</Typography>
+          )}
         </Container>
+
+        <Dialog open={purchaseDialog.open} onClose={() => setPurchaseDialog({ open: false, course: null })}>
+          <DialogTitle>Potvrdi kupovinu</DialogTitle>
+          <DialogContent>
+            <Typography>{purchaseDialog.course?.title}</Typography>
+            <Typography>
+              Cijena: {(purchaseDialog.course?.price * (1 - (purchaseDialog.course?.discount_percent || 0) / 100)).toFixed(2)} KM
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setPurchaseDialog({ open: false, course: null })}>Odustani</Button>
+            <Button onClick={confirmPurchase} variant="contained">Potvrdi</Button>
+          </DialogActions>
+        </Dialog>
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert severity={snackbar.severity} onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
 
-      <Container maxWidth="xl">
-        {cartCourses.length > 0 ? (
-          <div className={styles.ccardGrid}>
-            {cartCourses.map((course) => (
-              <div className={styles.ccardWrapper} key={course.id}>
-                <Card className={styles.ccourseCard}>
-                  <Box className={styles.cimageContainer}>
-                    <CardMedia
-                      component="img"
-                      image={normalizePath(course.image_thumbnail)}
-                      alt={course.title}
-                      className={styles.cfixedImage}
-                    />
-                    <Box className={styles.cimageOverlay}>
-                      {course.discount_percent > 0 && (
-                        <Chip label={`-${course.discount_percent}%`} className={styles.cdiscountChip} size="small" />
-                      )}
-                      <IconButton onClick={() => handleRemoveFromCart(course.cart_id)} className={styles.cremoveButton}>
-                        <Delete />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                  <CardContent>
-                    <Typography variant="h6" mt={1}>{course.title}</Typography>
-                    <Typography variant="body2" mb={1}>
-                      <School fontSize="small" /> {course.name} {course.surname}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">{course.description}</Typography>
-                    <Box mt={2}>
-                      <Typography variant="h5">
-                        {(course.price * (1 - (course.discount_percent || 0) / 100)).toFixed(2)} KM
-                      </Typography>
-                      {course.discount_percent > 0 && (
-                        <Typography variant="body2" className={styles.cstrikethrough}>
-                          {course.price.toFixed(2)} KM
-                        </Typography>
-                      )}
-                    </Box>
-                  </CardContent>
-                  <CardActions>
-                    <Button onClick={() => handleBuyCourse(course)} variant="contained" fullWidth startIcon={<CreditCard />}>
-                      Kupi sada
-                    </Button>
-                  </CardActions>
-                </Card>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <Typography variant="h5" align="center">Vaša korpa je prazna</Typography>
-        )}
-      </Container>
-
-      <Dialog open={purchaseDialog.open} onClose={() => setPurchaseDialog({ open: false, course: null })}>
-        <DialogTitle>Potvrdi kupovinu</DialogTitle>
-        <DialogContent>
-          <Typography>{purchaseDialog.course?.title}</Typography>
-          <Typography>
-            Cijena: {(purchaseDialog.course?.price * (1 - (purchaseDialog.course?.discount_percent || 0) / 100)).toFixed(2)} KM
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPurchaseDialog({ open: false, course: null })}>Odustani</Button>
-          <Button onClick={confirmPurchase} variant="contained">Potvrdi</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity={snackbar.severity} onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+      <Footer />
+    </>
   );
 }
