@@ -1,0 +1,426 @@
+.adminContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f4ff 0%, #ffffff 100%);
+}
+
+/* Admin Header */
+.adminHeader {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #9333ea 100%);
+  color: white;
+  padding: 3rem 0;
+  margin-bottom: 2rem;
+}
+
+.adminTitle {
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.adminIcon {
+  font-size: 3rem !important;
+}
+
+.adminDescription {
+  opacity: 0.95;
+  line-height: 1.6 !important;
+}
+
+/* Main Content */
+.mainContent {
+  padding-bottom: 3rem !important;
+}
+
+.tableContainer {
+  border-radius: 16px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1) !important;
+  border: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+/* Table Header */
+.tableHeader {
+  background: linear-gradient(135deg, #faf7ff 0%, #f3f0ff 100%) !important;
+}
+
+.headerCell {
+  font-weight: 600 !important;
+  color: #8b5cf6 !important;
+  border-bottom: 2px solid rgba(139, 92, 246, 0.1) !important;
+  padding: 1.5rem 1rem !important;
+}
+
+/* Course Row */
+.courseRow {
+  border-bottom: 1px solid rgba(139, 92, 246, 0.05) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.courseRow:hover {
+  background-color: rgba(139, 92, 246, 0.02) !important;
+}
+
+.courseCell {
+  padding: 1.5rem 1rem !important;
+}
+
+.courseInfo {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.courseImage {
+  width: 80px !important;
+  height: 60px !important;
+  border-radius: 8px !important;
+  border: 2px solid rgba(139, 92, 246, 0.1);
+}
+
+.courseTitle {
+  font-weight: 600 !important;
+  color: #374151 !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.3 !important;
+}
+
+.courseDescription {
+  color: #6b7280 !important;
+  line-height: 1.4 !important;
+  margin-bottom: 0.5rem !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.coursePrice {
+  color: #8b5cf6 !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.discountChip {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  font-size: 0.7rem !important;
+  height: 20px !important;
+}
+
+/* Creator Info */
+.creatorInfo {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.creatorAvatar {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.creatorName {
+  font-weight: 600 !important;
+  color: #374151 !important;
+}
+
+.creatorUsername {
+  color: #8b5cf6 !important;
+}
+
+/* Category Chip */
+.categoryChip {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%) !important;
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+/* Date Info */
+.dateInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dateIcon {
+  font-size: 1rem !important;
+  color: #6b7280 !important;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.acceptButton {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-size: 0.8rem !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.acceptButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.rejectButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  font-size: 0.8rem !important;
+  padding: 0.5rem 1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.rejectButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.expandButton {
+  color: #8b5cf6 !important;
+  transition: all 0.2s ease !important;
+}
+
+.expandButton:hover {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  transform: scale(1.1);
+}
+
+/* Collapse Cell */
+.collapseCell {
+  padding: 0 !important;
+  border-bottom: none !important;
+}
+
+/* Steps Container */
+.stepsContainer {
+  padding: 2rem;
+  background: linear-gradient(135deg, #faf7ff 0%, #f3f0ff 100%);
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.stepsTitle {
+  color: #8b5cf6 !important;
+  font-weight: 600 !important;
+  margin-bottom: 1.5rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Step Card */
+.stepCard {
+  margin-bottom: 1rem !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.05) !important;
+  overflow: hidden;
+}
+
+.stepHeader {
+  padding: 1rem 1.5rem;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.stepHeader:hover {
+  background-color: rgba(139, 92, 246, 0.02);
+}
+
+.stepInfo {
+  flex: 1;
+}
+
+.stepTitle {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.stepMeta {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.videoChip {
+  background: rgba(139, 92, 246, 0.1) !important;
+  color: #8b5cf6 !important;
+  font-size: 0.7rem !important;
+  height: 24px !important;
+}
+
+.imageChip {
+  background: rgba(168, 85, 247, 0.1) !important;
+  color: #a855f7 !important;
+  font-size: 0.7rem !important;
+  height: 24px !important;
+}
+
+.stepExpandButton {
+  color: #8b5cf6 !important;
+}
+
+/* Step Content */
+.stepContent {
+  background: #fafafa !important;
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.stepDescription {
+  color: #374151 !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.mediaTitle {
+  color: #8b5cf6 !important;
+  font-weight: 600 !important;
+  margin-bottom: 1rem !important;
+}
+
+/* Step Video */
+.stepVideo {
+  margin-bottom: 2rem;
+}
+
+.videoWrapper {
+  position: relative;
+  padding-top: 56.25%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.videoFrame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Step Image */
+.stepImage {
+  margin-bottom: 1rem;
+}
+
+.stepImageContent {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Dialog Styles */
+.dialogTitle {
+  background: linear-gradient(135deg, #faf7ff 0%, #f3f0ff 100%) !important;
+  color: #8b5cf6 !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dialogIcon {
+  font-size: 1.5rem !important;
+}
+
+.dialogActions {
+  padding: 1.5rem !important;
+  gap: 1rem;
+}
+
+.confirmAcceptButton {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+.confirmRejectButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+}
+
+/* Snackbar */
+.snackbar {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .adminTitle {
+    font-size: 2rem !important;
+  }
+
+  .courseInfo {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .courseImage {
+    width: 100% !important;
+    height: 120px !important;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .acceptButton,
+  .rejectButton {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .stepsContainer {
+    padding: 1rem;
+  }
+
+  .stepHeader {
+    padding: 1rem;
+  }
+
+  .stepContent {
+    padding: 1rem !important;
+  }
+}
+
+/* Scrollbar Styling */
+.tableContainer::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 4px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}
