@@ -49,7 +49,7 @@ export default function StatisticsSection() {
           <div className="card-content">
             <div className="stats-info">
               <div>
-                <div className="stats-number">${stats.total_revenue}</div>
+                <div className="stats-number">{stats.total_revenue} Tokena</div>
               </div>
               <div className="stats-icon">💵</div>
             </div>
