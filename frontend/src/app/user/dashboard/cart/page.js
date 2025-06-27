@@ -75,7 +75,7 @@ export default function CartPage() {
       if (detail.includes("nedovoljno kredita")) {
         const match = detail.match(/nedostaje\s+(\d+)/i);
         setMissingCredits(match ? parseInt(match[1]) : 0);
-        setSnackbar({ open: true, message: `Nedovoljno kredita! Nedostaje ${missingCredits} KM`, severity: "error" });
+        setSnackbar({ open: true, message: `Nedovoljno kredita! Nedostaje ${missingCredits} Tokena`, severity: "error" });
       } else {
         setSnackbar({ open: true, message: "Greška pri kupovini!", severity: "error" });
       }
@@ -123,15 +123,15 @@ export default function CartPage() {
                 Ukupno
               </Typography>
               <Typography variant="h4" className={styles.totalPrice}>
-                {totalDiscountPrice.toFixed(2)} KM
+                {totalDiscountPrice.toFixed(2)} Tokena
               </Typography>
               {totalSavings > 0 && (
                 <>
                   <Typography variant="body2" className={styles.originalPrice}>
-                    <span className={styles.strikethrough}>{totalOriginalPrice.toFixed(2)} KM</span>
+                    <span className={styles.strikethrough}>{totalOriginalPrice.toFixed(2)} Tokena</span>
                   </Typography>
                   <Typography variant="body2" className={styles.savings}>
-                    Ušteda: {totalSavings.toFixed(2)} KM
+                    Ušteda: {totalSavings.toFixed(2)} Tokena
                   </Typography>
                 </>
               )}
@@ -170,11 +170,11 @@ export default function CartPage() {
                     <Typography variant="body2" color="text.secondary">{course.description}</Typography>
                     <Box mt={2}>
                       <Typography variant="h5">
-                        {(course.price * (1 - (course.discount_percent || 0) / 100)).toFixed(2)} KM
+                        {(course.price * (1 - (course.discount_percent || 0) / 100)).toFixed(2)} Tokena
                       </Typography>
                       {course.discount_percent > 0 && (
                         <Typography variant="body2" className={styles.cstrikethrough}>
-                          {course.price.toFixed(2)} KM
+                          {course.price.toFixed(2)} Tokena
                         </Typography>
                       )}
                     </Box>
@@ -198,7 +198,7 @@ export default function CartPage() {
         <DialogContent>
           <Typography>{purchaseDialog.course?.title}</Typography>
           <Typography>
-            Cijena: {(purchaseDialog.course?.price * (1 - (purchaseDialog.course?.discount_percent || 0) / 100)).toFixed(2)} KM
+            Cijena: {(purchaseDialog.course?.price * (1 - (purchaseDialog.course?.discount_percent || 0) / 100)).toFixed(2)} Tokena
           </Typography>
         </DialogContent>
         <DialogActions>
