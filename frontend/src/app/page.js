@@ -21,6 +21,7 @@ export default function HomePage() {
     "Marketing": "Marketing",
     "Business": "Biznis",
     "Photography": "Fotografija",
+    "Music": "Muzika",
   };
 
   const categoryIcons = {
@@ -29,6 +30,7 @@ export default function HomePage() {
     "Marketing": "📊",
     "Business": "💼",
     "Photography": "📷",
+    "Music": "🎵",
   };
 
   const normalizePath = (path) => {
@@ -119,7 +121,7 @@ export default function HomePage() {
                           <div className="card h-100 text-center border-light hover-card">
                             <div className="card-body">
                               <div className="category-icon bg-primary-subtle text-primary rounded-circle mx-auto mb-3">
-                                <span className="fs-4">{categoryIcons[category.category]}</span>
+                                <span className="fs-4">{categoryIcons[category.category] || "📚"}</span>
                               </div>
                               <h5 className="card-title fs-6 fw-medium">
                                 {categoryTranslations[category.category] || category.category}
@@ -177,7 +179,7 @@ export default function HomePage() {
                       </div>
                       <div className="card-body">
                         <div className="d-flex justify-content-between align-items-center mb-2">
-                          <span className="badge bg-light text-dark">{course.category}</span>
+                          <span className="badge bg-light text-dark">{categoryTranslations[course.category] || course.category}</span>
                           <small className="text-secondary d-flex align-items-center">
                             <span className="me-1">👥</span>
                             <span className="course-stats">{course.students}</span>
@@ -190,7 +192,7 @@ export default function HomePage() {
                         <div className="d-flex align-items-center">
                           <small className="fw-medium">{course.creator_name}</small>
                         </div>
-                        <span className="fw-bold">{course.sale_price} €</span>
+                        <span className="fw-bold">{parseFloat(course.sale_price).toFixed(2)} Tokena</span>
                       </div>
                     </div>
                   </div>
