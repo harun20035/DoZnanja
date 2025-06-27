@@ -73,6 +73,13 @@ export default function CourseViewerPage() {
   const [quizResultStatus, setQuizResultStatus] = useState(null); // null | 'passed' | 'failed'
   const [role, setRole] = useState(null);
   const [username, setUsername] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState("");
+
+  const showSnackbar = (msg) => {
+    setSnackbarMsg(msg);
+    setSnackbarOpen(true);
+  };
 
   // Funkcija za učitavanje završenih koraka sa backend-a
   const fetchCompletedSteps = async (userId) => {
@@ -215,7 +222,7 @@ export default function CourseViewerPage() {
         }
 
         if (response.status === 403) {
-          alert("Nemate pristup ovom kursu.");
+          showSnackbar("Nemate pristup ovom kursu.");
           router.push("/user/dashboard");
           return;
         }
