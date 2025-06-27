@@ -108,10 +108,7 @@ const Register = () => {
             <input type="radio" name="role" value="USER" checked={formData.role === 'USER'} onChange={handleChange} />
             Korisnik
           </label>
-          <label>
-            <input type="radio" name="role" value="CREATOR" checked={formData.role === 'CREATOR'} onChange={handleChange} />
-            Kreator kurseva
-          </label>
+          
         </div>
 
         <button type="submit" className="submit-btn">Registruj se</button>
