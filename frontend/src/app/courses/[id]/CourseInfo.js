@@ -127,14 +127,14 @@ export default function CourseInfo({ course }) {
               <div className="course-price-header">
                 {course.discount_percent > 0 ? (
                   <>
-                    <p className="course-original-price">{course.price.toFixed(2)} kredita</p>
+                    <p className="course-original-price">{course.price.toFixed(2)} Tokena</p>
                     <p className="course-price">
-                      {(course.price * (1 - course.discount_percent / 100)).toFixed(2)} kredita
+                      {(course.price * (1 - course.discount_percent / 100)).toFixed(2)} Tokena
                       <span className="course-discount"> -{course.discount_percent}%</span>
                     </p>
                   </>
                 ) : (
-                  <p className="course-price">{course.price.toFixed(2)} kredita</p>
+                  <p className="course-price">{course.price.toFixed(2)} Tokena</p>
                 )}
               </div>
               <div className="course-price-body">
