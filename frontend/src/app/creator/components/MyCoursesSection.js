@@ -78,7 +78,7 @@ export default function MyCoursesSection() {
 
       router.push(`/creator/${selectedCourseId}/quiz`);
     } catch (err) {
-      alert("Greška: " + err.message);
+      
     } finally {
       setShowCreateModal(false);
     }
@@ -175,10 +175,10 @@ export default function MyCoursesSection() {
 
       setShowDeleteModal(false);
       setSelectedCourseId(null);
-      alert("🗑️ Kviz obrisan.");
+      
       await fetchCourses();
     } catch (err) {
-      alert("Greška pri brisanju kviza: " + err.message);
+      
       setShowDeleteModal(false);
       setSelectedCourseId(null);
     }
