@@ -164,7 +164,7 @@ export default function CreateCourseForm() {
         <form onSubmit={handleSubmit} className="form-fields">
           <input type="text" placeholder="Naslov" value={title} onChange={(e) => setTitle(e.target.value)} required />
           <textarea placeholder="Opis" value={description} onChange={(e) => setDescription(e.target.value)} required />
-          <input type="number" placeholder="Cena" value={price} onChange={(e) => setPrice(e.target.value)} required />
+          <input type="number" placeholder="Cijena" value={price} onChange={(e) => setPrice(e.target.value)} required />
           <input type="number" placeholder="Popust (%)" value={discount} onChange={(e) => setDiscount(e.target.value)} />
           <select value={category} onChange={(e) => setCategory(e.target.value)} required>
             <option value="Programming">Programiranje</option>

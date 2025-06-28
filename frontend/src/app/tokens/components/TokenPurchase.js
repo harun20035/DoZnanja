@@ -152,7 +152,7 @@ export default function TokenPurchase({ onPurchase }) {
             min="1"
             max="10000"
           />
-          {customAmount && <div className="custom-price">Cena: ${getCustomPackage()?.price}</div>}
+          {customAmount && <div className="custom-price">Cijena: ${getCustomPackage()?.price}</div>}
         </div>
       </div>
 
@@ -175,7 +175,7 @@ export default function TokenPurchase({ onPurchase }) {
               <span>{currentSelection.tokens + currentSelection.bonus}</span>
             </div>
             <div className="summary-row price">
-              <span>Cena:</span>
+              <span>Cijena:</span>
               <span>${currentSelection.price}</span>
             </div>
           </div>
