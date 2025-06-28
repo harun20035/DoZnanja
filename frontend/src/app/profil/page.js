@@ -275,7 +275,7 @@ const EditProfile = () => {
       <div className={styles.pageContainer}>
         <main className={styles.mainContent}>
           <div className={styles.pageHeader}>
-            <h1 className={styles.pageTitle}>Edit Profile</h1>
+            <h1 className={styles.pageTitle}>Uredi profil</h1>
             <div className={styles.roleBadge}>{formData.role}</div>
           </div>
 
