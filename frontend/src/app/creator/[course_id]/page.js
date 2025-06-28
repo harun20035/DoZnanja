@@ -170,8 +170,7 @@ const CourseStepEditor = () => {
   };
 
   const deleteStep = async (stepId) => {
-    const confirmed = confirm('Are you sure you want to delete this step?');
-    if (!confirmed) return;
+    
 
     const token = localStorage.getItem("auth_token");
 
@@ -372,7 +371,7 @@ const CourseStepEditor = () => {
     
 
 
-      <Footer />
+      
       </>
   );
 };
