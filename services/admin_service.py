@@ -36,8 +36,4 @@ def update_course_status(db: Session, course_id: int, new_status: str):
     creator = admin_repository.get_user_by_id(db, course.creator_id)
     if creator and creator.email:
         send_course_status_email(creator.email, course.title, new_status)
-
-
-   
-
     return {"message": f"Status kursa promijenjen u {new_status}"}

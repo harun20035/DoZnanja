@@ -7,8 +7,6 @@ from services import admin_service
 from schemas.admin_schema import CourseStatusUpdate  
 
 
-
-
 router = APIRouter()
 
 def get_session():
@@ -19,8 +17,6 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 @router.get("/pregled-svega")
 def get_all_data(db: SessionDep):
-    
-    
     return admin_service.get_all_admin_data(db)
 
 
